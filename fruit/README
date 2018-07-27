@@ -1,0 +1,39 @@
+################################################################################
+#                          Shumlib FRUIT testing library                       #
+################################################################################
+
+This directory consists of the following files:
+
+ * Makefile:
+     The makefile used to build a library from the source f90 files that 
+     the shumlib FRUIT test executables link against.
+
+ * Makefile-driver:
+     The makefile used to build the shumlib FRUIT test executables - which
+     includes simple generation of the top-level "driver" f90 file.
+
+ * fruit.f90:
+     The main FRUIT source file, which should not be edited directly; it is
+     generated via the Ruby script in this directory.
+
+ * fruit_mpi.f90:
+     The extensions for running FRUIT in an environment with MPI; not 
+     currently used by shumlib.
+
+ * fruit_f90_generator.rb (and 3.4.1 version):
+     The Ruby script which generates fruit.f90 from the .txt template file
+     and a list of rules.  This has been modified from the original FRUIT
+     source (provided as the 3.4.1 suffixed version of the file).
+
+ * fruit_f90_source.txt (and 3.4.1 version):
+     The template file used by the above Ruby script to generate fruit.f90.
+     Again this has been modified from the original FRUIT source (provided as
+     the 3.4.1 suffixed version of the file).
+
+ * LICENSE.txt:
+     The original FRUIT licence file; reproduced here as per the terms of the
+     contained licence.
+
+Ordinarily the fruit.f90 file should not need to be regenerated unless a fairly
+serious re-working of shumlib is underway; the files are merely provided here
+to aid in tracing how the original source was modified.

@@ -1,0 +1,114 @@
+# NOTE: This makefile assumes that any library tests and libraries have 
+# already been built, including the "compiled_libs.inc" listing file; it
+# will create a dynamic FRUIT test driver program which runs the main
+# test function from any included library tests.
+
+# Setup variables to store the target objects
+STATIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_static.exe
+DYNAMIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe
+
+# All of the libraries which have FRUIT tests
+FRUITTESTS=$(patsubst ../%/test,%,$(wildcard $(addprefix ../, $(addsuffix /test, ${ALL_LIBS}))))
+
+# Currently built libraries
+FRUIT_CURRENT_LIBS=$(patsubst lib%.so, %, $(notdir $(wildcard ${LIBDIR_OUT}/lib/*.so)))
+
+# Intersection of the above - i.e. names of libraries which are both compiled
+# and have tests available (so we can compile only tests that actually exist)
+FRUIT_AVAILABLE_TESTS=$(foreach libname,                                       \
+                        ${FRUIT_CURRENT_LIBS},                                 \
+                        $(filter ${libname},                                   \
+                        ${FRUITTESTS}))
+
+.PHONY: test
+test: $(STATIC_EXEC) $(DYNAMIC_EXEC)
+
+# Construct the paths to the test directories from the names
+TEST_DIR=$(patsubst %, $(DIR_ROOT)/%/test/, $(FRUIT_AVAILABLE_TESTS))
+
+# Include flags for the test directories
+TEST_FLAGS_INCL=$(addprefix -I, $(TEST_DIR))
+
+# Also construct the object filenames (static + dynamic)
+TEST_OBJ_STATIC_F=$(patsubst %, fruit_test_%.o, $(FRUIT_AVAILABLE_TESTS))
+TEST_OBJ_DYNAMIC_F=$(patsubst %, fruit_test_%_PIC.o, $(FRUIT_AVAILABLE_TESTS))
+TEST_OBJ_STATIC_C=$(patsubst %, c_fruit_test_%.o, $(FRUIT_AVAILABLE_TESTS))
+TEST_OBJ_DYNAMIC_C=$(patsubst %, c_fruit_test_%_PIC.o, $(FRUIT_AVAILABLE_TESTS))
+
+# Create the full paths to the object files by combining the above
+TEST_STATIC=$(wildcard $(join $(TEST_DIR), $(TEST_OBJ_STATIC_F)))              \
+            $(wildcard $(join $(TEST_DIR), $(TEST_OBJ_STATIC_C)))
+TEST_DYNAMIC=$(wildcard $(join $(TEST_DIR), $(TEST_OBJ_DYNAMIC_F)))            \
+             $(wildcard $(join $(TEST_DIR), $(TEST_OBJ_DYNAMIC_C)))
+
+# The flags used to link against each library
+TEST_FLAGS_LINK=$(addprefix -l, $(FRUIT_CURRENT_LIBS))
+
+# Write the driver file - it is a very simple Fortran file which contains
+# the means to call each test module - note that everything must be named
+# according to a specific convention for this to work
+fruit_driver.f90: ${TEST_DYNAMIC} ${TEST_STATIC}
+	@echo "PROGRAM fruit_driver" > $@
+	@echo "USE iso_c_binding" >> $@
+	@echo "USE fruit" >> $@
+	@for name in $(FRUIT_AVAILABLE_TESTS) ; do \
+	    echo "USE fruit_test_$${name}_mod" >> $@ ; \
+	done
+	@echo "IMPLICIT NONE" >> $@
+	@echo "INTERFACE" >> $@
+	@echo "SUBROUTINE c_exit(status)  BIND(c,NAME=\"exit\")" >> $@
+	@echo "IMPORT :: C_INT" >> $@
+	@echo "IMPLICIT NONE" >> $@
+	@echo "INTEGER(KIND=C_INT), VALUE, INTENT(IN) :: status" >> $@
+	@echo "END SUBROUTINE" >> $@
+	@echo "END INTERFACE" >> $@
+	@echo "INTEGER :: status" >> $@
+	@echo "CALL init_fruit" >> $@
+	@for name in $(FRUIT_AVAILABLE_TESTS) ; do \
+	    echo "CALL fruit_test_$${name}" >> $@ ; \
+	done
+	@echo "CALL fruit_summary" >> $@
+	@echo "CALL fruit_finalize" >> $@
+	@echo "CALL get_failed_count(status)" >> $@
+	@echo "CALL c_exit(INT(status,KIND=C_INT))" >> $@
+	@echo "END PROGRAM fruit_driver" >> $@
+
+# Note: In both cases below the linking flags are included *twice*; this is
+# intentional, because some compilers strip away un-used symbols as they 
+# include each library... This might remove symbol dependencies for other
+# libraries (depending on the order of the flags); the second inclusion means
+# the compiler will have a chance to pick up any previously missed symbols
+
+# Static driver object file
+#--------------------------
+fruit_driver.o: fruit_driver.f90
+	${FC} ${FCFLAGS} -I${LIBDIR_OUT}/include \
+	${TEST_FLAGS_INCL} -c $<
+
+fruit_driver_PIC.o: fruit_driver.f90
+	${FC} ${FCFLAGS} ${FCFLAGS_PIC}	-I${LIBDIR_OUT}/include \
+	${TEST_FLAGS_INCL} -c $< -o $@
+
+# Static executable
+#------------------
+$(STATIC_EXEC): fruit_driver.o
+	${FC} ${FCFLAGS} ${FCFLAGS_STATIC} \
+	$< $(TEST_STATIC) ${TEST_FLAGS_INCL} \
+	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib \
+	${TEST_FLAGS_LINK} ${TEST_FLAGS_LINK} \
+	-o $@ ${FCFLAGS_STATIC_TRAIL}
+
+# Dynamic executable
+#-------------------
+$(DYNAMIC_EXEC): fruit_driver_PIC.o
+	${FC} ${FCFLAGS} ${FCFLAGS_PIC} ${FCFLAGS_DYNAMIC} \
+	$< $(TEST_DYNAMIC) ${TEST_FLAGS_INCL} \
+	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib \
+	${TEST_FLAGS_LINK} ${TEST_FLAGS_LINK} \
+	-o $@ ${FCFLAGS_DYNAMIC_TRAIL}
+
+# Cleanup
+#--------
+.PHONY: clean
+clean: 
+	rm -f fruit_driver.f90 *.o *.mod
