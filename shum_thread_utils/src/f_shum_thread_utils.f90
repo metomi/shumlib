@@ -51,7 +51,7 @@ INTEGER, PARAMETER                  :: alreadyLockedCode = -1
 ! arguments in the abstract interfaces cannot have the VALUE attribute
 
 ABSTRACT INTERFACE
-SUBROUTINE parallel_sub(sharepointer)
+SUBROUTINE parallel_sub(sharepointer) BIND (C)
 
 IMPORT :: C_PTR
 
@@ -63,7 +63,7 @@ END SUBROUTINE parallel_sub
 END INTERFACE
 
 ABSTRACT INTERFACE
-SUBROUTINE parallelfor_sub(sharepointer, istart, iend, incr)
+SUBROUTINE parallelfor_sub(sharepointer, istart, iend, incr) BIND (C)
 
 IMPORT :: C_PTR, C_INT64_T
 

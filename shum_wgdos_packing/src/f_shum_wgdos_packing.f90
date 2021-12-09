@@ -1110,12 +1110,12 @@ LOGICAL ::                                                                     &
 
 INTEGER(KIND=int64), PARAMETER :: One64 = 1
 
-INTEGER(KIND=int64), SAVE :: mask_bits(0:63)
+INTEGER(KIND=int64), SAVE :: mask_bits(0:31)
 LOGICAL, SAVE :: first = .TRUE.
 
 IF (first) THEN
-  DO i=0,63
-    mask_bits(i) = ISHFT(One64,63-i)
+  DO i=0,31
+    mask_bits(i) = ISHFT(One64,31-i)
   END DO
   first = .FALSE.
 END IF
@@ -1188,12 +1188,10 @@ DO j=1,rows
 
   IF (nbits_bmap > 0) THEN
     iword = istart(j)
-    DO i1=1,nbits_bmap,64
-      ival  = IOR(ISHFT(                                                       &
-                IAND(INT(packed_field(iword),   KIND=int64), mask32), 32),     &
-                IAND(INT(packed_field(iword+1), KIND=int64), mask32))
-      iword = iword+2
-      DO i2=0,MIN(nbits_bmap-i1, INT(63, KIND=int64))
+    DO i1=1,nbits_bmap,32
+      ival  = IAND(INT(packed_field(iword),   KIND=int64), mask32)
+      iword = iword+1
+      DO i2=0,MIN(nbits_bmap-i1, INT(31, KIND=int64))
         itmp(i1+i2) = MERGE(1,0,IAND(ival,mask_bits(i2))/=0)
       END DO
     END DO

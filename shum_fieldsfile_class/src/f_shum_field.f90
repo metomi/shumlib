@@ -47,8 +47,8 @@ TYPE, PUBLIC :: shum_field_type
   PRIVATE
   INTEGER(KIND=int64) :: lookup_int(len_integer_lookup) = um_imdi
   REAL(KIND=real64)   :: lookup_real(len_real_lookup) = um_rmdi
-  INTEGER(KIND=int64), ALLOCATABLE     :: idata(:,:)
-  REAL(KIND=real64), ALLOCATABLE       :: rdata(:,:)
+  INTEGER(KIND=int64), PUBLIC,  ALLOCATABLE :: idata(:,:)
+  REAL(KIND=real64), PUBLIC, ALLOCATABLE    :: rdata(:,:)
   REAL(KIND=real64), ALLOCATABLE       :: latitudes(:)
   REAL(KIND=real64), ALLOCATABLE       :: longitudes(:)
   REAL(KIND=real64)                    :: fctime_real
