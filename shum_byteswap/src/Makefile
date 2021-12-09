@@ -18,7 +18,7 @@ include ${COMMON_DIR}/Makefile-version
 # Static library - uses archiver to create library
 #-------------------------------------------------------------------------------
 c_shum_byteswap.o: c_shum_byteswap.c c_shum_byteswap.h c_shum_byteswap_opt.h
-	${CC} ${CCFLAGS} -c $<
+	${CC} ${CCFLAGS} -c -I${LIBDIR_OUT}/include $<
 
 f_shum_byteswap.o: f_shum_byteswap.f90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
@@ -31,7 +31,7 @@ libshum_byteswap.a: c_shum_byteswap.o f_shum_byteswap.o ${VERSION_OBJECTS}
 # required position-independent-code flags whilst the static version does not)
 #-------------------------------------------------------------------------------
 c_shum_byteswap_PIC.o: c_shum_byteswap.c c_shum_byteswap.h c_shum_byteswap_opt.h
-	${CC} ${CCFLAGS} ${CCFLAGS_PIC} -c $< -o $@
+	${CC} ${CCFLAGS} ${CCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
 f_shum_byteswap_PIC.o: f_shum_byteswap.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@

@@ -3,6 +3,22 @@
 ! For further details please refer to the file COPYRIGHT.txt
 ! which you should have received as part of this distribution.
 ! *****************************COPYRIGHT*******************************
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
+!*******************************************************************************
 MODULE f_shum_field_mod
 
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                        &

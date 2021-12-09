@@ -1,31 +1,31 @@
 #!/bin/bash --login
 # *********************************COPYRIGHT************************************
-# (C) Crown copyright Met Office. All rights reserved.                       
-# For further details please refer to the file LICENCE.txt                   
-# which you should have received as part of this distribution.               
+# (C) Crown copyright Met Office. All rights reserved.
+# For further details please refer to the file LICENCE.txt
+# which you should have received as part of this distribution.
 # *********************************COPYRIGHT************************************
-#                                                                            
-# This file is part of the UM Shared Library project.                        
-#                                                                            
-# The UM Shared Library is free software: you can redistribute it            
-# and/or modify it under the terms of the Modified BSD License, as           
-# published by the Open Source Initiative.                                   
-#                                                                            
-# The UM Shared Library is distributed in the hope that it will be           
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-# Modified BSD License for more details.                                     
-#                                                                            
-# You should have received a copy of the Modified BSD License                
-# along with the UM Shared Library.                                          
-# If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+#
+# This file is part of the UM Shared Library project.
+#
+# The UM Shared Library is free software: you can redistribute it
+# and/or modify it under the terms of the Modified BSD License, as
+# published by the Open Source Initiative.
+#
+# The UM Shared Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Modified BSD License for more details.
+#
+# You should have received a copy of the Modified BSD License
+# along with the UM Shared Library.
+# If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 #*******************************************************************************
 #
 # Script to assist with installing shumlib under the many platform/compiler
 # combinations available at the Met Office...
 #
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
-#   scripts/meto_install_shumlib.sh [xc40|x86] 
+#   scripts/meto_install_shumlib.sh [xc40|x86]
 #
 # This script was used to install shumlib version 2018.10.1
 # and is based on the families etc. from the UM at UM 11.2
@@ -41,7 +41,7 @@ set -eu
 # Ensure directory is correct
 cd $(readlink -f $(dirname $0)/..)
 
-# Take the platform name as an argument 
+# Take the platform name as an argument
 # (purely so we can maintain one script rather than 2)
 PLATFORM=${1:-}
 if [ -z "${PLATFORM}" ] ; then
@@ -61,7 +61,7 @@ fi
 # tasks to exclude certain libraries)
 LIB_DIRS=$(ls -d shum_* | xargs)
 
-# Destination for the build (can be overidden, otherwise defaults to a 
+# Destination for the build (can be overidden, otherwise defaults to a
 # "build" directory in the working copy - like the Makefile would)
 BUILD_DESTINATION=${BUILD_DESTINATION:-$PWD/build}
 
@@ -79,8 +79,8 @@ function build_test_clean {
     make -f make/$config.mk clean-temp
 }
 
-# Function which executes the above function twice - once for each of the
-# possible OpenMP states
+# Function which executes the above function four time - once for each of the
+# possible OpenMP state and Thread_Utils state combinations
 function build_openmp_onoff {
     local config=$1
     local dir=$2
@@ -92,9 +92,19 @@ function build_openmp_onoff {
     # Perform the build
     export LIBDIR_OUT=$dir/openmp
     export SHUM_OPENMP=true
+    export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=false
     build_test_clean $config $*
     export LIBDIR_OUT=$dir/no-openmp
     export SHUM_OPENMP=false
+    export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=false
+    build_test_clean $config $*
+    export LIBDIR_OUT=$dir/thread_utils
+    export SHUM_OPENMP=true
+    export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=true
+    build_test_clean $config $*
+    export LIBDIR_OUT=$dir/serial_thread_utils
+    export SHUM_OPENMP=false
+    export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=true
     build_test_clean $config $*
     # Tidy up the temporary directory
     rm -rf $TEMP_BUILD_DIR
@@ -151,7 +161,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-# Portland/GCC (pgfortran 16.10) - Note that the "fieldsfile_class" 
+# Portland/GCC (pgfortran 16.10) - Note that the "fieldsfile_class"
 # lib doesn't work with portland, so we exclude it
 THIS="x86_pgfortran_16.10_gcc"
 if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
@@ -190,7 +200,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
 fi
 
 # Crayftn/CrayCC Haswell 8.3.4 (Current system default)
-# - note that these earlier versions of CCE don't work correctly with the 
+# - note that these earlier versions of CCE don't work correctly with the
 # Fieldsfile read/write libraries, so we exclude them
 THIS="xc40_haswell_cray_8.3.4"
 if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
@@ -216,7 +226,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
 fi
 
 # Crayftn/CrayCC Ivybridge 8.3.4 (Current system default)
-# - note that these earlier versions of CCE don't work correctly with the 
+# - note that these earlier versions of CCE don't work correctly with the
 # Fieldsfile read/write libraries, so we exclude them
 THIS="xc40_ivybridge_cray_8.3.4"
 if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
@@ -240,7 +250,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-# Crayftn/CrayCC Ivybridge 8.4.3 - note that these earlier versions of CCE don't 
+# Crayftn/CrayCC Ivybridge 8.4.3 - note that these earlier versions of CCE don't
 # work correctly with the Fieldsfile read/write libraries, so we exclude them
 THIS="xc40_ivybridge_cray_8.4.3"
 if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
@@ -354,7 +364,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-# Ifort/Icc Haswell 17.0 
+# Ifort/Icc Haswell 17.0
 THIS="xc40_haswell_intel_17.0"
 if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (

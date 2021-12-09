@@ -24,7 +24,10 @@ f_shum_conversions_mod.o: f_shum_conversions_mod.f90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
 
 f_shum_planet_earth_constants_mod.o: f_shum_planet_earth_constants_mod.f90 \
-        f_shum_conversions_mod.o
+	f_shum_conversions_mod.o
+	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
+
+f_shum_ztables.o: f_shum_ztables.f90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
 
 f_shum_rel_mol_mass_mod.o: f_shum_rel_mol_mass_mod.f90
@@ -36,8 +39,9 @@ f_shum_water_constants_mod.o: f_shum_water_constants_mod.f90
 
 libshum_constants.a: \
 	f_shum_chemistry_constants_mod.o f_shum_conversions_mod.o \
-        f_shum_planet_earth_constants_mod.o \
-        f_shum_rel_mol_mass_mod.o f_shum_water_constants_mod.o \
+	f_shum_planet_earth_constants_mod.o \
+	f_shum_rel_mol_mass_mod.o f_shum_water_constants_mod.o \
+	f_shum_ztables.o \
 	${VERSION_OBJECTS}
 	${AR} $@ $^
 
@@ -52,7 +56,10 @@ f_shum_conversions_mod_PIC.o: f_shum_conversions_mod.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
 f_shum_planet_earth_constants_mod_PIC.o: f_shum_planet_earth_constants_mod.f90 \
-        f_shum_conversions_mod_PIC.o
+	f_shum_conversions_mod_PIC.o
+	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
+
+f_shum_ztables_PIC.o: f_shum_ztables.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
 f_shum_rel_mol_mass_mod_PIC.o: f_shum_rel_mol_mass_mod.f90
@@ -64,13 +71,14 @@ f_shum_water_constants_mod_PIC.o: f_shum_water_constants_mod.f90
 
 libshum_constants.so: \
 	f_shum_chemistry_constants_mod_PIC.o f_shum_conversions_mod_PIC.o \
-        f_shum_planet_earth_constants_mod_PIC.o \
-        f_shum_rel_mol_mass_mod_PIC.o f_shum_water_constants_mod_PIC.o \
+	f_shum_planet_earth_constants_mod_PIC.o \
+	f_shum_rel_mol_mass_mod_PIC.o f_shum_water_constants_mod_PIC.o \
+	f_shum_ztables_PIC.o \
 	${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}

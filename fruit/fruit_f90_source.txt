@@ -26,19 +26,20 @@ module fruit_util
   use iso_c_binding, only: c_int32_t, c_int64_t, c_float, c_double, c_bool
   implicit none
   private
-  
+
   integer, parameter :: int32 = c_int32_t
   integer, parameter :: int64 = c_int64_t
-  
+
   integer, parameter :: real32 = c_float
   integer, parameter :: real64 = c_double
 
   integer, parameter :: bool = c_bool
 
   public :: equals, to_s, strip
-  
+
   interface equals
-     module procedure equalEpsilon
+     module procedure equalEpsilon32
+     module procedure equalEpsilon64
      module procedure real32Equal
      module procedure real64Equal
      module procedure integer32Equal
@@ -132,32 +133,56 @@ contains
   !------------------------
   ! test if 2 values are close
   !------------------------
-  !logical function equals (number1, number2) 
+  !logical function equals (number1, number2)
   !  real,  intent (in) :: number1, number2
-  !  
+  !
   !  return equalEpsilon (number1, number2, epsilon(number1))
   !
   !end function equals
 
-
-  function equalEpsilon (number1, number2, epsilon ) result (resultValue)
-    real , intent (in) :: number1, number2, epsilon 
-    logical(kind=bool) :: resultValue 
+  function equalEpsilon32 (number1, number2, epsilon ) result (resultValue)
+    real(kind=real32), intent (in) :: number1, number2, epsilon
+    real(kind=real32) :: max_num
+    logical(kind=bool) :: resultValue
 
     resultValue = .false.
 
-    ! test very small number1
-    if ( abs(number1) < epsilon .and.  abs(number1 - number2) < epsilon ) then
+    max_num = MAX(abs(number1),abs(number2))
+
+    ! test very small max_num
+    if ( max_num < abs(epsilon) .and.  abs(number1 - number2) < abs(epsilon) ) then
        resultValue = .true.
-    else 
-       if ((abs(( number1 - number2)) / number1) < epsilon ) then
+    else
+       if ((abs(( number1 - number2)) / max_num) < abs(epsilon)) then
           resultValue = .true.
        else
           resultValue = .false.
        end if
     end if
 
-  end function equalEpsilon
+  end function equalEpsilon32
+
+  function equalEpsilon64 (number1, number2, epsilon ) result (resultValue)
+    real(kind=real64), intent (in) :: number1, number2, epsilon
+    real(kind=real64) :: max_num
+    logical(kind=bool) :: resultValue
+
+    resultValue = .false.
+
+    max_num = MAX(abs(number1),abs(number2))
+
+    ! test very small number1
+    if ( max_num < abs(epsilon) .and.  abs(number1 - number2) < abs(epsilon) ) then
+       resultValue = .true.
+    else
+       if ((abs(( number1 - number2)) / max_num) < abs(epsilon) ) then
+          resultValue = .true.
+       else
+          resultValue = .false.
+       end if
+    end if
+
+  end function equalEpsilon64
 
   function real32Equal (number1, number2 ) result (resultValue)
     real(kind=real32) , intent (in) :: number1, number2
@@ -220,7 +245,7 @@ contains
 
     if ( number1 .eq. number2 ) then
        resultValue = .true.
-    else 
+    else
        resultValue = .false.
     end if
   end function integer64Equal
@@ -255,10 +280,10 @@ module fruit
   use iso_fortran_env, only: output_unit
   implicit none
   private
-  
+
   integer, parameter :: int32 = c_int32_t
   integer, parameter :: int64 = c_int64_t
-  
+
   integer, parameter :: real32 = c_float
   integer, parameter :: real64 = c_double
 

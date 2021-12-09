@@ -1,23 +1,23 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 ! Description: Pack a UM field using WGDOS packing
 !
@@ -26,7 +26,15 @@ MODULE f_shum_wgdos_packing_mod
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
   C_INT64_T, C_INT32_T, C_INT16_T, C_FLOAT, C_DOUBLE
 
-IMPLICIT NONE 
+! Define various masks used to manipulate values later
+USE f_shum_ztables_mod, ONLY:                                                  &
+  mask16        => z0000FFFF,                                                  &
+  mask32        => z00000000FFFFFFFF,                                          &
+  mask_mant_ibm => z0000000000FFFFFF,                                          &
+  mask_expt_ibm => z000000007F000000,                                          &
+  mask_sign_ibm => z0000000080000000
+
+IMPLICIT NONE
 
 PRIVATE
 
@@ -44,20 +52,8 @@ PUBLIC :: f_shum_read_wgdos_header, f_shum_wgdos_pack, f_shum_wgdos_unpack
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: int16  = C_INT16_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT                                       
+  INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
-
-! Define various masks used to manipulate values later
-INTEGER(KIND=int32), PARAMETER ::                                              &
-                     mask16  = INT(HUGE(0_int16), KIND=int32)*2 + 1
-INTEGER(KIND=int64), PARAMETER ::                                              &
-                     mask32  = INT(HUGE(0_int32), KIND=int64)*2 + 1
-INTEGER(KIND=int64), PARAMETER ::                                              &
-                     mask_mant_ibm = INT(z'00FFFFFF', KIND=int64)
-INTEGER(KIND=int64), PARAMETER ::                                              &
-                     mask_expt_ibm = INT(z'7F000000', KIND=int64)
-INTEGER(KIND=int64), PARAMETER ::                                              &
-                     mask_sign_ibm = INT(z'80000000', KIND=int64)
 
 INTERFACE f_shum_read_wgdos_header
   MODULE PROCEDURE                                                             &
@@ -92,7 +88,7 @@ CONTAINS
 FUNCTION f_shum_read_wgdos_header_arg32(                                       &
           packed_field, num_words, accuracy, cols, rows, message) RESULT(status)
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int32), INTENT(IN)  :: packed_field(:)
 INTEGER(KIND=int32), INTENT(OUT) :: num_words
@@ -157,7 +153,7 @@ END FUNCTION
 
 FUNCTION f_shum_wgdos_pack_2d_alloc_arg64(field, accuracy, rmdi, packed_field, &
                                           message) RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 
@@ -197,7 +193,7 @@ END FUNCTION f_shum_wgdos_pack_2d_alloc_arg64
 
 FUNCTION f_shum_wgdos_pack_2d_alloc_arg32(field, accuracy, rmdi, packed_field, &
                                           message) RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 
@@ -237,7 +233,7 @@ END FUNCTION f_shum_wgdos_pack_2d_alloc_arg32
 
 FUNCTION f_shum_wgdos_pack_2d_arg64(field, accuracy, rmdi, packed_field,       &
                                     n_packed_words, message) RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 
@@ -246,7 +242,7 @@ INTEGER(KIND=int64), INTENT(IN)  :: accuracy
 REAL(KIND=real64),   INTENT(IN)  :: rmdi
 INTEGER(KIND=int32), INTENT(OUT) :: packed_field(:)
 INTEGER(KIND=int64), INTENT(OUT) :: n_packed_words
-CHARACTER(LEN=*),    INTENT(OUT) :: message    
+CHARACTER(LEN=*),    INTENT(OUT) :: message
 
 INTEGER(KIND=int64) :: cols
 INTEGER(KIND=int64) :: rows
@@ -266,7 +262,7 @@ END FUNCTION f_shum_wgdos_pack_2d_arg64
 
 FUNCTION f_shum_wgdos_pack_2d_arg32(field, accuracy, rmdi, packed_field,       &
                                     n_packed_words, message) RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int32) :: status
 
@@ -275,11 +271,11 @@ INTEGER(KIND=int32), INTENT(IN)  :: accuracy
 REAL(KIND=real32),   INTENT(IN)  :: rmdi
 INTEGER(KIND=int32), INTENT(OUT) :: packed_field(:)
 INTEGER(KIND=int32), INTENT(OUT) :: n_packed_words
-CHARACTER(LEN=*),    INTENT(OUT) :: message    
+CHARACTER(LEN=*),    INTENT(OUT) :: message
 
 INTEGER(KIND=int32) :: cols
 INTEGER(KIND=int32) :: rows
-INTEGER(KIND=int32) :: len_packed_field 
+INTEGER(KIND=int32) :: len_packed_field
 
 cols = SIZE(field, 1, KIND=int32)
 rows = SIZE(field, 2, KIND=int32)
@@ -295,7 +291,7 @@ END FUNCTION f_shum_wgdos_pack_2d_arg32
 
 FUNCTION f_shum_wgdos_pack_1d_alloc_arg64(field, stride, accuracy, rmdi,       &
                                           packed_field, message) RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 
@@ -344,7 +340,7 @@ END FUNCTION f_shum_wgdos_pack_1d_alloc_arg64
 
 FUNCTION f_shum_wgdos_pack_1d_alloc_arg32(field, stride, accuracy, rmdi,       &
                                           packed_field, message) RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int32) :: status
 
@@ -394,7 +390,7 @@ END FUNCTION f_shum_wgdos_pack_1d_alloc_arg32
 FUNCTION f_shum_wgdos_pack_1d_arg64(field, stride, accuracy, rmdi,             &
                                     packed_field, n_packed_words, message)     &
                                     RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 
@@ -404,7 +400,7 @@ INTEGER(KIND=int64), INTENT(IN)         :: accuracy
 REAL(KIND=real64),   INTENT(IN)         :: rmdi
 INTEGER(KIND=int32), INTENT(OUT)        :: packed_field(:)
 INTEGER(KIND=int64), INTENT(OUT)        :: n_packed_words
-CHARACTER(LEN=*),    INTENT(OUT)        :: message    
+CHARACTER(LEN=*),    INTENT(OUT)        :: message
 
 INTEGER(KIND=int64)        :: cols
 INTEGER(KIND=int64)        :: rows
@@ -434,7 +430,7 @@ END FUNCTION f_shum_wgdos_pack_1d_arg64
 FUNCTION f_shum_wgdos_pack_1d_arg32(field, stride, accuracy, rmdi,             &
                                     packed_field, n_packed_words, message)     &
                                     RESULT(status)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int32) :: status
 
@@ -444,7 +440,7 @@ INTEGER(KIND=int32), INTENT(IN)          :: accuracy
 REAL(KIND=real32),   INTENT(IN)          :: rmdi
 INTEGER(KIND=int32), INTENT(OUT)         :: packed_field(:)
 INTEGER(KIND=int32), INTENT(OUT)         :: n_packed_words
-CHARACTER(LEN=*),    INTENT(OUT)         :: message    
+CHARACTER(LEN=*),    INTENT(OUT)         :: message
 
 INTEGER(KIND=int32)        :: cols
 INTEGER(KIND=int32)        :: rows
@@ -461,7 +457,7 @@ cols = INT(stride, KIND=int32)
 rows = INT(SIZE(field)/cols, KIND=int32)
 field2d(1:cols, 1:rows) => field(:)
 
-len_packed_field = SIZE(packed_field, 1, KIND=int64)
+len_packed_field = SIZE(packed_field, 1, KIND=int32)
 
 status = f_shum_wgdos_pack_expl_arg32(                                         &
                         field2d, cols, rows, accuracy, rmdi, packed_field,     &
@@ -531,7 +527,7 @@ REAL(KIND=real64),   INTENT(IN)  :: rmdi
 INTEGER(KIND=int64), INTENT(IN)  :: len_packed_field
 INTEGER(KIND=int32), INTENT(OUT) :: packed_field(len_packed_field)
 INTEGER(KIND=int64), INTENT(OUT) :: n_packed_words
-CHARACTER(LEN=*),    INTENT(OUT) :: message    
+CHARACTER(LEN=*),    INTENT(OUT) :: message
 
 INTEGER(KIND=int64) :: i, j, npoint, nshft, ival
 INTEGER(KIND=int64) :: iexp, iman
@@ -554,10 +550,10 @@ INTEGER(KIND=int64) :: iword(rows) ! per row sizes
 
 INTEGER(KIND=int64) :: itmp(2*cols+32)             ! temporary storage
 ! compression storage
-INTEGER(KIND=int64) :: icomp(2*cols+8,MAX(rows, INT(1,KIND=int64))) 
+INTEGER(KIND=int64) :: icomp(2*cols+8,MAX(rows, INT(1,KIND=int64)))
 
 ! start position in a row for data
-INTEGER(KIND=int64), PARAMETER :: istart = 1  
+INTEGER(KIND=int64), PARAMETER :: istart = 1
 
 REAL(KIND=real64)    :: atmp(cols)
 REAL(KIND=real64)    :: base
@@ -584,7 +580,7 @@ l_thread_error = .FALSE.
 !$OMP&         ival, atmp, nwords_bmap, nzero, status, message, fmax, base,    &
 !$OMP&         ibase, ibit, nmiss)                                             &
 !$OMP& SHARED(rows, field, cols, rmdi, aprec, bprec, iword, icomp)             &
-!$OMP& REDUCTION(.OR.: l_thread_error) 
+!$OMP& REDUCTION(.OR.: l_thread_error)
 DO j=1,rows
 
   ! If this thread's error flag has been triggered we should not continue
@@ -648,7 +644,7 @@ DO j=1,rows
 
     IF (i > 2147483647) THEN
       ! If the scaled value cannot be stored in a 32-bit integer
-      ! we cannot continue with the packing.  Set this thread's 
+      ! we cannot continue with the packing.  Set this thread's
       ! error flag and skip the rest of this row (the flag will also
       ! cause this thread to skip any remaining rows - see above)
       l_thread_error = .TRUE.
@@ -671,7 +667,7 @@ DO j=1,rows
   ELSE
     base = ABS(base)
     iexp = EXPONENT(base) + 256
-    iman = FRACTION(base) * 16777216.0
+    iman = INT(FRACTION(base) * 16777216.0,KIND=int64)
     ! IAND(iexp,3) is equivalent to MOD(iexp,4)
     SELECT CASE (IAND(iexp, INT(3, KIND=int64)))
       CASE (1_int64)
@@ -881,7 +877,7 @@ IF (n_packed_words > len_packed_field) THEN
   status = 2
   WRITE(message, "(A,I0,A,I0,A)")                                              &
     "Provided array for returning packed data is too small; found ",           &
-    len_packed_field, " words, but requires ", n_packed_words, " words"        
+    len_packed_field, " words, but requires ", n_packed_words, " words"
   RETURN
 END IF
 
@@ -897,7 +893,7 @@ IF (rows>0) THEN
   ! Now extract the filled part of each row into the single packed array
   DO i = 1, rows
     DO j = 1, iword(i) - 1
-      packed_field(i1 + j) = IAND(icomp(j, i), mask32)
+      packed_field(i1 + j) = INT(IAND(icomp(j, i), mask32),int32)
     END DO
     ! Update the offset for the next row
     i1 = i1 + iword(i) - 1
@@ -1124,7 +1120,7 @@ IF (first) THEN
   first = .FALSE.
 END IF
 
-! The first word of the field header gives the total words in the packed field, 
+! The first word of the field header gives the total words in the packed field,
 ! so we can confirm the field we have been passed is the right length
 num = SIZE(packed_field, KIND=int64)
 
@@ -1170,7 +1166,7 @@ DO j=1,rows
 
   mant = IAND(ibase(j),mask_mant_ibm)
   iexp = ISHFT(IAND(ibase(j),mask_expt_ibm),-24)-64-6
-  base(j) = 16.0**iexp*mant
+  base(j) = (16.0**INT(iexp,KIND=int32))*INT(mant,KIND=int32)
   IF (IAND(ibase(j),mask_sign_ibm) /= 0) base(j) = -base(j)
   ! Check if bitmaps are used
 
@@ -1277,7 +1273,7 @@ DO j=1,rows
         ! Bit offset to value (the total bits already written):
         ioff  = (i-1)*nbits(j)
 
-        ! Calculate how many whole words have already been written (beyond the 
+        ! Calculate how many whole words have already been written (beyond the
         ! start of the data)
         iword = ISHFT(ioff,-5)+istart(j)
 
@@ -1329,7 +1325,7 @@ DO j=1,rows
         ! Bit offset to value (the total bits already written):
         ioff  = (i-1)*nbits(j)
 
-        ! Calculate how many whole words have already been written (beyond the 
+        ! Calculate how many whole words have already been written (beyond the
         ! start of the data)
         iword = ISHFT(ioff,-5)+istart(j)
 

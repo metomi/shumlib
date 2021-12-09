@@ -41,28 +41,52 @@ def generate_assertation(t, dim, has_range, equals = "1")
     loop_from = ""
     loop_to   = ""
     pre_message = ""
-  elsif dim == "1d"
-    name = base_name + "1d_" + t + "_"
+  elsif dim == "1d32"
+    name = base_name + "1d32_" + t + "_"
     size = "n, "
-    integers_def = "    integer, intent (in) :: n" + "\n" + 
-                   "    integer              :: i"
+    integers_def = "    integer(kind=int32), intent (in) :: n" + "\n" +
+                   "    integer(kind=int32)              :: i"
     ij     = "(i)"
     ij_1st = "(1)"
     nm     = "(n)"
     loop_from = "    do i = 1, n"
     loop_to   = "    enddo"
     pre_message = "'1d array #{trouble}, ' // "
-  elsif dim == "2d"
-    name = base_name + "2d_" + t + "_"
+  elsif dim == "2d32"
+    name = base_name + "2d32_" + t + "_"
     size = "n, m, "
-    integers_def = "    integer, intent (in) :: n, m" + "\n" + 
-                   "    integer              :: i, j"
+    integers_def = "    integer(kind=int32), intent (in) :: n, m" + "\n" +
+                   "    integer(kind=int32)              :: i, j"
     ij     = "(i, j)"
     ij_1st = "(1, 1)"
     nm     = "(n, m)"
     loop_from = "    do j = 1, m" + "\n" + 
                 "      do i = 1, n"
     loop_to   = "      enddo" + "\n" + 
+                "    enddo"
+    pre_message = "'2d array #{trouble}, ' // "
+  elsif dim == "1d64"
+    name = base_name + "1d64_" + t + "_"
+    size = "n, "
+    integers_def = "    integer(kind=int64), intent (in) :: n" + "\n" +
+                   "    integer(kind=int64)              :: i"
+    ij     = "(i)"
+    ij_1st = "(1)"
+    nm     = "(n)"
+    loop_from = "    do i = 1, n"
+    loop_to   = "    enddo"
+    pre_message = "'1d array #{trouble}, ' // "
+  elsif dim == "2d64"
+    name = base_name + "2d64_" + t + "_"
+    size = "n, m, "
+    integers_def = "    integer(kind=int64), intent (in) :: n, m" + "\n" +
+                   "    integer(kind=int64)              :: i, j"
+    ij     = "(i, j)"
+    ij_1st = "(1, 1)"
+    nm     = "(n, m)"
+    loop_from = "    do j = 1, m" + "\n" +
+                "      do i = 1, n"
+    loop_to   = "      enddo" + "\n" +
                 "    enddo"
     pre_message = "'2d array #{trouble}, ' // "
   else
@@ -158,7 +182,7 @@ end
 
 def many_assert()
   types = %w/ logical string int32 int64 real32 real64 /
-  dims = %w/ 0d 1d 2d /
+  dims = %w/ 0d 1d32 2d32 1d64 2d64 /
   
   interface_eq = ""
   interface_neq = ""

@@ -3,21 +3,21 @@
 ! For further details please refer to the file COPYRIGHT.txt
 ! which you should have received as part of this distribution.
 ! *****************************COPYRIGHT*******************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !
 !*******************************************************************************
 !
@@ -55,7 +55,7 @@ PUBLIC :: f_shum_horizontal_field_bi_lin_interp_get_coeffs                    &
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
   INTEGER, PARAMETER :: real32 = C_FLOAT
-  INTEGER, PARAMETER :: bool   = C_BOOL                                    
+  INTEGER, PARAMETER :: bool   = C_BOOL
 !------------------------------------------------------------------------------!
 
 CONTAINS
@@ -380,7 +380,8 @@ IF (cyclic) THEN
   DO i=1, points
 
     ! Set index for cyclic wrap around (not sure this is ever met since
-    ! t_lambda always runs from lambda_srce(1) -> lambda_srce(points_lambda_srce)
+    ! t_lambda always runs from
+    !      lambda_srce(1) -> lambda_srce(points_lambda_srce)
     ! but we shall keep it here in case).
     IF (ix(i) <  1) THEN
       ix(i) = points_lambda_srce
@@ -554,7 +555,7 @@ END SUBROUTINE f_shum_calc_weights
 !              Gather indices point to bottom left hand corner, bottom
 !              right hand corner, top left hand corner and top right hand
 !              corner of each grid box on source grid enclosing a
-!              target point. 
+!              target point.
 !              If a target point falls outside the domain of the source
 !              data, one sided differencing is used. The source Y
 !              coordinates must be supplied in decreasing order. The source
@@ -717,76 +718,76 @@ INTEGER(KIND=int64), PARAMETER  :: channel = 3
 INTEGER(KIND=int64), PARAMETER  :: nowrap  = 2
 ! ----------------------------------------------------------------------
 
-! Set error code to zero 
+! Set error code to zero
 icode = 0_int64
 
 ! 1. Initialise arrays
 IF (grid_type == bicylic) THEN
 
   DO i = 1_int64, points
-    DO j = 1_int64, points_x_srce-1_int64 
+    DO j = 1_int64, points_x_srce-1_int64
       IF ( x_targ(i) >= x_srce(j) .AND. x_targ(i) < x_srce(j+1_int64) ) THEN
-        ix(i)   = j   
-        ixp1(i) = j+1_int64   
+        ix(i)   = j
+        ixp1(i) = j+1_int64
       END IF
     END DO
-    ! Wrap around grid 
-    ! Note as at present all Cartesian grids start at x= 0.0 but the first 
-    ! P grid point will be 0.5 gridbox width offset from zero. 
+    ! Wrap around grid
+    ! Note as at present all Cartesian grids start at x= 0.0 but the first
+    ! P grid point will be 0.5 gridbox width offset from zero.
     ! The locations of the source and target grids covering the same area
     ! all have values between 0.0 and grid max dimension which is the number
     ! of rows or columns multiplied by the grid length.
     !
-    !   x - >  1           2           3          4      End grid 
+    !   x - >  1           2           3          4      End grid
     !    |  A  X           X           X          X  B   |
     !   0.0                                             max_x_srce
-    !   
-    !  Test for points in locations A or B 
+    !
+    !  Test for points in locations A or B
     IF ( x_targ(i) < x_srce(1_int64) .OR.                             &
                                   x_targ(i) >= x_srce(points_x_srce) ) THEN
-      ix(i)   = points_x_srce   
+      ix(i)   = points_x_srce
       ixp1(i) = 1_int64
     END IF
-    DO j = 1_int64, points_y_srce-1_int64 
+    DO j = 1_int64, points_y_srce-1_int64
       IF ( y_targ(i) >= y_srce(j) .AND. y_targ(i) < y_srce(j+1) ) THEN
-        iy(i)   = j   
-        iyp1(i) = j+1_int64   
+        iy(i)   = j
+        iyp1(i) = j+1_int64
       END IF
     END DO
     ! Wrap around  tests as for X
     IF ( y_targ(i) < y_srce(1_int64) .OR.                             &
                                   y_targ(i) >= y_srce(points_y_srce) ) THEN
-      iy(i)   = points_y_srce   
-      iyp1(i) = 1_int64 
+      iy(i)   = points_y_srce
+      iyp1(i) = 1_int64
     END IF
   END DO
 
 ELSE IF (grid_type == nowrap) THEN
 
   DO i = 1_int64, points
-    DO j = 1_int64, points_x_srce-1_int64 
+    DO j = 1_int64, points_x_srce-1_int64
       IF ( x_targ(i) >= x_srce(j) .AND. x_targ(i) < x_srce(j+1_int64) ) THEN
-        ix(i)   = j   
-        ixp1(i) = j+1_int64   
+        ix(i)   = j
+        ixp1(i) = j+1_int64
       END IF
     END DO
     IF ( x_targ(i) < x_srce(1_int64) ) THEN
       ix(i)   = 1_int64
-      ixp1(i) = 1_int64  
+      ixp1(i) = 1_int64
     END IF
     IF ( x_targ(i) >= x_srce(points_x_srce) ) THEN
       ix(i)   = points_x_srce
       ixp1(i) = points_x_srce
     END IF
-    DO j = 1_int64, points_y_srce-1 
+    DO j = 1_int64, points_y_srce-1
       IF ( y_targ(i) >= y_srce(j) .AND. y_targ(i) < y_srce(j+1_int64) ) THEN
-        iy(i)   = j   
-        iyp1(i) = j+1_int64   
+        iy(i)   = j
+        iyp1(i) = j+1_int64
       END IF
     END DO
     IF ( y_targ(i) < y_srce(1_int64) ) THEN
       iy(i)   = 1_int64
-      iyp1(i) = 1_int64  
+      iyp1(i) = 1_int64
     END IF
     IF ( y_targ(i) >= y_srce(points_y_srce) ) THEN
       iy(i)   = points_y_srce
@@ -797,28 +798,28 @@ ELSE IF (grid_type == nowrap) THEN
 ELSE IF (grid_type == channel) THEN ! wrap in x direction only
 
   DO i = 1_int64, points
-    DO j = 1_int64, points_x_srce-1_int64 
+    DO j = 1_int64, points_x_srce-1_int64
       IF ( x_targ(i) >= x_srce(j) .AND. x_targ(i) < x_srce(j+1_int64) ) THEN
-        ix(i)   = j   
-        ixp1(i) = j+1_int64   
+        ix(i)   = j
+        ixp1(i) = j+1_int64
       END IF
     END DO
     ! Wrap around tests as for bicyclic case
     IF ( x_targ(i) < x_srce(1) .OR. x_targ(i) >= x_srce(points_x_srce) ) THEN
 
-      ix(i)   = points_x_srce   
+      ix(i)   = points_x_srce
       ixp1(i) = 1_int64
     END IF
     ! No wrap around
-    DO j = 1_int64, points_y_srce-1 
+    DO j = 1_int64, points_y_srce-1
       IF ( y_targ(i) >= y_srce(j) .AND. y_targ(i) < y_srce(j+1_int64) ) THEN
-        iy(i)   = j   
-        iyp1(i) = j+1_int64   
+        iy(i)   = j
+        iyp1(i) = j+1_int64
       END IF
     END DO
     IF (y_targ(i) < y_srce(1_int64) ) THEN
       iy(i)   = 1_int64
-      iyp1(i) = 1_int64  
+      iyp1(i) = 1_int64
     END IF
     IF (y_targ(i) >= y_srce(points_y_srce) ) THEN
       iy(i)   = points_y_srce
@@ -828,23 +829,23 @@ ELSE IF (grid_type == channel) THEN ! wrap in x direction only
 
 ELSE     ! unrecognised grid type, should never reach here
 
-  icode = 10 
+  icode = 10
   WRITE(cmessage,'(A,I0)') 'Unrecognised grid type ',grid_type
   RETURN
 
 END IF   ! test on input grid type
 
 !---------------------------------------------------------------------------
-! 2. From ix and iy work out four surrounding grid point locations in full 
+! 2. From ix and iy work out four surrounding grid point locations in full
 !    grid. Assumes input and target grids are cartesian, and have regular
-!    grid spacing in X and Y. 
+!    grid spacing in X and Y.
 !---------------------------------------------------------------------------
 
 ! location   in 1d array is  (row-1)* row length + column number
-! Left hand bottom   corner coordinates ix,   iy 
-! Left hand top      corner coordinates ix,   iyp1 
-! Right hand bottom  corner coordinates ixp1, iy 
-! Right hand top     corner coordinates ixp1, iyp1 
+! Left hand bottom   corner coordinates ix,   iy
+! Left hand top      corner coordinates ix,   iyp1
+! Right hand bottom  corner coordinates ixp1, iy
+! Right hand top     corner coordinates ixp1, iyp1
 
 DO i = 1_int64, points
   index_b_l(i) = ix(i)   + (iy(i)-1_int64)*points_x_srce
@@ -928,17 +929,17 @@ DO i=1_int64, points
   ! Calculate basic weights need different ix values
   IF (ixp1(i) > ix(i)) THEN
     a = (MAX(x_targ(i)-x_srce(ix(i)),0.0_real64))/dx_srce
-  ELSE IF (ixp1(i) < ix(i)) THEN ! Wrap around case 
+  ELSE IF (ixp1(i) < ix(i)) THEN ! Wrap around case
     ! Note first grid point X is not always 0.0 depends on whether U, V or P
     ! grid so target grid value can be > final source_grid_y  but less than
     ! grid max so orignal code ok  (poistion B) or in position A
-    ! 
-    !   x - >  1           2           3          4      End grid 
+    !
+    !   x - >  1           2           3          4      End grid
     !    |  A  X           X           X          X  B   |
     !   0.0                                             max_x_srce
     ! Case of wrap around with a finer grid, X coarse source grid point centre
-    ! The new point in the wrap around region can be in position A or B  
-                   
+    ! The new point in the wrap around region can be in position A or B
+
     IF ( x_targ(i) < x_srce(ix(i))) THEN   ! target in position A
       a = (MAX(x_targ(i)-(x_srce(ix(i))-max_x_srce),0.0_real64))/dx_srce
     ELSE   ! Target in position B
@@ -953,7 +954,7 @@ DO i=1_int64, points
     b = (MAX(y_targ(i)-y_srce(iy(i)),0.0_real64))/dy_srce
   ELSE IF (iyp1(i) < iy(i)) THEN ! Wrap around case
     ! Same problems in Y direction as X direction.
-    IF ( y_targ(i) < y_srce(iy(i))) THEN   ! Like position A   
+    IF ( y_targ(i) < y_srce(iy(i))) THEN   ! Like position A
       b = (MAX(y_targ(i)-(y_srce(iy(i))-max_y_srce),0.0_real64))/dy_srce
     ELSE        ! like position B
       b = (MAX(y_targ(i)-y_srce(iy(i)),0.0_real64))/dy_srce

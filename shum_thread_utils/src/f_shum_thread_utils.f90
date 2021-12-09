@@ -496,7 +496,7 @@ INTEGER(KIND=C_INT64_T), INTENT(IN) :: istart, iend, incr
 
 INTEGER(KIND=C_INT64_T) ::  t_istart, t_iend
 
-INTEGER :: blocksize, excess, extra, tid, t_incr
+INTEGER(KIND=C_INT64_T) :: blocksize, excess, extra, tid, t_incr
 
 PROCEDURE(parallelfor_sub), POINTER :: f_routine
 

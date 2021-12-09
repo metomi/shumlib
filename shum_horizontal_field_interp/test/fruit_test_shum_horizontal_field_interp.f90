@@ -1,31 +1,32 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 MODULE fruit_test_shum_horizontal_field_interp_mod
 
 USE fruit
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
   C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE, C_BOOL
+USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY: OUTPUT_UNIT
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -43,28 +44,30 @@ PUBLIC :: fruit_test_shum_horizontal_field_interp
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
   INTEGER, PARAMETER :: real32 = C_FLOAT
-  INTEGER, PARAMETER :: bool   = C_BOOL                                    
+  INTEGER, PARAMETER :: bool   = C_BOOL
 !------------------------------------------------------------------------------!
 
 ! Set a small tolerance level for real to real comparisons
 REAL(KIND=real64), PARAMETER :: tolerance = EPSILON(1.0_real64)*100.0_real64
 
+! Set debug_print to .TRUE. to cause the result fields to be printed
+LOGICAL, PARAMETER :: debug_print = .FALSE.
+
 CONTAINS
 
 SUBROUTINE fruit_test_shum_horizontal_field_interp
 
-USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY: OUTPUT_UNIT
 USE f_shum_horizontal_field_interp_version_mod, ONLY:                          &
                                      get_shum_horizontal_field_interp_version
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: version
 
 !------------------------------------------------------------------------------!
 ! Note: we don't have a test case for the version checking because we don't
 ! want the testing to include further hardcoded version numbers to test
-! against.  Since the version module is simple and hardcoded anyway it's 
+! against.  Since the version module is simple and hardcoded anyway it's
 ! sufficient to make sure it is callable; but let's print the version for info.
 !------------------------------------------------------------------------------!
 version = get_shum_horizontal_field_interp_version()
@@ -81,45 +84,44 @@ CALL run_test_case(test_get_simple_weights, "test_get_simple_weights")
 CALL run_test_case(test_apply_weights, "test_apply_weights")
 
 
-! Addtional tests for Cartesian grid routines 
+! Addtional tests for Cartesian grid routines
 ! Note the apply weights test above is sufficient as both lat-lon and Cartesian
 ! use the same routine
 ! Tests;
-! 1. Cartesian bicyclic grid to a coarser bicyclic grid 
-! 2. Cartesian bicyclic grid to a finer bicyclic grid 
+! 1. Cartesian bicyclic grid to a coarser bicyclic grid
+! 2. Cartesian bicyclic grid to a finer bicyclic grid
 
 CALL run_test_case(test_get_smaller_indices, "interp_smaller_2d_bicyclic_field")
 CALL run_test_case(test_get_smaller_cart_weights, "interp_smaller_cart_weights")
 CALL run_test_case(test_get_bigger_indices, "interp_bigger_2d_bicyclic_field")
 CALL run_test_case(test_get_bigger_cart_weights, "interp_bigger_cart_weights")
 
-
 END SUBROUTINE fruit_test_shum_horizontal_field_interp
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE write_1D_int_array(title, array) 
+SUBROUTINE write_1D_int_array(title, array)
 ! Subroutine to write out a 1D int array used when createing new tests
-IMPLICIT NONE 
+IMPLICIT NONE
 INTEGER(KIND=int64), INTENT(IN) :: array(:)
 CHARACTER(LEN=*), INTENT(IN)    :: title
 
-write(6,'(A,A)') title," =  [ &"
-write(6,'(10(1X,I5,","),"   &")') array
-write(6,'(A)') " ]"
+WRITE(OUTPUT_UNIT,'(A,A)') title," =  [ &"
+WRITE(OUTPUT_UNIT,'(10(1X,I5,","),"   &")') array
+WRITE(OUTPUT_UNIT,'(A)') " ]"
 END SUBROUTINE write_1D_int_array
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE write_1D_real_array(title, array) 
+SUBROUTINE write_1D_real_array(title, array)
 ! Subroutine to write out a 1D real array used when createing new tests
-IMPLICIT NONE 
+IMPLICIT NONE
 REAL(KIND=real64), INTENT(IN) :: array(:)
 CHARACTER(LEN=*), INTENT(IN)  :: title
 
-write(6,'(A,A)') title," =    [ &"
-write(6,'(3(1X,F10.4,"_real64,",1X),"   &")') array
-write(6,'(A)') " ]"
+WRITE(OUTPUT_UNIT,'(A,A)') title," =    [ &"
+WRITE(OUTPUT_UNIT,'(3(1X,F10.4,"_real64,",1X),"   &")') array
+WRITE(OUTPUT_UNIT,'(A)') " ]"
 END SUBROUTINE write_1D_real_array
 
 !------------------------------------------------------------------------------!
@@ -131,7 +133,7 @@ SUBROUTINE generate_1d_reg_grid_coords (start_coord, end_coord,                &
 ! evenly spaced coordinates with a given number of points. The optional logical
 ! argument dictates whether the  end lat/lon coordinate given is a member of
 ! the array or not.
-IMPLICIT NONE 
+IMPLICIT NONE
 REAL(KIND=real64),   INTENT(IN)           :: start_coord
 REAL(KIND=real64),   INTENT(IN)           :: end_coord
 INTEGER(KIND=int64), INTENT(IN)           :: no_of_points
@@ -178,7 +180,7 @@ SUBROUTINE generate_2d_reg_grid_coords(start_lat_coord, end_lat_coord,         &
 ! The optional logical argument dictates whether the  end lat/lon coordinates
 ! given are members of the arrays or not.
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real64),   INTENT(IN)           :: start_lat_coord
 REAL(KIND=real64),   INTENT(IN)           :: end_lat_coord
@@ -235,24 +237,24 @@ SUBROUTINE create_four_value_source_grid( grid_values, x_dim, y_dim,           &
                                           x_dim_change, y_dim_change,          &
                                           value_1, value_2, value_3)
 
-! Create source grid 'data' values as 4 blocks of values: 
+! Create source grid 'data' values as 4 blocks of values:
 !                            x_dim_change
 !              value_1 + value_3  |   value_1 + value_2 + value_3
 ! y_dim_change -------------------------------------------------- y_dim_change
 !              value_1            |   value_1 + value_2
 !                            x_dim_change
-! 
-IMPLICIT NONE 
+!
+IMPLICIT NONE
 
 REAL(KIND=real64),   INTENT(OUT)          :: grid_values(:)
 REAL(KIND=real64),   INTENT(IN)           :: value_1, value_2, value_3
 INTEGER(KIND=int64), INTENT(IN)           :: x_dim, y_dim
 INTEGER(KIND=int64), INTENT(IN)           :: x_dim_change, y_dim_change
-INTEGER(KIND=int32)                       :: i, j, ij
+INTEGER(KIND=int64)                       :: i, j, ij
 
 DO j = 1, y_dim
   DO i = 1, x_dim
-    ij = (j-1)* x_dim + i 
+    ij = (j-1)* x_dim + i
     IF (i <= x_dim_change) THEN
       grid_values(ij) = value_1
     ELSE
@@ -271,7 +273,7 @@ END SUBROUTINE create_four_value_source_grid
 SUBROUTINE return_three_grid_indices( x_dir_indices, y_dir_indices,            &
                                       x_dir_plus_1_indices )
 ! returns 3 arrays of indices used by multiple tests.
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), INTENT(OUT)          :: x_dir_indices(:),                 &
                                              y_dir_indices(:),                 &
@@ -336,7 +338,7 @@ END SUBROUTINE return_three_grid_indices
 SUBROUTINE return_two_grid_indices( index_bottom_left, index_bottom_right)
 ! returns 2 arrays of indices used by multiple tests.
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), INTENT(OUT)          :: index_bottom_left(:),             &
                                              index_bottom_right(:)
@@ -384,7 +386,7 @@ SUBROUTINE return_cart_grid_coarser( x_index, y_index, xp1_index, yp1_index,  &
                                     ind_b_l, ind_b_r, ind_t_l, ind_t_r)
 
 ! returns 8 arrays of indices and weights for coarser Cartesian grid
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), INTENT(OUT)          :: x_index(:),                 &
                                              y_index(:),                 &
@@ -399,7 +401,7 @@ INTEGER(KIND=int64), INTENT(OUT)          :: ind_b_l(:),             &
 x_index =    [ 1,     2,     4,     5,     1,     2,     4,     5 ]
 y_index =    [ 2,     2,     2,     2,     5,     5,     5,     5 ]
 xp1_index =  [ 2,     3,     5,     6,     2,     3,     5,     6 ]
-yp1_index =  [ 3,     3,     3,     3,     6,     6,     6,     6 ]  
+yp1_index =  [ 3,     3,     3,     3,     6,     6,     6,     6 ]
 
 ind_b_l =    [ 7,     8,    10,    11,    25,    26,    28,    29 ]
 ind_b_r =    [ 8,     9,    11,    12,    26,    27,    29,    30 ]
@@ -415,7 +417,7 @@ SUBROUTINE return_cart_coarser_weights( weight_t_r, weight_b_r,                &
 
 ! returns 4 arrays of weights used by coarser tests
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real64), INTENT(OUT)          :: weight_t_r(:),                      &
                                            weight_b_r(:),                      &
@@ -442,7 +444,7 @@ SUBROUTINE return_cart_grid_finer( x_index, y_index, xp1_index, yp1_index,  &
                                     ind_b_l, ind_b_r, ind_t_l, ind_t_r)
 
 ! returns 8 arrays of indices and weights for finer Cartesian grid
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), INTENT(OUT)          :: x_index(:),                 &
                                              y_index(:),                 &
@@ -464,12 +466,12 @@ x_index =    [ 1,   1,   2,  3,  4,  4,  5,  6,   &
                1,   1,   2,  3,  4,  4,  5,  6]
 
 xp1_index =  [ 2,   2,   3,  4,  5,  5,  6,  1,   &
-               2,   2,   3,  4,  5,  5,  6,  1,   &               
-               2,   2,   3,  4,  5,  5,  6,  1,   &               
-               2,   2,   3,  4,  5,  5,  6,  1,   &               
-               2,   2,   3,  4,  5,  5,  6,  1,   &               
-               2,   2,   3,  4,  5,  5,  6,  1,   &               
-               2,   2,   3,  4,  5,  5,  6,  1,   &               
+               2,   2,   3,  4,  5,  5,  6,  1,   &
+               2,   2,   3,  4,  5,  5,  6,  1,   &
+               2,   2,   3,  4,  5,  5,  6,  1,   &
+               2,   2,   3,  4,  5,  5,  6,  1,   &
+               2,   2,   3,  4,  5,  5,  6,  1,   &
+               2,   2,   3,  4,  5,  5,  6,  1,   &
                2,   2,   3,  4,  5,  5,  6,  1]
 
 y_index =    [ 6,   6,   6,  6,  6,  6,  6,  6,   &
@@ -534,7 +536,7 @@ SUBROUTINE return_cart_finer_weights( weight_t_r, weight_b_r,                &
 
 ! returns 4 arrays of weights used by finer tests.
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real64), INTENT(OUT)          :: weight_t_r(:),                      &
                                            weight_b_r(:),                      &
@@ -601,8 +603,8 @@ weight_b_l = [ 0.1750_real64, 0.04375_real64, 0.0875_real64, 0.13125_real64, &
                0.6750_real64, 0.16875_real64, 0.3375_real64, 0.50625_real64, &
                0.9250_real64, 0.23125_real64, 0.4625_real64, 0.69375_real64, &
                0.9250_real64, 0.23125_real64, 0.4625_real64, 0.69375_real64, &
-               0.1750_real64, 0.04375_real64, 0.0875_real64, 0.13125_real64, & 
-               0.1750_real64, 0.04375_real64, 0.0875_real64, 0.13125_real64, & 
+               0.1750_real64, 0.04375_real64, 0.0875_real64, 0.13125_real64, &
+               0.1750_real64, 0.04375_real64, 0.0875_real64, 0.13125_real64, &
                0.4250_real64, 0.10625_real64, 0.2125_real64, 0.31875_real64, &
                0.4250_real64, 0.10625_real64, 0.2125_real64, 0.31875_real64, &
                0.6750_real64, 0.16875_real64, 0.3375_real64, 0.50625_real64, &
@@ -617,7 +619,7 @@ SUBROUTINE return_4_sets_of_weights( weight_t_r, weight_b_r,                   &
                                      weight_t_l, weight_b_l )
 ! returns 4 arrays of weights used by multiple tests.
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real64), INTENT(OUT)          :: weight_t_r(:),                      &
                                            weight_b_r(:),                      &
@@ -838,12 +840,12 @@ END SUBROUTINE return_4_sets_of_weights
 
 SUBROUTINE test_get_corner_indices
 ! Subroutine used to return sample dataset of indices in the top/North
-! right/East corner of the source grid - the goal here 
+! right/East corner of the source grid - the goal here
 ! isn't for a numerical workout but rather easy to identify and work with
 ! numbers
 USE f_shum_horizontal_field_interp_mod, ONLY : f_shum_find_source_box_indices
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 35
 INTEGER(KIND=int64), PARAMETER :: points_lambda_srce = 18_int64
@@ -875,9 +877,7 @@ REAL(KIND=real64)   :: t_lambda_out(points)
 LOGICAL(KIND=bool)  :: cyclic
 LOGICAL             :: create_last_point
 
-INTEGER(KIND=int32) :: i
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
+INTEGER(KIND=int64) :: i
 
 create_last_point = .FALSE.
 
@@ -942,27 +942,39 @@ CALL f_shum_find_source_box_indices                                            &
                   , points_lambda_srce, points_phi_srce, points, cyclic        &
                   , t_lambda, ixp1, ix, iy )
 
-CALL assert_equals(ix_out, ix, INT(points), "array of x indicies is incorrect")
+CALL assert_equals(ix_out, ix, points, "array of x indicies is incorrect")
 
-CALL assert_equals(ixp1_out, ixp1, INT(points),                                &
+CALL assert_equals(ixp1_out, ixp1, points,                                     &
                  "array of x_plus_1 indicies is incorrect")
 
-CALL assert_equals(iy_out, iy, INT(points), "array of y indicies is incorrect")
+CALL assert_equals(iy_out, iy, points, "array of y indicies is incorrect")
 
-CALL assert_equals(index_b_l_out, index_b_l, INT(points),                      &
+CALL assert_equals(index_b_l_out, index_b_l, points,                           &
                    "array of bottom left indicies is incorrect")
 
-CALL assert_equals(index_b_r_out, index_b_r, INT(points),                      &
+CALL assert_equals(index_b_r_out, index_b_r, points,                           &
                    "array of bottom right indicies is incorrect")
 
-CALL assert_equals(index_t_l_out, index_t_l, INT(points),                      &
+CALL assert_equals(index_t_l_out, index_t_l, points,                           &
                    "array of top left indicies is incorrect")
 
-CALL assert_equals(index_t_r_out, index_t_r, INT(points),                      &
+CALL assert_equals(index_t_r_out, index_t_r, points,                           &
                    "array of top right indicies is incorrect")
 
-CALL assert_equals(t_lambda_out, t_lambda, INT(points), tolerance,             &
+CALL assert_equals(t_lambda_out, t_lambda, points, tolerance,                  &
                    "array of target lambda points is incorrect")
+
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_int_array('test_get_corner_indices - ix', ix)
+  CALL write_1D_int_array('test_get_corner_indices - ixp1', ixp1)
+  CALL write_1D_int_array('test_get_corner_indices - iy', iy)
+  CALL write_1D_int_array('test_get_corner_indices - index_b_l', index_b_l)
+  CALL write_1D_int_array('test_get_corner_indices - index_b_r', index_b_r)
+  CALL write_1D_int_array('test_get_corner_indices - index_t_l', index_t_l)
+  CALL write_1D_int_array('test_get_corner_indices - index_t_r', index_t_r)
+  CALL write_1D_real_array('test_get_corner_indices - t_lambda ', t_lambda)
+END IF
 
 END SUBROUTINE test_get_corner_indices
 
@@ -970,13 +982,13 @@ END SUBROUTINE test_get_corner_indices
 
 SUBROUTINE test_get_simple_indices
 ! Subroutine used to return sample dataset of indices generically well within
-! the source grid - the goal here 
+! the source grid - the goal here
 ! isn't for a numerical workout but rather easy to identify and work with
 ! numbers
 
 USE f_shum_horizontal_field_interp_mod, ONLY : f_shum_find_source_box_indices
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 150_int64
 INTEGER(KIND=int64), PARAMETER :: points_lambda_srce = 18_int64
@@ -1008,9 +1020,7 @@ REAL(KIND=real64)   :: t_lambda_out(points)
 LOGICAL(KIND=bool)  :: cyclic
 LOGICAL             :: create_last_point
 
-INTEGER(KIND=int32) :: i
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
+INTEGER(KIND=int64) :: i
 
 create_last_point = .FALSE.
 
@@ -1054,27 +1064,39 @@ CALL f_shum_find_source_box_indices                                            &
                   , points_lambda_srce, points_phi_srce, points, cyclic        &
                   , t_lambda, ixp1, ix, iy )
 
-CALL assert_equals(ix_out, ix, INT(points), "array of x indicies is incorrect")
+CALL assert_equals(ix_out, ix, points, "array of x indicies is incorrect")
 
-CALL assert_equals(ixp1_out, ixp1, INT(points),                                &
+CALL assert_equals(ixp1_out, ixp1, points,                                     &
                  "array of x_plus_1 indicies is incorrect")
 
-CALL assert_equals(iy_out, iy, INT(points), "array of y indicies is incorrect")
+CALL assert_equals(iy_out, iy, points, "array of y indicies is incorrect")
 
-CALL assert_equals(index_b_l_out, index_b_l, INT(points),                      &
+CALL assert_equals(index_b_l_out, index_b_l, points,                           &
                    "array of bottom left indicies is incorrect")
 
-CALL assert_equals(index_b_r_out, index_b_r, INT(points),                      &
+CALL assert_equals(index_b_r_out, index_b_r, points,                           &
                    "array of bottom right indicies is incorrect")
 
-CALL assert_equals(index_t_l_out, index_t_l, INT(points),                      &
+CALL assert_equals(index_t_l_out, index_t_l, points,                           &
                    "array of top left indicies is incorrect")
 
-CALL assert_equals(index_t_r_out, index_t_r, INT(points),                      &
+CALL assert_equals(index_t_r_out, index_t_r, points,                           &
                    "array of top right indicies is incorrect")
 
-CALL assert_equals(t_lambda_out, t_lambda, INT(points), tolerance,             &
+CALL assert_equals(t_lambda_out, t_lambda, points, tolerance,                  &
                    "array of target lambda points is incorrect")
+
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_int_array('test_get_simple_indices - ix', ix)
+  CALL write_1D_int_array('test_get_simple_indices - ixp1', ixp1)
+  CALL write_1D_int_array('test_get_simple_indices - iy', iy)
+  CALL write_1D_int_array('test_get_simple_indices - index_b_l', index_b_l)
+  CALL write_1D_int_array('test_get_simple_indices - index_b_r', index_b_r)
+  CALL write_1D_int_array('test_get_simple_indices - index_t_l', index_t_l)
+  CALL write_1D_int_array('test_get_simple_indices - index_t_r', index_t_r)
+  CALL write_1D_real_array('test_get_simple_indices - t_lambda ', t_lambda)
+END IF
 
 END SUBROUTINE test_get_simple_indices
 
@@ -1084,12 +1106,12 @@ SUBROUTINE test_get_wrapped_indices
 ! Subroutine used to return sample dataset of indices - The target grid has been
 ! specified 'beyond' the source such that when it is adjusted to be at
 ! lambda_source(1) to lambda_source91) + 360 it will fit withing the source.
-! the goal here isn't for a numerical workout but rather easy to identify and 
+! the goal here isn't for a numerical workout but rather easy to identify and
 ! work with numbers
 
 USE f_shum_horizontal_field_interp_mod, ONLY : f_shum_find_source_box_indices
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 150
 INTEGER(KIND=int64), PARAMETER :: points_lambda_srce = 18_int64
@@ -1121,9 +1143,7 @@ REAL(KIND=real64)   :: t_lambda_out(points)
 LOGICAL(KIND=bool)  :: cyclic
 LOGICAL             :: create_last_point
 
-INTEGER(KIND=int32) :: i
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
+INTEGER(KIND=int64) :: i
 
 create_last_point = .FALSE.
 
@@ -1166,27 +1186,39 @@ CALL f_shum_find_source_box_indices                                            &
                   , points_lambda_srce, points_phi_srce, points, cyclic        &
                   , t_lambda, ixp1, ix, iy )
 
-CALL assert_equals(ix_out, ix, INT(points), "array of x indicies is incorrect")
+CALL assert_equals(ix_out, ix, points, "array of x indicies is incorrect")
 
-CALL assert_equals(ixp1_out, ixp1, INT(points),                                &
+CALL assert_equals(ixp1_out, ixp1, points,                                     &
                  "array of x_plus_1 indicies is incorrect")
 
-CALL assert_equals(iy_out, iy, INT(points), "array of y indicies is incorrect")
+CALL assert_equals(iy_out, iy, points, "array of y indicies is incorrect")
 
-CALL assert_equals(index_b_l_out, index_b_l, INT(points),                      &
+CALL assert_equals(index_b_l_out, index_b_l, points,                           &
                    "array of bottom left indicies is incorrect")
 
-CALL assert_equals(index_b_r_out, index_b_r, INT(points),                      &
+CALL assert_equals(index_b_r_out, index_b_r, points,                           &
                    "array of bottom right indicies is incorrect")
 
-CALL assert_equals(index_t_l_out, index_t_l, INT(points),                      &
+CALL assert_equals(index_t_l_out, index_t_l, points,                           &
                    "array of top left indicies is incorrect")
 
-CALL assert_equals(index_t_r_out, index_t_r, INT(points),                      &
+CALL assert_equals(index_t_r_out, index_t_r, points,                           &
                    "array of top right indicies is incorrect")
 
-CALL assert_equals(t_lambda_out, t_lambda, INT(points), tolerance,   &
+CALL assert_equals(t_lambda_out, t_lambda, points, tolerance,                  &
                    "array of target lambda points is incorrect")
+
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_int_array('test_get_wrapped_indices - ix', ix)
+  CALL write_1D_int_array('test_get_wrapped_indices - ixp1', ixp1)
+  CALL write_1D_int_array('test_get_wrapped_indices - iy', iy)
+  CALL write_1D_int_array('test_get_wrapped_indices - index_b_l', index_b_l)
+  CALL write_1D_int_array('test_get_wrapped_indices - index_b_r', index_b_r)
+  CALL write_1D_int_array('test_get_wrapped_indices - index_t_l', index_t_l)
+  CALL write_1D_int_array('test_get_wrapped_indices - index_t_r', index_t_r)
+  CALL write_1D_real_array('test_get_wrapped_indices - t_lambda ', t_lambda)
+END IF
 
 END SUBROUTINE test_get_wrapped_indices
 
@@ -1197,7 +1229,7 @@ SUBROUTINE test_get_simple_weights
 
 USE f_shum_horizontal_field_interp_mod, ONLY : f_shum_calc_weights
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 150
 INTEGER(KIND=int64), PARAMETER :: points_lambda_srce = 18_int64
@@ -1223,10 +1255,6 @@ REAL(KIND=real64)   :: phi_targ(points)
 REAL(KIND=real64)   :: t_lambda(points)
 
 LOGICAL             :: create_last_point
-
-INTEGER(KIND=int32) :: i
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
 
 create_last_point = .FALSE.
 
@@ -1256,18 +1284,26 @@ CALL f_shum_calc_weights                                                       &
                   , points_lambda_srce, points_phi_srce, points                &
                   , t_lambda, ixp1, ix, iy )
 
-CALL assert_equals(weight_t_r_out, weight_t_r, INT(points), tolerance,         &
+CALL assert_equals(weight_t_r_out, weight_t_r, points, tolerance,              &
                  "array of top right weights is incorrect")
 
-CALL assert_equals(weight_b_r_out, weight_b_r, INT(points), tolerance,         &
+CALL assert_equals(weight_b_r_out, weight_b_r, points, tolerance,              &
                   "array of bottom right weights is incorrect")
 
-CALL assert_equals(weight_t_l_out, weight_t_l, INT(points), tolerance,         &
+CALL assert_equals(weight_t_l_out, weight_t_l, points, tolerance,              &
                    "array of top left weights is incorrect")
 
-CALL assert_equals(weight_b_l_out, weight_b_l, INT(points), tolerance,         &
+CALL assert_equals(weight_b_l_out, weight_b_l, points, tolerance,              &
                    "array of bottom left weights is incorrect")
 
+
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_real_array('test_get_simple_weights - weight_t_r', weight_t_r)
+  CALL write_1D_real_array('test_get_simple_weights - weight_b_r', weight_b_r)
+  CALL write_1D_real_array('test_get_simple_weights - weight_t_l', weight_t_l)
+  CALL write_1D_real_array('test_get_simple_weights - weight_b_l', weight_b_l)
+END IF
 
 END SUBROUTINE test_get_simple_weights
 
@@ -1280,7 +1316,7 @@ SUBROUTINE test_apply_weights
 USE f_shum_horizontal_field_interp_mod, ONLY :                                 &
                 f_shum_horizontal_field_bi_lin_interp_calc
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: rows = 10_int64
 INTEGER(KIND=int64), PARAMETER :: row_length = 18_int64
@@ -1298,9 +1334,6 @@ REAL(KIND=real64)   :: weight_b_l(len_field)
 REAL(KIND=real64)   :: data_in(rows * row_length)
 REAL(KIND=real64)   :: data_out(len_field)
 REAL(KIND=real64)   :: data_out_ref(len_field)
-
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
 
 CALL return_4_sets_of_weights( weight_t_r, weight_b_r,                         &
                                weight_t_l, weight_b_l )
@@ -1374,8 +1407,13 @@ CALL f_shum_horizontal_field_bi_lin_interp_calc                                &
                   , weight_b_l, weight_b_r, weight_t_l, weight_t_r             &
                   , data_out )
 
-CALL assert_equals(data_out_ref, data_out, INT(len_field), tolerance,          &
+CALL assert_equals(data_out_ref, data_out, len_field, tolerance,               &
                    "Horizontally interpolated data is incorrect")
+
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_real_array('test_apply_weights - data_out', data_out)
+END IF
 
 END SUBROUTINE test_apply_weights
 !------------------------------------------------------------------------------!
@@ -1388,8 +1426,8 @@ SUBROUTINE test_get_smaller_indices
 ! Going from a 6x6 (X by Y) grid to a 4x2 grid covering the same region
 ! so degrading dx and dy by different amounts
 ! Starting from dx=dy=100.m going to dx=125.m dy=300m
-! Choosing a u grid like setup as more possible problems with wrap around 
-!  
+! Choosing a u grid like setup as more possible problems with wrap around
+!
 !             - > X
 !   600 -------------------------
 !   550 u   u   u   u   u   u   !      u - original
@@ -1405,7 +1443,7 @@ SUBROUTINE test_get_smaller_indices
 !    50 u   u   u   u   u   u   !
 !    0  -------------------------
 !       0  100 200 300 400 500 600
-! 
+!
 ! Coarser grid  X will start at 0, dx = 150.
 !               Y will start at 50.0  dy = 300.
 
@@ -1413,7 +1451,7 @@ USE f_shum_horizontal_field_interp_mod, ONLY :                        &
                            f_shum_find_source_cart_box_indices
 
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 8
 INTEGER(KIND=int64), PARAMETER :: points_x_srce = 6_int64
@@ -1446,10 +1484,7 @@ REAL(KIND=real64)   :: y_targ(points)
 
 LOGICAL                         :: create_last_point
 
-INTEGER(KIND=int32)            :: i
-INTEGER(KIND=int32) :: status
 INTEGER(KIND=int64) :: icode     ! error code
-CHARACTER(LEN=500)  :: message
 CHARACTER(LEN=80)    :: cmessage  ! error message
 
 create_last_point = .false.
@@ -1483,28 +1518,39 @@ CALL f_shum_find_source_cart_box_indices                                       &
 CALL assert_equals(0_int64, icode,                                             &
                   "icode from f_shum_find_source_cart_box_indices is not zero")
 
-CALL assert_equals(ix_out, ix, INT(points), "array of x indicies is incorrect")
+CALL assert_equals(ix_out, ix, points, "array of x indicies is incorrect")
 
-CALL assert_equals(ixp1_out, ixp1, INT(points),                                &
+CALL assert_equals(ixp1_out, ixp1, points,                                     &
                  "array of x_plus_1 indicies is incorrect")
 
-CALL assert_equals(iy_out, iy, INT(points), "array of y indicies is incorrect")
+CALL assert_equals(iy_out, iy, points, "array of y indicies is incorrect")
 
-CALL assert_equals(iyp1_out, iyp1, INT(points),                                &
+CALL assert_equals(iyp1_out, iyp1, points,                                     &
                  "array of y_plus_1 indicies is incorrect")
 
-CALL assert_equals(index_b_l_out, index_b_l, INT(points),                      &
+CALL assert_equals(index_b_l_out, index_b_l, points,                           &
                    "array of bottom left indicies is incorrect")
 
-CALL assert_equals(index_b_r_out, index_b_r, INT(points),                      &
+CALL assert_equals(index_b_r_out, index_b_r, points,                           &
                    "array of bottom right indicies is incorrect")
 
-CALL assert_equals(index_t_l_out, index_t_l, INT(points),                      &
+CALL assert_equals(index_t_l_out, index_t_l, points,                           &
                    "array of top left indicies is incorrect")
 
-CALL assert_equals(index_t_r_out, index_t_r, INT(points),                      &
+CALL assert_equals(index_t_r_out, index_t_r, points,                           &
                    "array of top right indicies is incorrect")
 
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_int_array('test_get_smaller_indices - ix', ix)
+  CALL write_1D_int_array('test_get_smaller_indices - ixp1', ixp1)
+  CALL write_1D_int_array('test_get_smaller_indices - iy', iy)
+  CALL write_1D_int_array('test_get_smaller_indices - iyp1', iyp1)
+  CALL write_1D_int_array('test_get_smaller_indices - index_b_l', index_b_l)
+  CALL write_1D_int_array('test_get_smaller_indices - index_b_r', index_b_r)
+  CALL write_1D_int_array('test_get_smaller_indices - index_t_l', index_t_l)
+  CALL write_1D_int_array('test_get_smaller_indices - index_t_r', index_t_r)
+END IF
 
 END SUBROUTINE test_get_smaller_indices
 
@@ -1515,12 +1561,11 @@ SUBROUTINE test_get_smaller_cart_weights
 
 USE f_shum_horizontal_field_interp_mod, ONLY : f_shum_calc_cart_weights
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 8
 INTEGER(KIND=int64), PARAMETER :: points_x_srce = 6_int64
 INTEGER(KIND=int64), PARAMETER :: points_y_srce = 6_int64
-INTEGER(KIND=int64), PARAMETER :: grid_type = 4    ! bicyclic grid
 
 INTEGER(KIND=int64)            :: ix_out(points)
 INTEGER(KIND=int64)            :: ixp1_out(points)
@@ -1548,10 +1593,6 @@ REAL(KIND=real64)   :: x_targ(points)
 REAL(KIND=real64)   :: y_targ(points)
 
 LOGICAL             :: create_last_point
-
-INTEGER(KIND=int32)            :: i
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
 
 create_last_point = .FALSE.
 
@@ -1586,18 +1627,29 @@ CALL f_shum_calc_cart_weights                                                &
                   , ixp1_out, ix_out, iyp1_out, iy_out )
 
 
-CALL assert_equals(weight_t_r_out, weight_t_r, INT(points), tolerance,       &
+CALL assert_equals(weight_t_r_out, weight_t_r, points, tolerance,            &
                  "array of top right weights is incorrect")
 
-CALL assert_equals(weight_b_r_out, weight_b_r, INT(points), tolerance,       &
+CALL assert_equals(weight_b_r_out, weight_b_r, points, tolerance,            &
                   "array of bottom right weights is incorrect")
 
-CALL assert_equals(weight_t_l_out, weight_t_l, INT(points), tolerance,       &
+CALL assert_equals(weight_t_l_out, weight_t_l, points, tolerance,            &
                    "array of top left weights is incorrect")
 
-CALL assert_equals(weight_b_l_out, weight_b_l, INT(points), tolerance,       &
+CALL assert_equals(weight_b_l_out, weight_b_l, points, tolerance,            &
                    "array of bottom left weights is incorrect")
 
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_real_array('test_get_smaller_cart_weights - weight_t_r',     &
+                           weight_t_r)
+  CALL write_1D_real_array('test_get_smaller_cart_weights - weight_b_r',     &
+                           weight_b_r)
+  CALL write_1D_real_array('test_get_smaller_cart_weights - weight_t_l',     &
+                           weight_t_l)
+  CALL write_1D_real_array('test_get_smaller_cart_weights - weight_b_l',     &
+                           weight_b_l)
+END IF
 
 END SUBROUTINE test_get_smaller_cart_weights
 
@@ -1606,8 +1658,8 @@ SUBROUTINE test_get_bigger_indices
 ! bicyclic cartesian grid
 ! Going from a 6x6 (X by Y) grid to a 8x8 grid covering the same region
 ! ! Starting from dx=dy=100.m going to dx=75.m dy=75m
-! Choosing a u grid like setup as more possible problems with wrap around 
-!  
+! Choosing a u grid like setup as more possible problems with wrap around
+!
 !             - > X
 !   600 -------------------------
 ! 557.5 x  x  x  x  x  x  x  x
@@ -1628,21 +1680,21 @@ SUBROUTINE test_get_bigger_indices
 !
 ! 182.5 x  x  x  x  x  x  x  x
 !   150 u   u   u   u   u   u   !
-!       
+!
 ! 107.5 x  x  x  x  x  x  x  x
-!       
+!
 !    50 u   u   u   u   u   u   !
 !   32.5x  x  x  x  x  x  x  x
 !    0  -------------------------
 !       0  100 200 300 400 500 600
-! 
+!
 ! finer grid  X will start at 0, dx = 75.
 !             Y will start at 32.5  dy = 75.
 
 USE f_shum_horizontal_field_interp_mod, ONLY :    &
                f_shum_find_source_cart_box_indices
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 64
 INTEGER(KIND=int64), PARAMETER :: points_x_srce = 6_int64
@@ -1675,10 +1727,7 @@ REAL(KIND=real64)   :: y_targ(points)
 
 LOGICAL                         :: create_last_point
 
-INTEGER(KIND=int32)            :: i
-INTEGER(KIND=int32) :: status
 INTEGER(KIND=int64) :: icode     ! error code
-CHARACTER(LEN=500)  :: message
 CHARACTER(LEN=80)   :: cmessage  ! error message
 
 create_last_point = .false.
@@ -1714,28 +1763,40 @@ CALL f_shum_find_source_cart_box_indices                                     &
 CALL assert_equals(0_int64, icode,                                           &
                   "icode from f_shum_find_source_cart_box_indices is not zero")
 
-CALL assert_equals(ix_out, ix, INT(points), "array of x indicies is incorrect")
+CALL assert_equals(ix_out, ix, points, "array of x indicies is incorrect")
 
-CALL assert_equals(ixp1_out, ixp1, INT(points),                              &
+CALL assert_equals(ixp1_out, ixp1, points,                                     &
                  "array of x_plus_1 indicies is incorrect")
 
-CALL assert_equals(iy_out, iy, INT(points), "array of y indicies is incorrect")
+CALL assert_equals(iy_out, iy, points, "array of y indicies is incorrect")
 
-CALL assert_equals(iyp1_out, iyp1, INT(points),                                &
+CALL assert_equals(iyp1_out, iyp1, points,                                     &
                  "array of y_plus_1 indicies is incorrect")
 
-CALL assert_equals(index_b_l_out, index_b_l, INT(points),                      &
+CALL assert_equals(index_b_l_out, index_b_l, points,                           &
                    "array of bottom left indicies is incorrect")
 
-CALL assert_equals(index_b_r_out, index_b_r, INT(points),                      &
+CALL assert_equals(index_b_r_out, index_b_r, points,                           &
                    "array of bottom right indicies is incorrect")
 
-CALL assert_equals(index_t_l_out, index_t_l, INT(points),                      &
+CALL assert_equals(index_t_l_out, index_t_l, points,                           &
                    "array of top left indicies is incorrect")
 
-CALL assert_equals(index_t_r_out, index_t_r, INT(points),                      &
+CALL assert_equals(index_t_r_out, index_t_r, points,                           &
                    "array of top right indicies is incorrect")
 
+
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_int_array('test_get_bigger_indices - ix', ix)
+  CALL write_1D_int_array('test_get_bigger_indices - ixp1', ixp1)
+  CALL write_1D_int_array('test_get_bigger_indices - iy', iy)
+  CALL write_1D_int_array('test_get_bigger_indices - iyp1', iyp1)
+  CALL write_1D_int_array('test_get_bigger_indices - index_b_l', index_b_l)
+  CALL write_1D_int_array('test_get_bigger_indices - index_b_r', index_b_r)
+  CALL write_1D_int_array('test_get_bigger_indices - index_t_l', index_t_l)
+  CALL write_1D_int_array('test_get_bigger_indices - index_t_r', index_t_r)
+END IF
 
 END SUBROUTINE test_get_bigger_indices
 
@@ -1746,12 +1807,11 @@ SUBROUTINE test_get_bigger_cart_weights
 
 USE f_shum_horizontal_field_interp_mod, ONLY : f_shum_calc_cart_weights
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: points = 64
 INTEGER(KIND=int64), PARAMETER :: points_x_srce = 6_int64
 INTEGER(KIND=int64), PARAMETER :: points_y_srce = 6_int64
-INTEGER(KIND=int64), PARAMETER :: grid_type = 4    ! bicyclic grid
 
 INTEGER(KIND=int64)            :: ix_out(points)
 INTEGER(KIND=int64)            :: ixp1_out(points)
@@ -1779,10 +1839,6 @@ REAL(KIND=real64)   :: x_targ(points)
 REAL(KIND=real64)   :: y_targ(points)
 
 LOGICAL             :: create_last_point
-
-INTEGER(KIND=int32)            :: i
-INTEGER(KIND=int32) :: status
-CHARACTER(LEN=500)  :: message
 
 create_last_point = .FALSE.
 
@@ -1815,18 +1871,29 @@ CALL f_shum_calc_cart_weights                                                &
                   , points_x_srce, points_y_srce, points                     &
                   , ixp1_out, ix_out, iyp1_out, iy_out )
 
-CALL assert_equals(weight_t_r_out, weight_t_r, INT(points), tolerance,     &
+CALL assert_equals(weight_t_r_out, weight_t_r, points, tolerance,            &
                  "array of top right weights is incorrect")
 
-CALL assert_equals(weight_b_r_out, weight_b_r, INT(points), tolerance,     &
+CALL assert_equals(weight_b_r_out, weight_b_r, points, tolerance,            &
                   "array of bottom right weights is incorrect")
 
-CALL assert_equals(weight_t_l_out, weight_t_l, INT(points), tolerance,     &
+CALL assert_equals(weight_t_l_out, weight_t_l, points, tolerance,            &
                    "array of top left weights is incorrect")
 
-CALL assert_equals(weight_b_l_out, weight_b_l, INT(points), tolerance,     &
+CALL assert_equals(weight_b_l_out, weight_b_l, points, tolerance,            &
                    "array of bottom left weights is incorrect")
 
+IF (debug_print) THEN
+  WRITE(OUTPUT_UNIT,'(A)') ""
+  CALL write_1D_real_array('test_get_bigger_cart_weights - weight_t_r',        &
+                           weight_t_r)
+  CALL write_1D_real_array('test_get_bigger_cart_weights - weight_b_r',        &
+                           weight_b_r)
+  CALL write_1D_real_array('test_get_bigger_cart_weights - weight_t_l',        &
+                           weight_t_l)
+  CALL write_1D_real_array('test_get_bigger_cart_weights - weight_b_l',        &
+                           weight_b_l)
+END IF
 
 END SUBROUTINE test_get_bigger_cart_weights
 

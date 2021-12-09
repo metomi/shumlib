@@ -712,12 +712,12 @@ END SUBROUTINE test_unlock
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE test_unlock_foreign
+!$ SUBROUTINE test_unlock_foreign
 
-IMPLICIT NONE
+!$ IMPLICIT NONE
 
-LOGICAL(KIND=C_BOOL) :: test_ret
-INTEGER(KIND=C_INT64_T) :: lock
+!$ LOGICAL(KIND=C_BOOL) :: test_ret
+!$ INTEGER(KIND=C_INT64_T) :: lock
 
 !$ lock = -1
 
@@ -735,16 +735,16 @@ INTEGER(KIND=C_INT64_T) :: lock
 !$ CALL assert_true(test_ret,                                                  &
 !$          "Did not correctly handle unlocking a lock owner by another thread")
 
-END SUBROUTINE test_unlock_foreign
+!$ END SUBROUTINE test_unlock_foreign
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE test_lock_blocking
+!$ SUBROUTINE test_lock_blocking
 
-IMPLICIT NONE
+!$ IMPLICIT NONE
 
-LOGICAL(KIND=C_BOOL) :: test_ret
-INTEGER(KIND=C_INT64_T) :: lock
+!$ LOGICAL(KIND=C_BOOL) :: test_ret
+!$ INTEGER(KIND=C_INT64_T) :: lock
 
 !$ CALL set_case_name("test_lock_blocking")
 
@@ -759,16 +759,16 @@ INTEGER(KIND=C_INT64_T) :: lock
 !$OMP END PARALLEL
 !$ CALL assert_true(test_ret,"Set locks did not correctly block another thread")
 
-END SUBROUTINE test_lock_blocking
+!$ END SUBROUTINE test_lock_blocking
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE test_lockqueue_multi
+!$ SUBROUTINE test_lockqueue_multi
 
-IMPLICIT NONE
+!$ IMPLICIT NONE
 
-LOGICAL(KIND=C_BOOL) :: test_ret
-INTEGER(KIND=C_INT64_T) :: lock
+!$ LOGICAL(KIND=C_BOOL) :: test_ret
+!$ INTEGER(KIND=C_INT64_T) :: lock
 
 !$ CALL set_case_name("test_lockqueue_multi")
 
@@ -783,16 +783,16 @@ INTEGER(KIND=C_INT64_T) :: lock
 !$OMP END PARALLEL
 !$ CALL assert_true(test_ret, "Set locks did not queue correctly")
 
-END SUBROUTINE test_lockqueue_multi
+!$ END SUBROUTINE test_lockqueue_multi
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE test_testlock_nonblocking
+!$ SUBROUTINE test_testlock_nonblocking
 
-IMPLICIT NONE
+!$ IMPLICIT NONE
 
-LOGICAL(KIND=C_BOOL) :: test_ret
-INTEGER(KIND=C_INT64_T) :: lock
+!$ LOGICAL(KIND=C_BOOL) :: test_ret
+!$ INTEGER(KIND=C_INT64_T) :: lock
 
 !$ CALL set_case_name("test_testlock_nonblocking")
 
@@ -807,7 +807,7 @@ INTEGER(KIND=C_INT64_T) :: lock
 !$OMP END PARALLEL
 !$ CALL assert_true(test_ret,"Set locks did not correctly block another thread")
 
-END SUBROUTINE test_testlock_nonblocking
+!$ END SUBROUTINE test_testlock_nonblocking
 
 
 !------------------------------------------------------------------------------!
@@ -974,7 +974,7 @@ SUBROUTINE test_inpar
 IMPLICIT NONE
 
 LOGICAL(KIND=C_BOOL) :: test_ret
-LOGICAL :: working
+!$ LOGICAL :: working
 INTEGER(KIND=C_INT64_T) :: par
 
 par = -1

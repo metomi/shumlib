@@ -30,7 +30,7 @@
 #include "c_shum_thread_utils.h"
 #include "c_fruit_test_shum_thread_utils.h"
 
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
 #include "omp.h"
 #endif
 
@@ -1027,7 +1027,7 @@ void c_test_lock_self_owned_testlock(bool *test_ret)
 void c_test_inpar(bool *test_ret, int64_t *par_res)
 {
   *par_res = f_shum_inPar();
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
   *test_ret = (*par_res == omp_in_parallel());
 #else
   *test_ret = (*par_res==1 || *par_res==0);
@@ -1039,7 +1039,7 @@ void c_test_inpar(bool *test_ret, int64_t *par_res)
 void c_test_threadid(bool *test_ret, int64_t *tid)
 {
   *tid = f_shum_threadID();
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
   *test_ret = (*tid == omp_get_thread_num());
 #else
   *test_ret = (*tid >= 0);
@@ -1051,7 +1051,7 @@ void c_test_threadid(bool *test_ret, int64_t *tid)
 void c_test_numthreads(bool *test_ret, int64_t *numthreads)
 {
   *numthreads = f_shum_numThreads();
-#if defined(_OPENMP)
+#if defined(_OPENMP) && !defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
   *test_ret = (*numthreads == omp_get_num_threads());
 #else
   *test_ret = (*numthreads >= 1);

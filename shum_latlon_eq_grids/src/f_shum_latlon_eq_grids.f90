@@ -1,25 +1,25 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
-! Description: Functions to Transform Lat/Long values and Rotate wind vector 
+! Description: Functions to Transform Lat/Long values and Rotate wind vector
 !              values to Rotated Pole Equatorial Lat/Long coordinates.
 !
 MODULE f_shum_latlon_eq_grids_mod
@@ -30,7 +30,7 @@ USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
 USE f_shum_conversions_mod, ONLY:                                              &
                                  shum_pi_over_180_const,                       &
                                  shum_180_over_pi_const
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -49,7 +49,7 @@ PUBLIC :: f_shum_latlon_to_eq, f_shum_eq_to_latlon,                            &
   INTEGER, PARAMETER :: int64  = C_INT64_T
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT                                       
+  INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
 INTERFACE f_shum_latlon_to_eq
@@ -220,9 +220,9 @@ REAL(KIND=real64), INTENT(IN)  :: lambda_pole ! Long pole (eq)
 REAL(KIND=real64), INTENT(OUT) :: phi_eq      ! Lat (eq)
 REAL(KIND=real64), INTENT(OUT) :: lambda_eq   ! Long (eq)
 
-REAL(KIND=real64) :: phi_arr(1)    
-REAL(KIND=real64) :: lambda_arr(1) 
-REAL(KIND=real64) :: phi_eq_arr(1) 
+REAL(KIND=real64) :: phi_arr(1)
+REAL(KIND=real64) :: lambda_arr(1)
+REAL(KIND=real64) :: phi_eq_arr(1)
 REAL(KIND=real64) :: lambda_eq_arr(1)
 
 CHARACTER(LEN=*)    :: message
@@ -256,6 +256,7 @@ REAL(KIND=real32), INTENT(OUT) :: phi_eq(SIZE(phi))    ! Lat (eq)
 REAL(KIND=real32), INTENT(OUT) :: lambda_eq(SIZE(phi)) ! Long (eq)
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
 
 REAL(KIND=real64)   :: phi64(SIZE(phi))
@@ -277,8 +278,9 @@ END DO
 phi_pole64 = REAL(phi_pole, KIND=real64)
 lambda_pole64 = REAL(lambda_pole, KIND=real64)
 
-status = f_shum_lltoeq_arg64(phi64, lambda64, phi_eq64, lambda_eq64,           &
-                             phi_pole64, lambda_pole64, message)
+status64 = f_shum_lltoeq_arg64(phi64, lambda64, phi_eq64, lambda_eq64,         &
+                               phi_pole64, lambda_pole64, message)
+status = INT(status64,KIND=int32)
 
 IF (status == 0_int32) THEN
   !$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                            &
@@ -306,14 +308,15 @@ REAL(KIND=real32), INTENT(IN)  :: lambda_pole ! Long pole (eq)
 REAL(KIND=real32), INTENT(OUT) :: phi_eq      ! Lat (eq)
 REAL(KIND=real32), INTENT(OUT) :: lambda_eq   ! Long (eq)
 
-REAL(KIND=real64) :: phi_arr64(1)    
-REAL(KIND=real64) :: lambda_arr64(1) 
-REAL(KIND=real64) :: phi_eq_arr64(1) 
+REAL(KIND=real64) :: phi_arr64(1)
+REAL(KIND=real64) :: lambda_arr64(1)
+REAL(KIND=real64) :: phi_eq_arr64(1)
 REAL(KIND=real64) :: lambda_eq_arr64(1)
 REAL(KIND=real64) :: phi_pole64
 REAL(KIND=real64) :: lambda_pole64
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
 
 phi_arr64(1) = REAL(phi, KIND=real64)
@@ -322,9 +325,10 @@ lambda_arr64(1) = REAL(lambda, KIND=real64)
 phi_pole64 = REAL(phi_pole, KIND=real64)
 lambda_pole64 = REAL(lambda_pole, KIND=real64)
 
-status = f_shum_lltoeq_arg64(phi_arr64, lambda_arr64,                          &
-                             phi_eq_arr64, lambda_eq_arr64,                    &
-                             phi_pole64, lambda_pole64, message)
+status64 = f_shum_lltoeq_arg64(phi_arr64, lambda_arr64,                        &
+                               phi_eq_arr64, lambda_eq_arr64,                  &
+                               phi_pole64, lambda_pole64, message)
+status = INT(status64,KIND=int32)
 
 IF (status == 0_int32) THEN
   phi_eq = REAL(phi_eq_arr64(1), KIND=real32)
@@ -410,7 +414,7 @@ DO i=1,SIZE(phi_eq)
   IF (ABS(e_lambda) > 180.0_real64) THEN
     e_lambda = e_lambda - SIGN(360.0_real64, e_lambda)
   END IF
- 
+
   ! Convert eq latitude & longitude to radians
   e_lambda = shum_pi_over_180_const*e_lambda
   e_phi    = shum_pi_over_180_const*phi_eq(i)
@@ -467,12 +471,12 @@ REAL(KIND=real64), INTENT(IN)  :: lambda_eq   ! Long (eq)
 REAL(KIND=real64), INTENT(IN)  :: phi_pole    ! Lat pole (eq)
 REAL(KIND=real64), INTENT(IN)  :: lambda_pole ! Long pole (eq)
 REAL(KIND=real64), INTENT(OUT) :: phi         ! Lat (lat-lon)
-REAL(KIND=real64), INTENT(OUT) :: lambda      ! Long (lat-lon)   
+REAL(KIND=real64), INTENT(OUT) :: lambda      ! Long (lat-lon)
 
-REAL(KIND=real64) :: phi_eq_arr(1) 
+REAL(KIND=real64) :: phi_eq_arr(1)
 REAL(KIND=real64) :: lambda_eq_arr(1)
-REAL(KIND=real64) :: phi_arr(1)    
-REAL(KIND=real64) :: lambda_arr(1) 
+REAL(KIND=real64) :: phi_arr(1)
+REAL(KIND=real64) :: lambda_arr(1)
 
 CHARACTER(LEN=*)    :: message
 INTEGER(KIND=int64) :: status
@@ -505,6 +509,7 @@ REAL(KIND=real32), INTENT(OUT) :: phi(SIZE(phi_eq))       ! Lat (lat-lon)
 REAL(KIND=real32), INTENT(OUT) :: lambda(SIZE(phi_eq))    ! Long (lat-lon)
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
 
 REAL(KIND=real64)   :: phi64(SIZE(phi_eq))
@@ -526,8 +531,9 @@ END DO
 phi_pole64 = REAL(phi_pole, KIND=real64)
 lambda_pole64 = REAL(lambda_pole, KIND=real64)
 
-status = f_shum_eqtoll_arg64(phi_eq64, lambda_eq64, phi64, lambda64,           &
-                             phi_pole64, lambda_pole64, message)
+status64 = f_shum_eqtoll_arg64(phi_eq64, lambda_eq64, phi64, lambda64,         &
+                               phi_pole64, lambda_pole64, message)
+status = INT(status64,KIND=int32)
 
 IF (status == 0_int32) THEN
   !$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                            &
@@ -555,14 +561,15 @@ REAL(KIND=real32), INTENT(IN)  :: lambda_pole ! Long pole (eq)
 REAL(KIND=real32), INTENT(OUT) :: phi         ! Lat (lat-lon)
 REAL(KIND=real32), INTENT(OUT) :: lambda      ! Long (lat-lon)
 
-REAL(KIND=real64) :: phi_arr64(1)    
-REAL(KIND=real64) :: lambda_arr64(1) 
-REAL(KIND=real64) :: phi_eq_arr64(1) 
+REAL(KIND=real64) :: phi_arr64(1)
+REAL(KIND=real64) :: lambda_arr64(1)
+REAL(KIND=real64) :: phi_eq_arr64(1)
 REAL(KIND=real64) :: lambda_eq_arr64(1)
 REAL(KIND=real64) :: phi_pole64
 REAL(KIND=real64) :: lambda_pole64
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
 
 phi_eq_arr64(1) = REAL(phi_eq, KIND=real64)
@@ -571,9 +578,10 @@ lambda_eq_arr64(1) = REAL(lambda_eq, KIND=real64)
 phi_pole64 = REAL(phi_pole, KIND=real64)
 lambda_pole64 = REAL(lambda_pole, KIND=real64)
 
-status = f_shum_eqtoll_arg64(phi_eq_arr64, lambda_eq_arr64,                    &
-                             phi_arr64, lambda_arr64,                          &
-                             phi_pole64, lambda_pole64, message)
+status64 = f_shum_eqtoll_arg64(phi_eq_arr64, lambda_eq_arr64,                  &
+                               phi_arr64, lambda_arr64,                        &
+                               phi_pole64, lambda_pole64, message)
+status = INT(status64,KIND=int32)
 
 IF (status == 0_int32) THEN
   phi = REAL(phi_arr64(1), KIND=real32)
@@ -716,6 +724,7 @@ REAL(KIND=real32), INTENT(OUT) :: coeff1(SIZE(lambda))    ! Rotation coeff 1
 REAL(KIND=real32), INTENT(OUT) :: coeff2(SIZE(lambda))    ! Rotation coeff 2
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
 
 REAL(KIND=real64)   :: lambda64(SIZE(lambda))
@@ -737,8 +746,9 @@ END DO
 phi_pole64 = REAL(phi_pole, KIND=real64)
 lambda_pole64 = REAL(lambda_pole, KIND=real64)
 
-status = f_shum_w_coeff_arg64(coeff1_64, coeff2_64, lambda64, lambda_eq64,     &
-                              phi_pole64, lambda_pole64, message)
+status64 = f_shum_w_coeff_arg64(coeff1_64, coeff2_64, lambda64, lambda_eq64,   &
+                                phi_pole64, lambda_pole64, message)
+status = INT(status64,KIND=int32)
 
 IF (status == 0_int32) THEN
   !$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                            &
@@ -820,16 +830,15 @@ REAL(KIND=real32), INTENT(OUT) :: v(SIZE(coeff1))      ! Wind U compt (lat-lon)
 REAL(KIND=real32), INTENT(IN), OPTIONAL :: mdi         ! Missing data value
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
-
 REAL(KIND=real64)   :: coeff1_64(SIZE(coeff1))
 REAL(KIND=real64)   :: coeff2_64(SIZE(coeff1))
 REAL(KIND=real64)   :: u_eq_64(SIZE(coeff1))
 REAL(KIND=real64)   :: v_eq_64(SIZE(coeff1))
 REAL(KIND=real64)   :: u_64(SIZE(coeff1))
 REAL(KIND=real64)   :: v_64(SIZE(coeff1))
-REAL(KIND=real64)   :: mdi_64  
-LOGICAL             :: l_mdi 
+REAL(KIND=real64)   :: mdi_64
 INTEGER(KIND=int64) :: i
 
 !$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                              &
@@ -845,11 +854,13 @@ END DO
 
 IF (PRESENT(mdi)) THEN
   mdi_64 = REAL(mdi, KIND=real64)
-  status = f_shum_w_eqtoll_arg64(coeff1_64, coeff2_64, u_eq_64, v_eq_64,       &
-                                 u_64, v_64, message, mdi_64)
+  status64 = f_shum_w_eqtoll_arg64(coeff1_64, coeff2_64, u_eq_64, v_eq_64,     &
+                                   u_64, v_64, message, mdi_64)
+  status = INT(status64,KIND=int32)
 ELSE
-  status = f_shum_w_eqtoll_arg64(coeff1_64, coeff2_64, u_eq_64, v_eq_64,       &
-                                 u_64, v_64, message)
+  status64 = f_shum_w_eqtoll_arg64(coeff1_64, coeff2_64, u_eq_64, v_eq_64,     &
+                                   u_64, v_64, message)
+  status = INT(status64,KIND=int32)
 END IF
 
 IF (status == 0_int32) THEN
@@ -933,6 +944,7 @@ REAL(KIND=real32), INTENT(OUT) :: v_eq(SIZE(coeff1))   ! Wind U compt (eq)
 REAL(KIND=real32), INTENT(IN), OPTIONAL :: mdi         ! Missing data value
 
 CHARACTER(LEN=*)    :: message
+INTEGER(KIND=int64) :: status64
 INTEGER(KIND=int32) :: status
 
 REAL(KIND=real64)   :: coeff1_64(SIZE(coeff1))
@@ -941,8 +953,7 @@ REAL(KIND=real64)   :: u_eq_64(SIZE(coeff1))
 REAL(KIND=real64)   :: v_eq_64(SIZE(coeff1))
 REAL(KIND=real64)   :: u_64(SIZE(coeff1))
 REAL(KIND=real64)   :: v_64(SIZE(coeff1))
-REAL(KIND=real64)   :: mdi_64  
-LOGICAL             :: l_mdi 
+REAL(KIND=real64)   :: mdi_64
 INTEGER(KIND=int64) :: i
 
 !$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                              &
@@ -957,11 +968,13 @@ END DO
 
 IF (PRESENT(mdi)) THEN
   mdi_64 = REAL(mdi, KIND=real64)
-  status = f_shum_w_lltoeq_arg64(coeff1_64, coeff2_64, u_64, v_64,             &
-                                 u_eq_64, v_eq_64, message, mdi_64)
+  status64 = f_shum_w_lltoeq_arg64(coeff1_64, coeff2_64, u_64, v_64,           &
+                                   u_eq_64, v_eq_64, message, mdi_64)
+  status = INT(status64,KIND=int32)
 ELSE
-  status = f_shum_w_lltoeq_arg64(coeff1_64, coeff2_64, u_64, v_64,             &
-                                 u_eq_64, v_eq_64, message)  
+  status64 = f_shum_w_lltoeq_arg64(coeff1_64, coeff2_64, u_64, v_64,           &
+                                   u_eq_64, v_eq_64, message)
+  status = INT(status64,KIND=int32)
 END IF
 
 IF (status == 0_int32) THEN

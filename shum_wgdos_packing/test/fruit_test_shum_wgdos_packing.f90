@@ -25,6 +25,10 @@ USE fruit
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         & 
   C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE, C_LOC, C_F_POINTER
 
+! Define a mask used to manipulate values later
+USE f_shum_ztables_mod, ONLY:                                                  &
+  mask16 => z0000FFFF
+
 IMPLICIT NONE 
 
 PRIVATE
@@ -246,7 +250,7 @@ INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 INTEGER(KIND=int32) :: expected_data(len_packed)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -259,7 +263,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, len1_unpacked, accuracy, mdi,        &
                            packed_data, num_words, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 CALL sample_packed_data(expected_data)
@@ -267,7 +271,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_1d_arg64
@@ -289,7 +293,7 @@ INTEGER(KIND=int32) :: expected_data(len_packed)
 
 INTEGER(KIND=int32), ALLOCATABLE :: packed_data(:)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -302,7 +306,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, len1_unpacked, accuracy, mdi,        &
                            packed_data, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 CALL sample_packed_data(expected_data)
@@ -310,7 +314,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, SIZE(packed_data, KIND=int64),                  &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_1d_alloc_arg64
@@ -332,7 +336,7 @@ INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 INTEGER(KIND=int32) :: expected_data(len_packed)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -345,7 +349,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 CALL sample_packed_data(expected_data)
@@ -353,7 +357,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_2d_arg64
@@ -375,7 +379,7 @@ INTEGER(KIND=int32) :: expected_data(len_packed)
 
 INTEGER(KIND=int32), ALLOCATABLE :: packed_data(:)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -387,7 +391,7 @@ mdi      = -99.0
 
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 CALL sample_packed_data(expected_data)
@@ -395,7 +399,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, SIZE(packed_data, KIND=int64),                  &
     "Size of packed data is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_2d_alloc_arg64
@@ -438,7 +442,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_1d_arg32
@@ -481,7 +485,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, SIZE(packed_data, KIND=int32),                  &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_1d_alloc_arg32
@@ -503,7 +507,7 @@ INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 INTEGER(KIND=int32) :: expected_data(len_packed)
 
 INTEGER(KIND=int32) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int32) :: accuracy
 REAL(KIND=real32)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -516,7 +520,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 CALL sample_packed_data(expected_data)
@@ -524,7 +528,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_2d_arg32
@@ -546,7 +550,7 @@ INTEGER(KIND=int32) :: expected_data(len_packed)
 
 INTEGER(KIND=int32), ALLOCATABLE :: packed_data(:)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int32) :: accuracy
 REAL(KIND=real32)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -558,7 +562,7 @@ mdi      = -99.0
 
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 CALL sample_packed_data(expected_data)
@@ -566,7 +570,7 @@ CALL sample_packed_data(expected_data)
 CALL assert_equals(len_packed, SIZE(packed_data, KIND=int32),                  &
     "Number of packed words is incorrect")
 
-CALL assert_equals(expected_data, packed_data, INT(len_packed),                &
+CALL assert_equals(expected_data, packed_data, len_packed,                     &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_pack_simple_field_2d_alloc_arg32
@@ -587,7 +591,7 @@ INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked*len2_unpacked)
 REAL(KIND=real64)   :: expected_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -598,12 +602,12 @@ mdi = -99.0
 status = f_shum_wgdos_unpack(packed_data, mdi, unpacked_data, len1_unpacked,   &
                              message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 CALL sample_unpacked_data(expected_data)
 
-CALL assert_equals(expected_data, unpacked_data, INT(len1_unpacked),           &
+CALL assert_equals(expected_data, unpacked_data, len1_unpacked,                &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_unpack_simple_field_1d_arg64
@@ -624,7 +628,7 @@ INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 REAL(KIND=real64)   :: expected_data(len1_unpacked, len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -634,13 +638,13 @@ mdi = -99.0
 
 status = f_shum_wgdos_unpack(packed_data, mdi, unpacked_data, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 CALL sample_unpacked_data(expected_data)
 
 CALL assert_equals(expected_data, unpacked_data,                               &
-    INT(len1_unpacked), INT(len2_unpacked),                                    &
+    len1_unpacked, len2_unpacked,                                              &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_unpack_simple_field_2d_arg64
@@ -661,7 +665,7 @@ INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked*len2_unpacked)
 REAL(KIND=real64)   :: expected_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real32)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -673,7 +677,7 @@ status = f_shum_wgdos_unpack(                                                  &
                 packed_data, mdi, unpacked_data, len1_unpacked,                &
                 message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 CALL sample_unpacked_data(expected_data)
@@ -699,7 +703,7 @@ INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 REAL(KIND=real64)   :: expected_data(len1_unpacked, len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real32)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -709,13 +713,13 @@ mdi = -99.0
 
 status = f_shum_wgdos_unpack(packed_data, mdi, unpacked_data, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 CALL sample_unpacked_data(expected_data)
 
 CALL assert_equals(                                                            &
-     expected_data, unpacked_data, INT(len1_unpacked), INT(len2_unpacked),     &
+     expected_data, unpacked_data, len1_unpacked, len2_unpacked,               &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_unpack_simple_field_2d_arg32
@@ -740,7 +744,7 @@ INTEGER(KIND=int64), TARGET  :: expected_packed_data64(len_packed/2)
 REAL(KIND=real64)   :: expected_unpacked_data(len1_unpacked, len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -763,7 +767,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 ! Define the expected data as a 64-bit array.  The reason for this is that 
@@ -798,13 +802,13 @@ CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
 CALL assert_equals(expected_packed_data, packed_data(1:num_words),             &
-    INT(len_packed),                                                           &
+    len_packed,                                                                &
     "Packed array does not agree with expected result")
 
 status = f_shum_wgdos_unpack(packed_data(1:num_words), mdi, unpacked_data,     &
                              message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 expected_unpacked_data(:,1) = [  0.0,  0.0,  4.0,  4.0,  6.0 ]
@@ -815,7 +819,7 @@ expected_unpacked_data(:,5) = [  0.0, 22.0,  0.0,  0.0, 26.0 ]
 expected_unpacked_data(:,6) = [ 26.0,  0.0, 28.0, 30.0,  0.0 ]
 
 CALL assert_equals(expected_unpacked_data, unpacked_data,                      &
-    INT(len1_unpacked), INT(len2_unpacked),                                    &
+    len1_unpacked, len2_unpacked,                                              &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_packing_field_with_zeros
@@ -840,7 +844,7 @@ INTEGER(KIND=int64), TARGET  :: expected_packed_data64(len_packed/2)
 REAL(KIND=real64)   :: expected_unpacked_data(len1_unpacked, len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -863,7 +867,7 @@ unpacked_data(:,6) = [  26.0, -99.0,  28.0,  29.0, -99.0 ]
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 ! Define the expected data as a 64-bit array.  The reason for this is that 
@@ -899,13 +903,13 @@ CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
 CALL assert_equals(expected_packed_data, packed_data(1:num_words),             &
-    INT(len_packed),                                                           &
+    len_packed,                                                                &
     "Packed array does not agree with expected result")
 
 status = f_shum_wgdos_unpack(packed_data(1:num_words), mdi, unpacked_data,     &
                              message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 expected_unpacked_data(:,1) = [ -99.0, -99.0,  4.0,    4.0,   6.0 ]
@@ -916,7 +920,7 @@ expected_unpacked_data(:,5) = [ -99.0,  22.0, -99.0, -99.0,  26.0 ]
 expected_unpacked_data(:,6) = [  26.0, -99.0,  28.0,  30.0, -99.0 ]
 
 CALL assert_equals(expected_unpacked_data, unpacked_data,                      &
-    INT(len1_unpacked), INT(len2_unpacked),                                    &
+    len1_unpacked, len2_unpacked,                                              &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_packing_field_with_mdi
@@ -941,7 +945,7 @@ INTEGER(KIND=int64), TARGET  :: expected_packed_data64(len_packed/2)
 REAL(KIND=real64)   :: expected_unpacked_data(len1_unpacked, len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -965,7 +969,7 @@ unpacked_data(:,6) = [  26.0,  27.0,  28.0,  29.0,  30.0 ]
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Packing of array returned non-zero exit status")
 
 ! Define the expected data as a 64-bit array.  The reason for this is that 
@@ -999,13 +1003,12 @@ CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
 
 CALL assert_equals(expected_packed_data, packed_data(1:num_words),             &
-    INT(len_packed),                                                           &
-    "Packed array does not agree with expected result")
+    len_packed, "Packed array does not agree with expected result")
 
 status = f_shum_wgdos_unpack(packed_data(1:num_words), mdi, unpacked_data,     &
                              message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Unpacking of array returned non-zero exit status")
 
 expected_unpacked_data(:,1) = [ -99.0, -99.0,   0.0,  0.0,   6.0 ]
@@ -1016,7 +1019,7 @@ expected_unpacked_data(:,5) = [   0.0,   0.0,   0.0,   0.0,   0.0 ]
 expected_unpacked_data(:,6) = [  26.0,  28.0,  28.0,  30.0,  30.0 ]
 
 CALL assert_equals(expected_unpacked_data, unpacked_data,                      &
-    INT(len1_unpacked), INT(len2_unpacked),                                    &
+    len1_unpacked, len2_unpacked,                                              &
     "Packed array does not agree with expected result")
 
 END SUBROUTINE test_packing_field_with_zeros_and_mdi
@@ -1036,7 +1039,7 @@ INTEGER(KIND=int32) :: packed_data(len_packed)
 INTEGER(KIND=int64) :: words
 INTEGER(KIND=int64) :: rows
 INTEGER(KIND=int64) :: cols
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 CHARACTER(LEN=500)  :: message
 
@@ -1045,7 +1048,7 @@ CALL sample_packed_data(packed_data)
 status = f_shum_read_wgdos_header(packed_data, words, accuracy, cols, rows,    &
                                   message)
 
-CALL assert_equals(0_int32, status,                                            &
+CALL assert_equals(0_int64, status,                                            &
     "Reading WGDOS header returned non-zero exit status")
 
 CALL assert_equals(len_packed, words,                                          &
@@ -1118,7 +1121,7 @@ REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -1133,7 +1136,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(2_int32, status,                                            &
+CALL assert_equals(2_int64, status,                                            &
     "Packing of array with unpackable value returned unexpected exit status")
 
 
@@ -1158,7 +1161,7 @@ REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len_packed)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -1171,7 +1174,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
                            num_words, message)
 
-CALL assert_equals(2_int32, status,                                            &
+CALL assert_equals(2_int64, status,                                            &
     "Packing array with too small return array returned unexpected exit status")
 
 CALL assert_equals("Provided array for returning packed data is too small; "// &
@@ -1196,7 +1199,7 @@ REAL(KIND=real64)   :: unpacked_data(len1_unpacked*len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len_packed)
 
 INTEGER(KIND=int64) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int64) :: accuracy
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -1209,7 +1212,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, len1_unpacked-1, accuracy, mdi,      &
                            packed_data, num_words, message)
 
-CALL assert_equals(1_int32, status,                                            &
+CALL assert_equals(1_int64, status,                                            &
     "Passing array with indivisible stride returned unexpected exit status")
 
 CALL assert_equals("1d Field length not divisible by given stride",            &
@@ -1233,7 +1236,7 @@ REAL(KIND=real64)   :: unpacked_data(len1_unpacked*len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len_packed)
 
 INTEGER(KIND=int32) :: num_words
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 INTEGER(KIND=int32) :: accuracy
 REAL(KIND=real32)   :: mdi
 CHARACTER(LEN=500)  :: message
@@ -1246,7 +1249,7 @@ mdi      = -99.0
 status = f_shum_wgdos_pack(unpacked_data, len1_unpacked - 1_int32, accuracy,   &
                            mdi, packed_data, num_words, message)
 
-CALL assert_equals(1_int32, status,                                            &
+CALL assert_equals(1_int64, status,                                            &
     "Passing array with indivisible stride returned unexpected exit status")
 
 CALL assert_equals("1d Field length not divisible by given stride",            &
@@ -1269,7 +1272,7 @@ INTEGER(KIND=int64), PARAMETER :: len_packed = 21
 INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -1280,7 +1283,7 @@ mdi = -99.0
 status = f_shum_wgdos_unpack(packed_data, mdi, unpacked_data,                  &
                              len1_unpacked - 1_int32, message)
 
-CALL assert_equals(1_int32, status,                                            &
+CALL assert_equals(1_int64, status,                                            &
     "Passing array with indivisible stride returned unexpected exit status")
 
 CALL assert_equals("1d Field length not divisible by given stride",            &
@@ -1303,7 +1306,7 @@ INTEGER(KIND=int32), PARAMETER :: len_packed = 21
 INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real32)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -1314,7 +1317,7 @@ mdi = -99.0
 status = f_shum_wgdos_unpack(packed_data, mdi, unpacked_data,                  &
                              len1_unpacked - 1_int32, message)
 
-CALL assert_equals(1_int32, status,                                            &
+CALL assert_equals(1_int64, status,                                            &
     "Passing array with indivisible stride returned unexpected exit status")
 
 CALL assert_equals("1d Field length not divisible by given stride",            &
@@ -1337,7 +1340,7 @@ INTEGER(KIND=int64), PARAMETER :: len_packed = 21
 INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -1347,7 +1350,7 @@ mdi = -99.0
 
 status = f_shum_wgdos_unpack(packed_data(1:4), mdi, unpacked_data, message)
 
-CALL assert_equals(2_int32, status,                                            &
+CALL assert_equals(2_int64, status,                                            &
     "Passing array with too many elements returned unexpected exit status")
 
 CALL assert_equals("Packed field header reports 21 words, but provided "     //&
@@ -1373,7 +1376,7 @@ INTEGER(KIND=int64), PARAMETER :: len_packed = 21
 INTEGER(KIND=int32) :: packed_data(len_packed)
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 
-INTEGER(KIND=int32) :: status
+INTEGER(KIND=int64) :: status
 REAL(KIND=real64)   :: mdi
 CHARACTER(LEN=500)  :: message
 
@@ -1381,9 +1384,6 @@ CHARACTER(LEN=500)  :: message
 ! packed value which will force failure of the consistency check
 INTEGER(KIND=int32) :: bad_word_p1
 INTEGER(KIND=int32) :: bad_word_p2
-INTEGER, PARAMETER  :: int16  = C_INT16_T
-INTEGER(KIND=int32), PARAMETER ::                                              &
-                     mask16  = INT(HUGE(0_int16), KIND=int64)*2 + 1
 
 CALL sample_packed_data(packed_data)
 
@@ -1413,7 +1413,7 @@ mdi = -99.0
 
 status = f_shum_wgdos_unpack(packed_data, mdi, unpacked_data, message)
 
-CALL assert_equals(2_int32, status,                                            &
+CALL assert_equals(2_int64, status,                                            &
     "Passing array with inconsistent data returned unexpected exit status")
 
 CALL assert_equals("Compressed data inconsistent",                             &

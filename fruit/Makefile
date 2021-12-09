@@ -9,6 +9,9 @@ ${LIBTARGETS}: libfruit.so libfruit.a
 	cp $^ ${LIBDIR_OUT}/lib
 	cp *.mod ${LIBDIR_OUT}/include
 
+fruit.f90: fruit_f90_source.txt fruit_f90_generator.rb
+	./fruit_f90_generator.rb fruit_f90_source.txt
+
 # Static library - uses archiver to create library
 #-------------------------------------------------------------------------------
 fruit.o: fruit.f90

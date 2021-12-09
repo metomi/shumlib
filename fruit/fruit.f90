@@ -26,19 +26,20 @@ module fruit_util
   use iso_c_binding, only: c_int32_t, c_int64_t, c_float, c_double, c_bool
   implicit none
   private
-  
+
   integer, parameter :: int32 = c_int32_t
   integer, parameter :: int64 = c_int64_t
-  
+
   integer, parameter :: real32 = c_float
   integer, parameter :: real64 = c_double
 
   integer, parameter :: bool = c_bool
 
   public :: equals, to_s, strip
-  
+
   interface equals
-     module procedure equalEpsilon
+     module procedure equalEpsilon32
+     module procedure equalEpsilon64
      module procedure real32Equal
      module procedure real64Equal
      module procedure integer32Equal
@@ -132,32 +133,56 @@ contains
   !------------------------
   ! test if 2 values are close
   !------------------------
-  !logical function equals (number1, number2) 
+  !logical function equals (number1, number2)
   !  real,  intent (in) :: number1, number2
-  !  
+  !
   !  return equalEpsilon (number1, number2, epsilon(number1))
   !
   !end function equals
 
-
-  function equalEpsilon (number1, number2, epsilon ) result (resultValue)
-    real , intent (in) :: number1, number2, epsilon 
-    logical(kind=bool) :: resultValue 
+  function equalEpsilon32 (number1, number2, epsilon ) result (resultValue)
+    real(kind=real32), intent (in) :: number1, number2, epsilon
+    real(kind=real32) :: max_num
+    logical(kind=bool) :: resultValue
 
     resultValue = .false.
 
-    ! test very small number1
-    if ( abs(number1) < epsilon .and.  abs(number1 - number2) < epsilon ) then
+    max_num = MAX(abs(number1),abs(number2))
+
+    ! test very small max_num
+    if ( max_num < abs(epsilon) .and.  abs(number1 - number2) < abs(epsilon) ) then
        resultValue = .true.
-    else 
-       if ((abs(( number1 - number2)) / number1) < epsilon ) then
+    else
+       if ((abs(( number1 - number2)) / max_num) < abs(epsilon)) then
           resultValue = .true.
        else
           resultValue = .false.
        end if
     end if
 
-  end function equalEpsilon
+  end function equalEpsilon32
+
+  function equalEpsilon64 (number1, number2, epsilon ) result (resultValue)
+    real(kind=real64), intent (in) :: number1, number2, epsilon
+    real(kind=real64) :: max_num
+    logical(kind=bool) :: resultValue
+
+    resultValue = .false.
+
+    max_num = MAX(abs(number1),abs(number2))
+
+    ! test very small number1
+    if ( max_num < abs(epsilon) .and.  abs(number1 - number2) < abs(epsilon) ) then
+       resultValue = .true.
+    else
+       if ((abs(( number1 - number2)) / max_num) < abs(epsilon) ) then
+          resultValue = .true.
+       else
+          resultValue = .false.
+       end if
+    end if
+
+  end function equalEpsilon64
 
   function real32Equal (number1, number2 ) result (resultValue)
     real(kind=real32) , intent (in) :: number1, number2
@@ -220,7 +245,7 @@ contains
 
     if ( number1 .eq. number2 ) then
        resultValue = .true.
-    else 
+    else
        resultValue = .false.
     end if
   end function integer64Equal
@@ -255,10 +280,10 @@ module fruit
   use iso_fortran_env, only: output_unit
   implicit none
   private
-  
+
   integer, parameter :: int32 = c_int32_t
   integer, parameter :: int64 = c_int64_t
-  
+
   integer, parameter :: real32 = c_float
   integer, parameter :: real64 = c_double
 
@@ -380,87 +405,135 @@ module fruit
   interface assert_equals
   !====== begin of generated interface ======
     module procedure assert_eq_logical_
-    module procedure assert_eq_1d_logical_
-    module procedure assert_eq_2d_logical_
+    module procedure assert_eq_1d32_logical_
+    module procedure assert_eq_2d32_logical_
+    module procedure assert_eq_1d64_logical_
+    module procedure assert_eq_2d64_logical_
     module procedure assert_eq_string_
-    module procedure assert_eq_1d_string_
-    module procedure assert_eq_2d_string_
+    module procedure assert_eq_1d32_string_
+    module procedure assert_eq_2d32_string_
+    module procedure assert_eq_1d64_string_
+    module procedure assert_eq_2d64_string_
     module procedure assert_eq_int32_
-    module procedure assert_eq_1d_int32_
-    module procedure assert_eq_2d_int32_
+    module procedure assert_eq_1d32_int32_
+    module procedure assert_eq_2d32_int32_
+    module procedure assert_eq_1d64_int32_
+    module procedure assert_eq_2d64_int32_
     module procedure assert_eq_int64_
-    module procedure assert_eq_1d_int64_
-    module procedure assert_eq_2d_int64_
+    module procedure assert_eq_1d32_int64_
+    module procedure assert_eq_2d32_int64_
+    module procedure assert_eq_1d64_int64_
+    module procedure assert_eq_2d64_int64_
     module procedure assert_eq_real32_
     module procedure assert_eq_real32_in_range_
-    module procedure assert_eq_1d_real32_
-    module procedure assert_eq_1d_real32_in_range_
-    module procedure assert_eq_2d_real32_
-    module procedure assert_eq_2d_real32_in_range_
+    module procedure assert_eq_1d32_real32_
+    module procedure assert_eq_1d32_real32_in_range_
+    module procedure assert_eq_2d32_real32_
+    module procedure assert_eq_2d32_real32_in_range_
+    module procedure assert_eq_1d64_real32_
+    module procedure assert_eq_1d64_real32_in_range_
+    module procedure assert_eq_2d64_real32_
+    module procedure assert_eq_2d64_real32_in_range_
     module procedure assert_eq_real64_
     module procedure assert_eq_real64_in_range_
-    module procedure assert_eq_1d_real64_
-    module procedure assert_eq_1d_real64_in_range_
-    module procedure assert_eq_2d_real64_
-    module procedure assert_eq_2d_real64_in_range_
+    module procedure assert_eq_1d32_real64_
+    module procedure assert_eq_1d32_real64_in_range_
+    module procedure assert_eq_2d32_real64_
+    module procedure assert_eq_2d32_real64_in_range_
+    module procedure assert_eq_1d64_real64_
+    module procedure assert_eq_1d64_real64_in_range_
+    module procedure assert_eq_2d64_real64_
+    module procedure assert_eq_2d64_real64_in_range_
   !====== end of generated inteface ======
   end interface
 
   interface assertEquals
   !====== begin of generated interface ======
     module procedure assert_eq_logical_
-    module procedure assert_eq_1d_logical_
-    module procedure assert_eq_2d_logical_
+    module procedure assert_eq_1d32_logical_
+    module procedure assert_eq_2d32_logical_
+    module procedure assert_eq_1d64_logical_
+    module procedure assert_eq_2d64_logical_
     module procedure assert_eq_string_
-    module procedure assert_eq_1d_string_
-    module procedure assert_eq_2d_string_
+    module procedure assert_eq_1d32_string_
+    module procedure assert_eq_2d32_string_
+    module procedure assert_eq_1d64_string_
+    module procedure assert_eq_2d64_string_
     module procedure assert_eq_int32_
-    module procedure assert_eq_1d_int32_
-    module procedure assert_eq_2d_int32_
+    module procedure assert_eq_1d32_int32_
+    module procedure assert_eq_2d32_int32_
+    module procedure assert_eq_1d64_int32_
+    module procedure assert_eq_2d64_int32_
     module procedure assert_eq_int64_
-    module procedure assert_eq_1d_int64_
-    module procedure assert_eq_2d_int64_
+    module procedure assert_eq_1d32_int64_
+    module procedure assert_eq_2d32_int64_
+    module procedure assert_eq_1d64_int64_
+    module procedure assert_eq_2d64_int64_
     module procedure assert_eq_real32_
     module procedure assert_eq_real32_in_range_
-    module procedure assert_eq_1d_real32_
-    module procedure assert_eq_1d_real32_in_range_
-    module procedure assert_eq_2d_real32_
-    module procedure assert_eq_2d_real32_in_range_
+    module procedure assert_eq_1d32_real32_
+    module procedure assert_eq_1d32_real32_in_range_
+    module procedure assert_eq_2d32_real32_
+    module procedure assert_eq_2d32_real32_in_range_
+    module procedure assert_eq_1d64_real32_
+    module procedure assert_eq_1d64_real32_in_range_
+    module procedure assert_eq_2d64_real32_
+    module procedure assert_eq_2d64_real32_in_range_
     module procedure assert_eq_real64_
     module procedure assert_eq_real64_in_range_
-    module procedure assert_eq_1d_real64_
-    module procedure assert_eq_1d_real64_in_range_
-    module procedure assert_eq_2d_real64_
-    module procedure assert_eq_2d_real64_in_range_
+    module procedure assert_eq_1d32_real64_
+    module procedure assert_eq_1d32_real64_in_range_
+    module procedure assert_eq_2d32_real64_
+    module procedure assert_eq_2d32_real64_in_range_
+    module procedure assert_eq_1d64_real64_
+    module procedure assert_eq_1d64_real64_in_range_
+    module procedure assert_eq_2d64_real64_
+    module procedure assert_eq_2d64_real64_in_range_
   !====== end of generated inteface ======
   end interface
 
   interface assert_not_equals
   !====== begin of generated interface ======
     module procedure assert_not_equals_logical_
-    module procedure assert_not_equals_1d_logical_
-    module procedure assert_not_equals_2d_logical_
+    module procedure assert_not_equals_1d32_logical_
+    module procedure assert_not_equals_2d32_logical_
+    module procedure assert_not_equals_1d64_logical_
+    module procedure assert_not_equals_2d64_logical_
     module procedure assert_not_equals_string_
-    module procedure assert_not_equals_1d_string_
-    module procedure assert_not_equals_2d_string_
+    module procedure assert_not_equals_1d32_string_
+    module procedure assert_not_equals_2d32_string_
+    module procedure assert_not_equals_1d64_string_
+    module procedure assert_not_equals_2d64_string_
     module procedure assert_not_equals_int32_
-    module procedure assert_not_equals_1d_int32_
-    module procedure assert_not_equals_2d_int32_
+    module procedure assert_not_equals_1d32_int32_
+    module procedure assert_not_equals_2d32_int32_
+    module procedure assert_not_equals_1d64_int32_
+    module procedure assert_not_equals_2d64_int32_
     module procedure assert_not_equals_int64_
-    module procedure assert_not_equals_1d_int64_
-    module procedure assert_not_equals_2d_int64_
+    module procedure assert_not_equals_1d32_int64_
+    module procedure assert_not_equals_2d32_int64_
+    module procedure assert_not_equals_1d64_int64_
+    module procedure assert_not_equals_2d64_int64_
     module procedure assert_not_equals_real32_
     module procedure assert_not_equals_real32_in_range_
-    module procedure assert_not_equals_1d_real32_
-    module procedure assert_not_equals_1d_real32_in_range_
-    module procedure assert_not_equals_2d_real32_
-    module procedure assert_not_equals_2d_real32_in_range_
+    module procedure assert_not_equals_1d32_real32_
+    module procedure assert_not_equals_1d32_real32_in_range_
+    module procedure assert_not_equals_2d32_real32_
+    module procedure assert_not_equals_2d32_real32_in_range_
+    module procedure assert_not_equals_1d64_real32_
+    module procedure assert_not_equals_1d64_real32_in_range_
+    module procedure assert_not_equals_2d64_real32_
+    module procedure assert_not_equals_2d64_real32_in_range_
     module procedure assert_not_equals_real64_
     module procedure assert_not_equals_real64_in_range_
-    module procedure assert_not_equals_1d_real64_
-    module procedure assert_not_equals_1d_real64_in_range_
-    module procedure assert_not_equals_2d_real64_
-    module procedure assert_not_equals_2d_real64_in_range_
+    module procedure assert_not_equals_1d32_real64_
+    module procedure assert_not_equals_1d32_real64_in_range_
+    module procedure assert_not_equals_2d32_real64_
+    module procedure assert_not_equals_2d32_real64_in_range_
+    module procedure assert_not_equals_1d64_real64_
+    module procedure assert_not_equals_1d64_real64_in_range_
+    module procedure assert_not_equals_2d64_real64_
+    module procedure assert_not_equals_2d64_real64_in_range_
   !====== end of generated inteface ======
 
   end interface
@@ -468,29 +541,45 @@ module fruit
   interface assertNotEquals
   !====== begin of generated interface ======
     module procedure assert_not_equals_logical_
-    module procedure assert_not_equals_1d_logical_
-    module procedure assert_not_equals_2d_logical_
+    module procedure assert_not_equals_1d32_logical_
+    module procedure assert_not_equals_2d32_logical_
+    module procedure assert_not_equals_1d64_logical_
+    module procedure assert_not_equals_2d64_logical_
     module procedure assert_not_equals_string_
-    module procedure assert_not_equals_1d_string_
-    module procedure assert_not_equals_2d_string_
+    module procedure assert_not_equals_1d32_string_
+    module procedure assert_not_equals_2d32_string_
+    module procedure assert_not_equals_1d64_string_
+    module procedure assert_not_equals_2d64_string_
     module procedure assert_not_equals_int32_
-    module procedure assert_not_equals_1d_int32_
-    module procedure assert_not_equals_2d_int32_
+    module procedure assert_not_equals_1d32_int32_
+    module procedure assert_not_equals_2d32_int32_
+    module procedure assert_not_equals_1d64_int32_
+    module procedure assert_not_equals_2d64_int32_
     module procedure assert_not_equals_int64_
-    module procedure assert_not_equals_1d_int64_
-    module procedure assert_not_equals_2d_int64_
+    module procedure assert_not_equals_1d32_int64_
+    module procedure assert_not_equals_2d32_int64_
+    module procedure assert_not_equals_1d64_int64_
+    module procedure assert_not_equals_2d64_int64_
     module procedure assert_not_equals_real32_
     module procedure assert_not_equals_real32_in_range_
-    module procedure assert_not_equals_1d_real32_
-    module procedure assert_not_equals_1d_real32_in_range_
-    module procedure assert_not_equals_2d_real32_
-    module procedure assert_not_equals_2d_real32_in_range_
+    module procedure assert_not_equals_1d32_real32_
+    module procedure assert_not_equals_1d32_real32_in_range_
+    module procedure assert_not_equals_2d32_real32_
+    module procedure assert_not_equals_2d32_real32_in_range_
+    module procedure assert_not_equals_1d64_real32_
+    module procedure assert_not_equals_1d64_real32_in_range_
+    module procedure assert_not_equals_2d64_real32_
+    module procedure assert_not_equals_2d64_real32_in_range_
     module procedure assert_not_equals_real64_
     module procedure assert_not_equals_real64_in_range_
-    module procedure assert_not_equals_1d_real64_
-    module procedure assert_not_equals_1d_real64_in_range_
-    module procedure assert_not_equals_2d_real64_
-    module procedure assert_not_equals_2d_real64_in_range_
+    module procedure assert_not_equals_1d32_real64_
+    module procedure assert_not_equals_1d32_real64_in_range_
+    module procedure assert_not_equals_2d32_real64_
+    module procedure assert_not_equals_2d32_real64_in_range_
+    module procedure assert_not_equals_1d64_real64_
+    module procedure assert_not_equals_1d64_real64_in_range_
+    module procedure assert_not_equals_2d64_real64_
+    module procedure assert_not_equals_2d64_real64_in_range_
   !====== end of generated inteface ======
 
   end interface
@@ -1413,10 +1502,10 @@ contains
     call add_success
   end subroutine assert_eq_logical_
 
-  !------ 1d_logical ------
-  subroutine assert_eq_1d_logical_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_logical ------
+  subroutine assert_eq_1d32_logical_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     logical(kind=bool), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1429,12 +1518,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_logical_
+  end subroutine assert_eq_1d32_logical_
 
-  !------ 2d_logical ------
-  subroutine assert_eq_2d_logical_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_logical ------
+  subroutine assert_eq_2d32_logical_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     logical(kind=bool), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1449,7 +1538,45 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_logical_
+  end subroutine assert_eq_2d32_logical_
+
+  !------ 1d64_logical ------
+  subroutine assert_eq_1d64_logical_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    logical(kind=bool), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if (var1(i) .neqv. var2(i)) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_logical_
+
+  !------ 2d64_logical ------
+  subroutine assert_eq_2d64_logical_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    logical(kind=bool), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if (var1(i, j) .neqv. var2(i, j)) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_logical_
 
   !------ 0d_string ------
   subroutine assert_eq_string_(var1, var2, message)
@@ -1468,10 +1595,10 @@ contains
     call add_success
   end subroutine assert_eq_string_
 
-  !------ 1d_string ------
-  subroutine assert_eq_1d_string_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_string ------
+  subroutine assert_eq_1d32_string_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     character (len = *), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1484,12 +1611,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_string_
+  end subroutine assert_eq_1d32_string_
 
-  !------ 2d_string ------
-  subroutine assert_eq_2d_string_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_string ------
+  subroutine assert_eq_2d32_string_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     character (len = *), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1504,7 +1631,45 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_string_
+  end subroutine assert_eq_2d32_string_
+
+  !------ 1d64_string ------
+  subroutine assert_eq_1d64_string_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    character (len = *), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if (trim(strip(var1(i))) /= trim(strip(var2(i)))) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_string_
+
+  !------ 2d64_string ------
+  subroutine assert_eq_2d64_string_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    character (len = *), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if (trim(strip(var1(i, j))) /= trim(strip(var2(i, j)))) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_string_
 
   !------ 0d_int32 ------
   subroutine assert_eq_int32_(var1, var2, message)
@@ -1523,10 +1688,10 @@ contains
     call add_success
   end subroutine assert_eq_int32_
 
-  !------ 1d_int32 ------
-  subroutine assert_eq_1d_int32_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_int32 ------
+  subroutine assert_eq_1d32_int32_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     integer(kind=int32), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1539,12 +1704,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_int32_
+  end subroutine assert_eq_1d32_int32_
 
-  !------ 2d_int32 ------
-  subroutine assert_eq_2d_int32_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_int32 ------
+  subroutine assert_eq_2d32_int32_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     integer(kind=int32), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1559,7 +1724,45 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_int32_
+  end subroutine assert_eq_2d32_int32_
+
+  !------ 1d64_int32 ------
+  subroutine assert_eq_1d64_int32_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    integer(kind=int32), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if (var1(i) /= var2(i)) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_int32_
+
+  !------ 2d64_int32 ------
+  subroutine assert_eq_2d64_int32_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    integer(kind=int32), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if (var1(i, j) /= var2(i, j)) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_int32_
 
   !------ 0d_int64 ------
   subroutine assert_eq_int64_(var1, var2, message)
@@ -1578,10 +1781,10 @@ contains
     call add_success
   end subroutine assert_eq_int64_
 
-  !------ 1d_int64 ------
-  subroutine assert_eq_1d_int64_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_int64 ------
+  subroutine assert_eq_1d32_int64_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     integer(kind=int64), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1594,12 +1797,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_int64_
+  end subroutine assert_eq_1d32_int64_
 
-  !------ 2d_int64 ------
-  subroutine assert_eq_2d_int64_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_int64 ------
+  subroutine assert_eq_2d32_int64_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     integer(kind=int64), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1614,7 +1817,45 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_int64_
+  end subroutine assert_eq_2d32_int64_
+
+  !------ 1d64_int64 ------
+  subroutine assert_eq_1d64_int64_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    integer(kind=int64), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if (var1(i) /= var2(i)) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_int64_
+
+  !------ 2d64_int64 ------
+  subroutine assert_eq_2d64_int64_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    integer(kind=int64), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if (var1(i, j) /= var2(i, j)) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_int64_
 
   !------ 0d_real32 ------
   subroutine assert_eq_real32_(var1, var2, message)
@@ -1650,10 +1891,10 @@ contains
     call add_success
   end subroutine assert_eq_real32_in_range_
 
-  !------ 1d_real32 ------
-  subroutine assert_eq_1d_real32_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real32 ------
+  subroutine assert_eq_1d32_real32_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real32), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1666,12 +1907,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_real32_
+  end subroutine assert_eq_1d32_real32_
 
-  !------ 1d_real32 ------
-  subroutine assert_eq_1d_real32_in_range_(var1, var2, n, delta, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real32 ------
+  subroutine assert_eq_1d32_real32_in_range_(var1, var2, n, delta, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real32), intent (in) :: var1(n), var2(n)
     real(kind=real32), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -1684,12 +1925,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_real32_in_range_
+  end subroutine assert_eq_1d32_real32_in_range_
 
-  !------ 2d_real32 ------
-  subroutine assert_eq_2d_real32_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real32 ------
+  subroutine assert_eq_2d32_real32_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1704,12 +1945,12 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_real32_
+  end subroutine assert_eq_2d32_real32_
 
-  !------ 2d_real32 ------
-  subroutine assert_eq_2d_real32_in_range_(var1, var2, n, m, delta, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real32 ------
+  subroutine assert_eq_2d32_real32_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
     real(kind=real32), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -1724,7 +1965,83 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_real32_in_range_
+  end subroutine assert_eq_2d32_real32_in_range_
+
+  !------ 1d64_real32 ------
+  subroutine assert_eq_1d64_real32_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real32), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_real32_
+
+  !------ 1d64_real32 ------
+  subroutine assert_eq_1d64_real32_in_range_(var1, var2, n, delta, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real32), intent (in) :: var1(n), var2(n)
+    real(kind=real32), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if (abs(var1(i) - var2(i)) > delta) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_real32_in_range_
+
+  !------ 2d64_real32 ------
+  subroutine assert_eq_2d64_real32_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_real32_
+
+  !------ 2d64_real32 ------
+  subroutine assert_eq_2d64_real32_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
+    real(kind=real32), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if (abs(var1(i, j) - var2(i, j)) > delta) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_real32_in_range_
 
   !------ 0d_real64 ------
   subroutine assert_eq_real64_(var1, var2, message)
@@ -1760,10 +2077,10 @@ contains
     call add_success
   end subroutine assert_eq_real64_in_range_
 
-  !------ 1d_real64 ------
-  subroutine assert_eq_1d_real64_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real64 ------
+  subroutine assert_eq_1d32_real64_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real64), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1776,12 +2093,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_real64_
+  end subroutine assert_eq_1d32_real64_
 
-  !------ 1d_real64 ------
-  subroutine assert_eq_1d_real64_in_range_(var1, var2, n, delta, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real64 ------
+  subroutine assert_eq_1d32_real64_in_range_(var1, var2, n, delta, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real64), intent (in) :: var1(n), var2(n)
     real(kind=real64), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -1794,12 +2111,12 @@ contains
         endif
     enddo
     call add_success
-  end subroutine assert_eq_1d_real64_in_range_
+  end subroutine assert_eq_1d32_real64_in_range_
 
-  !------ 2d_real64 ------
-  subroutine assert_eq_2d_real64_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real64 ------
+  subroutine assert_eq_2d32_real64_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1814,12 +2131,12 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_real64_
+  end subroutine assert_eq_2d32_real64_
 
-  !------ 2d_real64 ------
-  subroutine assert_eq_2d_real64_in_range_(var1, var2, n, m, delta, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real64 ------
+  subroutine assert_eq_2d32_real64_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
     real(kind=real64), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -1834,7 +2151,83 @@ contains
       enddo
     enddo
     call add_success
-  end subroutine assert_eq_2d_real64_in_range_
+  end subroutine assert_eq_2d32_real64_in_range_
+
+  !------ 1d64_real64 ------
+  subroutine assert_eq_1d64_real64_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real64), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_real64_
+
+  !------ 1d64_real64 ------
+  subroutine assert_eq_1d64_real64_in_range_(var1, var2, n, delta, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real64), intent (in) :: var1(n), var2(n)
+    real(kind=real64), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    do i = 1, n
+        if (abs(var1(i) - var2(i)) > delta) then
+          call failed_assert_action(&
+          & to_s(var1(i)), &
+          & to_s(var2(i)), '1d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+    enddo
+    call add_success
+  end subroutine assert_eq_1d64_real64_in_range_
+
+  !------ 2d64_real64 ------
+  subroutine assert_eq_2d64_real64_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_real64_
+
+  !------ 2d64_real64 ------
+  subroutine assert_eq_2d64_real64_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
+    real(kind=real64), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    do j = 1, m
+      do i = 1, n
+        if (abs(var1(i, j) - var2(i, j)) > delta) then
+          call failed_assert_action(&
+          & to_s(var1(i, j)), &
+          & to_s(var2(i, j)), '2d array has difference, ' // message, if_is = .true.)
+          return
+        endif
+      enddo
+    enddo
+    call add_success
+  end subroutine assert_eq_2d64_real64_in_range_
 
   !------ 0d_logical ------
   subroutine assert_not_equals_logical_(var1, var2, message)
@@ -1859,10 +2252,10 @@ contains
     call add_success
   end subroutine assert_not_equals_logical_
 
-  !------ 1d_logical ------
-  subroutine assert_not_equals_1d_logical_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_logical ------
+  subroutine assert_not_equals_1d32_logical_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     logical(kind=bool), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1881,12 +2274,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_logical_
+  end subroutine assert_not_equals_1d32_logical_
 
-  !------ 2d_logical ------
-  subroutine assert_not_equals_2d_logical_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_logical ------
+  subroutine assert_not_equals_2d32_logical_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     logical(kind=bool), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1907,7 +2300,57 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_logical_
+  end subroutine assert_not_equals_2d32_logical_
+
+  !------ 1d64_logical ------
+  subroutine assert_not_equals_1d64_logical_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    logical(kind=bool), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if (var1(i) .neqv. var2(i)) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_logical_
+
+  !------ 2d64_logical ------
+  subroutine assert_not_equals_2d64_logical_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    logical(kind=bool), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if (var1(i, j) .neqv. var2(i, j)) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_logical_
 
   !------ 0d_string ------
   subroutine assert_not_equals_string_(var1, var2, message)
@@ -1932,10 +2375,10 @@ contains
     call add_success
   end subroutine assert_not_equals_string_
 
-  !------ 1d_string ------
-  subroutine assert_not_equals_1d_string_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_string ------
+  subroutine assert_not_equals_1d32_string_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     character (len = *), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -1954,12 +2397,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_string_
+  end subroutine assert_not_equals_1d32_string_
 
-  !------ 2d_string ------
-  subroutine assert_not_equals_2d_string_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_string ------
+  subroutine assert_not_equals_2d32_string_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     character (len = *), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -1980,7 +2423,57 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_string_
+  end subroutine assert_not_equals_2d32_string_
+
+  !------ 1d64_string ------
+  subroutine assert_not_equals_1d64_string_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    character (len = *), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if (trim(strip(var1(i))) /= trim(strip(var2(i)))) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_string_
+
+  !------ 2d64_string ------
+  subroutine assert_not_equals_2d64_string_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    character (len = *), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if (trim(strip(var1(i, j))) /= trim(strip(var2(i, j)))) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_string_
 
   !------ 0d_int32 ------
   subroutine assert_not_equals_int32_(var1, var2, message)
@@ -2005,10 +2498,10 @@ contains
     call add_success
   end subroutine assert_not_equals_int32_
 
-  !------ 1d_int32 ------
-  subroutine assert_not_equals_1d_int32_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_int32 ------
+  subroutine assert_not_equals_1d32_int32_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     integer(kind=int32), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -2027,12 +2520,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_int32_
+  end subroutine assert_not_equals_1d32_int32_
 
-  !------ 2d_int32 ------
-  subroutine assert_not_equals_2d_int32_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_int32 ------
+  subroutine assert_not_equals_2d32_int32_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     integer(kind=int32), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -2053,7 +2546,57 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_int32_
+  end subroutine assert_not_equals_2d32_int32_
+
+  !------ 1d64_int32 ------
+  subroutine assert_not_equals_1d64_int32_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    integer(kind=int32), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if (var1(i) /= var2(i)) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_int32_
+
+  !------ 2d64_int32 ------
+  subroutine assert_not_equals_2d64_int32_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    integer(kind=int32), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if (var1(i, j) /= var2(i, j)) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_int32_
 
   !------ 0d_int64 ------
   subroutine assert_not_equals_int64_(var1, var2, message)
@@ -2078,10 +2621,10 @@ contains
     call add_success
   end subroutine assert_not_equals_int64_
 
-  !------ 1d_int64 ------
-  subroutine assert_not_equals_1d_int64_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_int64 ------
+  subroutine assert_not_equals_1d32_int64_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     integer(kind=int64), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -2100,12 +2643,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_int64_
+  end subroutine assert_not_equals_1d32_int64_
 
-  !------ 2d_int64 ------
-  subroutine assert_not_equals_2d_int64_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_int64 ------
+  subroutine assert_not_equals_2d32_int64_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     integer(kind=int64), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -2126,7 +2669,57 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_int64_
+  end subroutine assert_not_equals_2d32_int64_
+
+  !------ 1d64_int64 ------
+  subroutine assert_not_equals_1d64_int64_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    integer(kind=int64), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if (var1(i) /= var2(i)) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_int64_
+
+  !------ 2d64_int64 ------
+  subroutine assert_not_equals_2d64_int64_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    integer(kind=int64), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if (var1(i, j) /= var2(i, j)) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_int64_
 
   !------ 0d_real32 ------
   subroutine assert_not_equals_real32_(var1, var2, message)
@@ -2174,10 +2767,10 @@ contains
     call add_success
   end subroutine assert_not_equals_real32_in_range_
 
-  !------ 1d_real32 ------
-  subroutine assert_not_equals_1d_real32_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real32 ------
+  subroutine assert_not_equals_1d32_real32_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real32), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -2196,12 +2789,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_real32_
+  end subroutine assert_not_equals_1d32_real32_
 
-  !------ 1d_real32 ------
-  subroutine assert_not_equals_1d_real32_in_range_(var1, var2, n, delta, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real32 ------
+  subroutine assert_not_equals_1d32_real32_in_range_(var1, var2, n, delta, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real32), intent (in) :: var1(n), var2(n)
     real(kind=real32), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -2220,12 +2813,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_real32_in_range_
+  end subroutine assert_not_equals_1d32_real32_in_range_
 
-  !------ 2d_real32 ------
-  subroutine assert_not_equals_2d_real32_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real32 ------
+  subroutine assert_not_equals_2d32_real32_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -2246,12 +2839,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_real32_
+  end subroutine assert_not_equals_2d32_real32_
 
-  !------ 2d_real32 ------
-  subroutine assert_not_equals_2d_real32_in_range_(var1, var2, n, m, delta, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real32 ------
+  subroutine assert_not_equals_2d32_real32_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
     real(kind=real32), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -2272,7 +2865,107 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_real32_in_range_
+  end subroutine assert_not_equals_2d32_real32_in_range_
+
+  !------ 1d64_real32 ------
+  subroutine assert_not_equals_1d64_real32_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real32), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_real32_
+
+  !------ 1d64_real32 ------
+  subroutine assert_not_equals_1d64_real32_in_range_(var1, var2, n, delta, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real32), intent (in) :: var1(n), var2(n)
+    real(kind=real32), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if (abs(var1(i) - var2(i)) > delta) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_real32_in_range_
+
+  !------ 2d64_real32 ------
+  subroutine assert_not_equals_2d64_real32_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_real32_
+
+  !------ 2d64_real32 ------
+  subroutine assert_not_equals_2d64_real32_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real32), intent (in) :: var1(n, m), var2(n, m)
+    real(kind=real32), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if (abs(var1(i, j) - var2(i, j)) > delta) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_real32_in_range_
 
   !------ 0d_real64 ------
   subroutine assert_not_equals_real64_(var1, var2, message)
@@ -2320,10 +3013,10 @@ contains
     call add_success
   end subroutine assert_not_equals_real64_in_range_
 
-  !------ 1d_real64 ------
-  subroutine assert_not_equals_1d_real64_(var1, var2, n, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real64 ------
+  subroutine assert_not_equals_1d32_real64_(var1, var2, n, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real64), intent (in) :: var1(n), var2(n)
     
     character(len = *), intent (in), optional :: message
@@ -2342,12 +3035,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_real64_
+  end subroutine assert_not_equals_1d32_real64_
 
-  !------ 1d_real64 ------
-  subroutine assert_not_equals_1d_real64_in_range_(var1, var2, n, delta, message)
-    integer, intent (in) :: n
-    integer              :: i
+  !------ 1d32_real64 ------
+  subroutine assert_not_equals_1d32_real64_in_range_(var1, var2, n, delta, message)
+    integer(kind=int32), intent (in) :: n
+    integer(kind=int32)              :: i
     real(kind=real64), intent (in) :: var1(n), var2(n)
     real(kind=real64), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -2366,12 +3059,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_1d_real64_in_range_
+  end subroutine assert_not_equals_1d32_real64_in_range_
 
-  !------ 2d_real64 ------
-  subroutine assert_not_equals_2d_real64_(var1, var2, n, m, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real64 ------
+  subroutine assert_not_equals_2d32_real64_(var1, var2, n, m, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
     
     character(len = *), intent (in), optional :: message
@@ -2392,12 +3085,12 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_real64_
+  end subroutine assert_not_equals_2d32_real64_
 
-  !------ 2d_real64 ------
-  subroutine assert_not_equals_2d_real64_in_range_(var1, var2, n, m, delta, message)
-    integer, intent (in) :: n, m
-    integer              :: i, j
+  !------ 2d32_real64 ------
+  subroutine assert_not_equals_2d32_real64_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int32), intent (in) :: n, m
+    integer(kind=int32)              :: i, j
     real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
     real(kind=real64), intent (in) :: delta
     character(len = *), intent (in), optional :: message
@@ -2418,7 +3111,107 @@ contains
       return
     endif
     call add_success
-  end subroutine assert_not_equals_2d_real64_in_range_
+  end subroutine assert_not_equals_2d32_real64_in_range_
+
+  !------ 1d64_real64 ------
+  subroutine assert_not_equals_1d64_real64_(var1, var2, n, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real64), intent (in) :: var1(n), var2(n)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if ((var1(i) < var2(i)) .or. (var1(i) > var2(i))) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_real64_
+
+  !------ 1d64_real64 ------
+  subroutine assert_not_equals_1d64_real64_in_range_(var1, var2, n, delta, message)
+    integer(kind=int64), intent (in) :: n
+    integer(kind=int64)              :: i
+    real(kind=real64), intent (in) :: var1(n), var2(n)
+    real(kind=real64), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do i = 1, n
+        if (abs(var1(i) - var2(i)) > delta) then
+          same_so_far = .false.
+        endif
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1)), &
+      & to_s(var2(1)), '1d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_1d64_real64_in_range_
+
+  !------ 2d64_real64 ------
+  subroutine assert_not_equals_2d64_real64_(var1, var2, n, m, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
+    
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if ((var1(i, j) < var2(i, j)) .or. (var1(i, j) > var2(i, j))) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_real64_
+
+  !------ 2d64_real64 ------
+  subroutine assert_not_equals_2d64_real64_in_range_(var1, var2, n, m, delta, message)
+    integer(kind=int64), intent (in) :: n, m
+    integer(kind=int64)              :: i, j
+    real(kind=real64), intent (in) :: var1(n, m), var2(n, m)
+    real(kind=real64), intent (in) :: delta
+    character(len = *), intent (in), optional :: message
+    logical :: same_so_far
+
+    same_so_far = .true.
+    do j = 1, m
+      do i = 1, n
+        if (abs(var1(i, j) - var2(i, j)) > delta) then
+          same_so_far = .false.
+        endif
+      enddo
+    enddo
+    if (same_so_far) then
+      call failed_assert_action(&
+      & to_s(var1(1, 1)), &
+      & to_s(var2(1, 1)), '2d array has no difference, ' // message, if_is = .false.)
+      return
+    endif
+    call add_success
+  end subroutine assert_not_equals_2d64_real64_in_range_
 
   !====== end of generated code ======
 

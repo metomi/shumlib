@@ -1,25 +1,25 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
-! Description: Function to resolve a set of 'unresolved' grid-points 
+! Description: Function to resolve a set of 'unresolved' grid-points
 !              using an independent unbiased spiral search algorithm
 !              with optional range constraint.
 !
@@ -34,7 +34,7 @@ USE f_shum_conversions_mod, ONLY:                                              &
                                  shum_pi_const_32,                             &
                                  shum_pi_over_180_const_32
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -51,12 +51,12 @@ PUBLIC :: f_shum_spiral_search_algorithm
   INTEGER, PARAMETER :: int64  = C_INT64_T
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT       
-  INTEGER, PARAMETER :: bool   = C_BOOL                                
+  INTEGER, PARAMETER :: real32 = C_FLOAT
+  INTEGER, PARAMETER :: bool   = C_BOOL
 !------------------------------------------------------------------------------!
 
-REAL(KIND=real64), PARAMETER :: RMDI      = -32768.0_real64*32768.0_real64
-REAL(KIND=real32), PARAMETER :: RMDI_32b  = -32768.0_real32*32768.0_real32
+REAL(KIND=real64), PARAMETER :: rMDI      = -32768.0_real64*32768.0_real64
+REAL(KIND=real32), PARAMETER :: rMDI_32b  = -32768.0_real32*32768.0_real32
 
 INTERFACE f_shum_spiral_search_algorithm
   MODULE PROCEDURE                                                             &
@@ -104,9 +104,9 @@ FUNCTION f_shum_spiral_arg64                                                   &
 IMPLICIT NONE
 
                                           ! Number of rows in grid
-INTEGER(KIND=int64), INTENT(IN)    :: points_phi 
+INTEGER(KIND=int64), INTENT(IN)    :: points_phi
                                           ! Number of columns in grid
-INTEGER(KIND=int64), INTENT(IN)    :: points_lambda 
+INTEGER(KIND=int64), INTENT(IN)    :: points_lambda
                                           ! Land sea mask
 LOGICAL(KIND=bool),  INTENT(IN)    :: lsm(points_lambda*points_phi)
                                           ! Number of unresolved points
@@ -127,7 +127,7 @@ REAL(KIND=real64),   INTENT(IN)    :: constrained_max_dist
 REAL(KIND=real64),   INTENT(IN)    :: dist_step
                                           ! True if covering complete lat circle
 LOGICAL(KIND=bool),  INTENT(IN)    :: cyclic_domain
-                                          ! False for a point that is resolved, 
+                                          ! False for a point that is resolved,
                                           ! True for an unresolved point
 LOGICAL(KIND=bool),  INTENT(IN)    :: unres_mask(points_lambda*points_phi)
                                           ! Indices to resolved pts
@@ -197,15 +197,15 @@ END IF
 
 ! Loop over every unresolved point.
 DO k=1, no_point_unres
-  distance(:,:)=RMDI
+  distance(:,:)=rMDI
   ! Find i/j index for point.
   unres_j  = (index_unres(k)-1_int64)/points_lambda + 1_int64
   unres_i  = index_unres(k)-(unres_j-1_int64)*points_lambda
- 
+
   ! Calculate minimum local grid spacing
- 
+
   min_loc_spc=99999999_int64
- 
+
   IF (unres_j > 1) THEN
     min_loc_spc=MIN(min_loc_spc,&
       calc_distance(lats(unres_j), lons(unres_i), lats(unres_j-1_int64), &
@@ -226,9 +226,9 @@ DO k=1, no_point_unres
       calc_distance(lats(unres_j), lons(unres_i), lats(unres_j), &
                     lons(unres_i+1_int64), planet_radius))
   END IF
- 
+
   ! Do in steps dist_step*minimum local grid spacing
- 
+
   step=dist_step*min_loc_spc
   search_dist=step
   IF (search_dist > max_dist) THEN
@@ -238,22 +238,22 @@ DO k=1, no_point_unres
 ! Assume if we don't find a valid min the value is at planet_radius*pi+1.
   curr_dist_valid_min = (planet_radius*shum_pi_const)+1.0_real64
 ! We want nearest one so we dont want to limit search to max_dist.
-  curr_dist_invalid_min = RMDI
-! Give some initial RMDI values in case they are never set
-  distance(:,:)=RMDI
- 
+  curr_dist_invalid_min = rMDI
+! Give some initial rMDI values in case they are never set
+  distance(:,:)=rMDI
+
   found=.FALSE.
- 
-  ! Loop in steps of dist_step*minimum local grid spacing until max 
+
+  ! Loop in steps of dist_step*minimum local grid spacing until max
   ! search trying to find a valid point
 
   curr_i_valid_min= 0_int64
   curr_j_valid_min= 0_int64
   curr_i_invalid_min= 0_int64
   curr_j_invalid_min= 0_int64
- 
+
   DO WHILE (search_dist <= max_dist .AND. .NOT. found)
-   
+
     south=-1_int64
     north=-1_int64
     west=-1_int64
@@ -353,12 +353,12 @@ DO k=1, no_point_unres
               END IF
             ELSE IF (constrained .OR. allsametype) THEN
               IF (distance(i,j) < curr_dist_invalid_min .OR. &
-                curr_dist_invalid_min == RMDI) THEN
+                curr_dist_invalid_min == rMDI) THEN
                 curr_dist_invalid_min = distance(i,j)
                 curr_i_invalid_min=i
                 curr_j_invalid_min=j
               END IF
-              distance(i,j) = RMDI
+              distance(i,j) = rMDI
             END IF
           END IF
         END DO
@@ -369,16 +369,16 @@ DO k=1, no_point_unres
       IF (curr_dist_valid_min <= max_dist) THEN
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
       ELSE IF (allsametype .AND. &
-               curr_dist_invalid_min /= RMDI .AND. &
+               curr_dist_invalid_min /= rMDI .AND. &
                curr_dist_invalid_min > max_dist) THEN
         cmessage = 'There are no resolved points of this type, setting ' &
         // 'to closest resolved point'
         status = -5
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= RMDI .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI .AND. &
                curr_dist_invalid_min <= max_dist) THEN
         indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= RMDI .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI .AND. &
                curr_dist_invalid_min > max_dist) THEN
         ! Though hit the maximum search distance there has not been a
         ! resolved point of either type found, therefore use the closest
@@ -393,9 +393,9 @@ DO k=1, no_point_unres
         status = 47
       END IF
       found=.TRUE.
-     
+
     ELSE ! s,n,w,e /= -1 i.e. not hit edge of a cyclic domain
-   
+
       IF (south+north /= 0 .OR. east+west /= 0) THEN
         DO j = unres_j-south, unres_j+north
           DO i = unres_i-west, unres_i+east
@@ -418,12 +418,12 @@ DO k=1, no_point_unres
               ! have to add this in as if it isn't constrained don't want it
               ! storing an invalid value
                 IF (distance(i,j) < curr_dist_invalid_min .OR. &
-                  curr_dist_invalid_min == RMDI) THEN
+                  curr_dist_invalid_min == rMDI) THEN
                   curr_dist_invalid_min = distance(i,j)
                   curr_i_invalid_min=i
                   curr_j_invalid_min=j
                 END IF
-                distance(i,j) = RMDI
+                distance(i,j) = rMDI
               END IF
             END IF
           END DO
@@ -448,7 +448,7 @@ DO k=1, no_point_unres
           ELSE IF (search_dist < max_dist) THEN
             search_dist=max_dist
           ELSE IF (constrained .AND. &
-                   curr_dist_invalid_min == RMDI) THEN
+                   curr_dist_invalid_min == rMDI) THEN
             ! Though hit the maximum search distance there has not been a
             ! resolved point of either type found, therefore increase
             ! max_dist by step
@@ -469,7 +469,7 @@ DO k=1, no_point_unres
         ELSE IF (search_dist < max_dist) THEN
           search_dist=max_dist
         ELSE IF (constrained .AND. &
-                 curr_dist_invalid_min == RMDI) THEN
+                 curr_dist_invalid_min == rMDI) THEN
           ! Though hit the maximum search distance there has not been a
           ! resolved point of either type found, therefore increase
           ! max_dist by step
@@ -487,7 +487,7 @@ DO k=1, no_point_unres
     END IF
   END DO ! while
   IF (.NOT. found) THEN
-    IF (curr_dist_invalid_min /= RMDI) THEN
+    IF (curr_dist_invalid_min /= rMDI) THEN
       indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
     ELSE
       cmessage = 'A point has been left as still unresolved'
@@ -498,7 +498,7 @@ END DO
 
 END FUNCTION f_shum_spiral_arg64
 
-! Repeat the whole function at 32-bit for comparison. 
+! Repeat the whole function at 32-bit for comparison.
 FUNCTION f_shum_spiral_arg32                                                   &
            (lsm, index_unres, no_point_unres,                                  &
             points_phi, points_lambda, lats, lons,                             &
@@ -510,9 +510,9 @@ FUNCTION f_shum_spiral_arg32                                                   &
 IMPLICIT NONE
 
                                           ! Number of rows in grid
-INTEGER(KIND=int32), INTENT(IN)    :: points_phi 
+INTEGER(KIND=int32), INTENT(IN)    :: points_phi
                                           ! Number of columns in grid
-INTEGER(KIND=int32), INTENT(IN)    :: points_lambda 
+INTEGER(KIND=int32), INTENT(IN)    :: points_lambda
                                           ! Land sea mask
 LOGICAL(KIND=bool),  INTENT(IN)    :: lsm(points_lambda*points_phi)
                                           ! Number of unresolved points
@@ -533,7 +533,7 @@ REAL(KIND=real32),   INTENT(IN)    :: constrained_max_dist
 REAL(KIND=real32),   INTENT(IN)    :: dist_step
                                           ! True if covering complete lat circle
 LOGICAL(KIND=bool),  INTENT(IN)    :: cyclic_domain
-                                          ! False for a point that is resolved, 
+                                          ! False for a point that is resolved,
                                           ! True for an unresolved point
 LOGICAL(KIND=bool),  INTENT(IN)    :: unres_mask(points_lambda*points_phi)
                                           ! Index to resolved pts
@@ -603,15 +603,15 @@ END IF
 
 ! Loop over every unresolved point.
 DO k=1, no_point_unres
-  distance(:,:)=RMDI_32b
+  distance(:,:)=rMDI_32b
   ! Find i/j index for point.
   unres_j  = (index_unres(k)-1_int32)/points_lambda + 1_int32
   unres_i  = index_unres(k)-(unres_j-1_int32)*points_lambda
- 
+
   ! Calculate minimum local grid spacing
- 
-  min_loc_spc=99999999_int32
- 
+
+  min_loc_spc=99999999.0_real32
+
   IF (unres_j > 1) THEN
     min_loc_spc=MIN(min_loc_spc,&
       calc_distance(lats(unres_j), lons(unres_i), lats(unres_j-1_int32), &
@@ -632,39 +632,39 @@ DO k=1, no_point_unres
       calc_distance(lats(unres_j), lons(unres_i), lats(unres_j), &
                     lons(unres_i+1_int32), planet_radius))
   END IF
- 
+
   ! Do in steps dist_step*minimum local grid spacing
- 
+
   step=dist_step*min_loc_spc
   search_dist=step
   IF (search_dist > max_dist) THEN
     search_dist = max_dist
   END IF
- 
+
 ! Assume if we don't find a valid min the value is at planet_radius*pi+1.
   curr_dist_valid_min = (planet_radius*shum_pi_const_32)+1.0_real32
 ! We want nearest one so we dont want to limit search to max_dist.
-  curr_dist_invalid_min = RMDI_32b
-! Give some initial RMDI values in case they are never set
-  distance(:,:)=RMDI_32b
- 
+  curr_dist_invalid_min = rMDI_32b
+! Give some initial rMDI values in case they are never set
+  distance(:,:)=rMDI_32b
+
   found=.FALSE.
- 
-  ! Loop in steps of dist_step*minimum local grid spacing until max 
+
+  ! Loop in steps of dist_step*minimum local grid spacing until max
   ! search trying to find a valid point
 
   curr_i_valid_min= 0_int32
   curr_j_valid_min= 0_int32
   curr_i_invalid_min= 0_int32
   curr_j_invalid_min= 0_int32
- 
+
   DO WHILE (search_dist <= max_dist .AND. .NOT. found)
-   
+
     south=-1_int32
     north=-1_int32
     west=-1_int32
     east=-1_int32
-   
+
     ! Find how many points can go south and be inside search_dist
     DO j = 1, points_phi
       IF (unres_j-j > 0) THEN
@@ -759,12 +759,12 @@ DO k=1, no_point_unres
               END IF
             ELSE IF (constrained .OR. allsametype) THEN
               IF (distance(i,j) < curr_dist_invalid_min .OR. &
-                curr_dist_invalid_min == RMDI_32b) THEN
+                curr_dist_invalid_min == rMDI_32b) THEN
                 curr_dist_invalid_min = distance(i,j)
                 curr_i_invalid_min=i
                 curr_j_invalid_min=j
               END IF
-              distance(i,j) = RMDI_32b
+              distance(i,j) = rMDI_32b
             END IF
           END IF
         END DO
@@ -775,16 +775,16 @@ DO k=1, no_point_unres
       IF (curr_dist_valid_min <= max_dist) THEN
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
       ELSE IF (allsametype .AND. &
-               curr_dist_invalid_min /= RMDI_32b .AND. &
+               curr_dist_invalid_min /= rMDI_32b .AND. &
                curr_dist_invalid_min > max_dist) THEN
         cmessage = 'There are no resolved points of this type, setting ' &
         // 'to closest resolved point'
         status = -5
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= RMDI_32b .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND. &
                curr_dist_invalid_min <= max_dist) THEN
         indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= RMDI_32b .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND. &
                curr_dist_invalid_min > max_dist) THEN
         ! Though hit the maximum search distance there has not been a
         ! resolved point of either type found, therefore use the closest
@@ -799,9 +799,9 @@ DO k=1, no_point_unres
         status = 47
       END IF
       found=.TRUE.
-     
+
     ELSE ! s,n,w,e /= -1 i.e. not hit edge of a cyclic domain
-   
+
       IF (south+north /= 0 .OR. east+west /= 0) THEN
         DO j = unres_j-south, unres_j+north
           DO i = unres_i-west, unres_i+east
@@ -824,12 +824,12 @@ DO k=1, no_point_unres
               ! have to add this in as if it isn't constrained don't want it
               ! storing an invalid value
                 IF (distance(i,j) < curr_dist_invalid_min .OR. &
-                  curr_dist_invalid_min == RMDI_32b) THEN
+                  curr_dist_invalid_min == rMDI_32b) THEN
                   curr_dist_invalid_min = distance(i,j)
                   curr_i_invalid_min=i
                   curr_j_invalid_min=j
                 END IF
-                distance(i,j) = RMDI_32b
+                distance(i,j) = rMDI_32b
               END IF
             END IF
           END DO
@@ -854,7 +854,7 @@ DO k=1, no_point_unres
           ELSE IF (search_dist < max_dist) THEN
             search_dist=max_dist
           ELSE IF (constrained .AND. &
-                   curr_dist_invalid_min == RMDI_32b) THEN
+                   curr_dist_invalid_min == rMDI_32b) THEN
             ! Though hit the maximum search distance there has not been a
             ! resolved point of either type found, therefore increase
             ! max_dist by step
@@ -875,7 +875,7 @@ DO k=1, no_point_unres
         ELSE IF (search_dist < max_dist) THEN
           search_dist=max_dist
         ELSE IF (constrained .AND. &
-                 curr_dist_invalid_min == RMDI_32b) THEN
+                 curr_dist_invalid_min == rMDI_32b) THEN
           ! Though hit the maximum search distance there has not been a
           ! resolved point of either type found, therefore increase
           ! max_dist by step
@@ -893,7 +893,7 @@ DO k=1, no_point_unres
     END IF
   END DO ! while
   IF (.NOT. found) THEN
-    IF (curr_dist_invalid_min /= RMDI_32b) THEN
+    IF (curr_dist_invalid_min /= rMDI_32b) THEN
       indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
     ELSE
       cmessage = 'A point has been left as still unresolved'

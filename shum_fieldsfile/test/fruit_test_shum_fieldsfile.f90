@@ -1,23 +1,23 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 MODULE fruit_test_shum_fieldsfile_mod
 
@@ -25,7 +25,7 @@ USE fruit
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
   C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE, C_INT, C_BOOL
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -68,14 +68,14 @@ SUBROUTINE fruit_test_shum_fieldsfile
 USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY: OUTPUT_UNIT, ERROR_UNIT
 USE f_shum_fieldsfile_version_mod, ONLY: get_shum_fieldsfile_version
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: version
 INTEGER             :: get_env_status
 
 ! Note: we don't have a test case for the version checking because we don't
 ! want the testing to include further hardcoded version numbers to test
-! against.  Since the version module is simple and hardcoded anyway it's 
+! against.  Since the version module is simple and hardcoded anyway it's
 ! sufficient to make sure it is callable; but let's print the version for info.
 version = get_shum_fieldsfile_version()
 
@@ -95,7 +95,7 @@ IF (get_env_status == 0) THEN
                                 VALUE=shum_tmpdir,                             &
                                 STATUS=get_env_status)
 END IF
-! Now check the status (not an ELSE IF, because that way we can catch the 
+! Now check the status (not an ELSE IF, because that way we can catch the
 ! failed status of either the first or second call
 IF (get_env_status /= 0) THEN
   WRITE(ERROR_UNIT, "(A)") "Unable to access SHUM_TMPDIR environment variable"
@@ -140,7 +140,7 @@ USE f_shum_lookup_indices_mod, ONLY:                                           &
 USE f_shum_fixed_length_header_indices_mod, ONLY:                              &
   int_const_start, int_const_dim, real_const_start, real_const_dim,            &
   lev_dep_const_start, lev_dep_const_dim1, lev_dep_const_dim2,                 &
-  row_dep_const_start, row_dep_const_dim1, row_dep_const_dim2,                 &  
+  row_dep_const_start, row_dep_const_dim1, row_dep_const_dim2,                 &
   col_dep_const_start, col_dep_const_dim1, col_dep_const_dim2,                 &
   additional_const_start, additional_const_dim1, additional_const_dim2,        &
   extra_const_start, extra_const_dim, temp_histfile_start, temp_histfile_dim,  &
@@ -150,7 +150,7 @@ USE f_shum_fixed_length_header_indices_mod, ONLY:                              &
   lookup_start, lookup_dim1, lookup_dim2, data_start, data_dim,                &
   num_prognostic_fields
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 CHARACTER(LEN=500)  :: message = ""
@@ -217,7 +217,7 @@ INTEGER(KIND=int64), ALLOCATABLE :: i64_field_data_r(:)
 REAL(KIND=real32),   ALLOCATABLE :: r32_field_data_r(:)
 INTEGER(KIND=int32), ALLOCATABLE :: i32_field_data_r(:)
 
-INTEGER :: i, j, k
+INTEGER(KIND=int64) :: i, j, k
 INTEGER :: failures_at_entry
 INTEGER :: failures_at_exit
 
@@ -226,13 +226,13 @@ LOGICAL(KIND=bool) :: check
 ! Get the number of failed tests prior to this test starting
 CALL get_failed_count(failures_at_entry)
 
-! Create a temporary file to use for testing 
+! Create a temporary file to use for testing
 ALLOCATE(CHARACTER(shum_tmpdir_len + LEN(tempfile)) :: scratch_filename)
 scratch_filename = shum_tmpdir // '/' // tempfile
 
 status = f_shum_create_file(scratch_filename, n_fields_test + 2, ff_id, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                    "Failed to create new file: "//TRIM(message))
 
 DO i = 1, f_shum_fixed_length_header_len
@@ -244,7 +244,7 @@ fixed_length_header(1) = 20_int64
 
 status = f_shum_write_fixed_length_header(ff_id, fixed_length_header, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to write fixed_length_header: "//TRIM(message))
 
 DO i = 1, int_const_dim_test
@@ -253,7 +253,7 @@ END DO
 
 status = f_shum_write_integer_constants(ff_id, integer_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to write integer_constants: "//TRIM(message))
 
 DO i = 1, real_const_dim_test
@@ -262,7 +262,7 @@ END DO
 
 status = f_shum_write_real_constants(ff_id, real_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to write real_constants: "//TRIM(message))
 
 DO i = 1, lev_const_dim1_test
@@ -274,7 +274,7 @@ END DO
 
 status = f_shum_write_level_dependent_constants(ff_id, level_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                    "Failed to write level_dependent_constants: "//TRIM(message))
 
 DO i = 1, row_const_dim1_test
@@ -286,7 +286,7 @@ END DO
 
 status = f_shum_write_row_dependent_constants(ff_id, row_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                      "Failed to write row_dependent_constants: "//TRIM(message))
 
 DO i = 1, col_const_dim1_test
@@ -298,7 +298,7 @@ END DO
 
 status = f_shum_write_column_dependent_constants(ff_id, col_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                   "Failed to write column_dependent_constants: "//TRIM(message))
 
 DO i = 1, addl_param_dim1_test
@@ -310,7 +310,7 @@ END DO
 
 status = f_shum_write_additional_parameters(ff_id, addl_params, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                        "Failed to write additional_parameters: "//TRIM(message))
 
 DO i = 1, extra_const_dim_test
@@ -319,7 +319,7 @@ END DO
 
 status = f_shum_write_extra_constants(ff_id, extra_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                              "Failed to write extra_constants: "//TRIM(message))
 
 DO i = 1, temp_hist_dim_test
@@ -328,7 +328,7 @@ END DO
 
 status = f_shum_write_temp_histfile(ff_id, temp_histfile, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                "Failed to write temp_histfile: "//TRIM(message))
 
 DO i = 1, comp_ind_1_dim_test
@@ -337,7 +337,7 @@ END DO
 
 status = f_shum_write_compressed_index(ff_id, comp_index_1, 1_int64, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                           "Failed to write compressed_index 1: "//TRIM(message))
 
 DO i = 1, comp_ind_2_dim_test
@@ -346,7 +346,7 @@ END DO
 
 status = f_shum_write_compressed_index(ff_id, comp_index_2, 2_int64, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                           "Failed to write compressed_index 2: "//TRIM(message))
 
 
@@ -356,7 +356,7 @@ END DO
 
 status = f_shum_write_compressed_index(ff_id, comp_index_3, 3_int64, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                           "Failed to write compressed_index 3: "//TRIM(message))
 
 DO i = 1, f_shum_lookup_dim1_len
@@ -379,12 +379,12 @@ lookup(lbpack,  11:13) = [   1,   2,   0 ]
 
 status = f_shum_write_lookup(ff_id, lookup, 1_int64, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                 "Failed to write lookup table: "//TRIM(message))
 
 status = f_shum_precalc_data_positions(ff_id, rows*columns, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                        "Failed to precalculate data positions: "//TRIM(message))
 
 DO k = 1, n_fields_test
@@ -446,7 +446,7 @@ CALL assert_equals(0_int64, status, "Failed to re-open file: "//TRIM(message))
 
 status = f_shum_read_fixed_length_header(ff_id, fixed_length_header_r, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to read fixed_length_header: "//TRIM(message))
 
 DO i = int_const_dim, f_shum_fixed_length_header_len
@@ -495,39 +495,39 @@ fixed_length_header(extra_const_start) =                                       &
 
 fixed_length_header(temp_histfile_dim) = temp_hist_dim_test
 fixed_length_header(temp_histfile_start) =                                     &
-  fixed_length_header(extra_const_start) + fixed_length_header(extra_const_dim)  
+  fixed_length_header(extra_const_start) + fixed_length_header(extra_const_dim)
 
 fixed_length_header(comp_field_index1_dim) = comp_ind_1_dim_test
 fixed_length_header(comp_field_index1_start) =                                 &
   fixed_length_header(temp_histfile_start) +                                   &
-  fixed_length_header(temp_histfile_dim)  
+  fixed_length_header(temp_histfile_dim)
 
 fixed_length_header(comp_field_index2_dim) = comp_ind_2_dim_test
 fixed_length_header(comp_field_index2_start) =                                 &
   fixed_length_header(comp_field_index1_start) +                               &
-  fixed_length_header(comp_field_index1_dim)  
+  fixed_length_header(comp_field_index1_dim)
 
 fixed_length_header(comp_field_index3_dim) = comp_ind_3_dim_test
 fixed_length_header(comp_field_index3_start) =                                 &
   fixed_length_header(comp_field_index2_start) +                               &
-  fixed_length_header(comp_field_index2_dim)  
+  fixed_length_header(comp_field_index2_dim)
 
 fixed_length_header(lookup_dim1) = f_shum_lookup_dim1_len
 fixed_length_header(lookup_dim2) = n_fields_test
 fixed_length_header(lookup_start) =                                            &
   fixed_length_header(comp_field_index3_start) +                               &
-  fixed_length_header(comp_field_index3_dim)  
+  fixed_length_header(comp_field_index3_dim)
 
 fixed_length_header(data_start) = 524289_int64
 fixed_length_header(data_dim)   = 535552_int64
 
 CALL assert_equals(fixed_length_header, fixed_length_header_r,                 &
-  INT(f_shum_fixed_length_header_len, KIND=int32),                             &
+  f_shum_fixed_length_header_len,                                              &
   "Re-read fixed_length_header does not contain expected values")
 
 status = f_shum_read_integer_constants(ff_id, integer_constants_r, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                    "Failed to read integer_constants: "//TRIM(message))
 
 check = ALLOCATED(integer_constants_r)
@@ -537,7 +537,7 @@ CALL assert_equals(int_const_dim_test, SIZE(integer_constants_r, KIND=int64),  &
                    "Re-read integer_constants incorrect size")
 
 CALL assert_equals(integer_constants, integer_constants_r,                     &
-                   INT(int_const_dim_test, KIND=int32),                        &
+                   int_const_dim_test,                                         &
                    "Re-read integer_constants contain incorrect values")
 
 status = f_shum_read_real_constants(ff_id, real_constants_r, message)
@@ -552,7 +552,7 @@ CALL assert_equals(real_const_dim_test, SIZE(real_constants_r, KIND=int64),    &
                    "Re-read real_constants incorrect size")
 
 CALL assert_equals(real_constants, real_constants_r,                           &
-                   INT(real_const_dim_test, KIND=int32),                       &
+                   real_const_dim_test,                                        &
                    "Re-read real_constants contain incorrect values")
 
 status = f_shum_read_level_dependent_constants(                                &
@@ -574,12 +574,12 @@ CALL assert_equals(lev_const_dim2_test,                                        &
                    "Re-read level_dependent_constants incorrect 2nd dimension")
 
 CALL assert_equals(level_constants, level_constants_r,                         &
-                   INT(lev_const_dim1_test, KIND=int32),                       &
-                   INT(lev_const_dim2_test, KIND=int32),                       &
+                   lev_const_dim1_test,                                        &
+                   lev_const_dim2_test,                                        &
                    "Re-read level_dependent_constants contain incorrect values")
 
 status = f_shum_read_row_dependent_constants(ff_id, row_constants_r, message)
-                                                
+
 CALL assert_equals(0_int64, status,                                            &
                    "Failed to read row_dependent_constants: "//TRIM(message))
 
@@ -596,8 +596,8 @@ CALL assert_equals(row_const_dim2_test,                                        &
                    "Re-read row_dependent_constants incorrect 2nd dimension")
 
 CALL assert_equals(row_constants, row_constants_r,                             &
-                   INT(row_const_dim1_test, KIND=int32),                       &
-                   INT(row_const_dim2_test, KIND=int32),                       &
+                   row_const_dim1_test,                                        &
+                   row_const_dim2_test,                                        &
                    "Re-read row_dependent_constants contain incorrect values")
 
 status = f_shum_read_column_dependent_constants(ff_id, col_constants_r, message)
@@ -618,8 +618,8 @@ CALL assert_equals(col_const_dim2_test,                                        &
                    "Re-read column_dependent_constants incorrect 2nd dimension")
 
 CALL assert_equals(col_constants, col_constants_r,                             &
-                   INT(col_const_dim1_test, KIND=int32),                       &
-                   INT(col_const_dim2_test, KIND=int32),                       &
+                   col_const_dim1_test,                                        &
+                   col_const_dim2_test,                                        &
                   "Re-read column_dependent_constants contain incorrect values")
 
 status = f_shum_read_additional_parameters(ff_id, addl_params_r, message)
@@ -640,8 +640,8 @@ CALL assert_equals(addl_param_dim2_test,                                       &
                    "Re-read additional_parameters incorrect 2nd dimension")
 
 CALL assert_equals(addl_params, addl_params_r,                                 &
-                   INT(addl_param_dim1_test, KIND=int32),                      &
-                   INT(addl_param_dim2_test, KIND=int32),                      &
+                   addl_param_dim1_test,                                       &
+                   addl_param_dim2_test,                                       &
                   "Re-read additional_parameters contain incorrect values")
 
 status = f_shum_read_extra_constants(ff_id, extra_constants_r, message)
@@ -656,7 +656,7 @@ CALL assert_equals(extra_const_dim_test, SIZE(extra_constants_r, KIND=int64),  &
                    "Re-read extra_constants incorrect size")
 
 CALL assert_equals(extra_constants, extra_constants_r,                         &
-                   INT(extra_const_dim_test, KIND=int32),                      &
+                   extra_const_dim_test,                                       &
                    "Re-read extra_constants contain incorrect values")
 
 status = f_shum_read_temp_histfile(ff_id, temp_histfile_r, message)
@@ -671,7 +671,7 @@ CALL assert_equals(temp_hist_dim_test, SIZE(temp_histfile_r, KIND=int64),      &
                    "Re-read temp_histfile incorrect size")
 
 CALL assert_equals(temp_histfile, temp_histfile_r,                             &
-                   INT(temp_hist_dim_test, KIND=int32),                        &
+                   temp_hist_dim_test,                                         &
                    "Re-read temp_histfile contain incorrect values")
 
 status = f_shum_read_compressed_index(ff_id, comp_index_1_r, 1_int64, message)
@@ -686,7 +686,7 @@ CALL assert_equals(comp_ind_1_dim_test, SIZE(comp_index_1_r, KIND=int64),      &
                    "Re-read compressed_index 1 incorrect size")
 
 CALL assert_equals(comp_index_1, comp_index_1_r,                               &
-                   INT(comp_ind_1_dim_test, KIND=int32),                       &
+                   comp_ind_1_dim_test,                                        &
                    "Re-read compressed_index 1 contain incorrect values")
 
 status = f_shum_read_compressed_index(ff_id, comp_index_2_r, 2_int64, message)
@@ -701,7 +701,7 @@ CALL assert_equals(comp_ind_2_dim_test, SIZE(comp_index_2_r, KIND=int64),      &
                    "Re-read compressed_index 2 incorrect size")
 
 CALL assert_equals(comp_index_2, comp_index_2_r,                               &
-                   INT(comp_ind_2_dim_test, KIND=int32),                       &
+                   comp_ind_2_dim_test,                                        &
                    "Re-read compressed_index 2 contain incorrect values")
 
 status = f_shum_read_compressed_index(ff_id, comp_index_3_r, 3_int64, message)
@@ -716,7 +716,7 @@ CALL assert_equals(comp_ind_3_dim_test, SIZE(comp_index_3_r, KIND=int64),      &
                    "Re-read compressed_index 3 incorrect size")
 
 CALL assert_equals(comp_index_3, comp_index_3_r,                               &
-                   INT(comp_ind_3_dim_test, KIND=int32),                       &
+                   comp_ind_3_dim_test,                                        &
                    "Re-read compressed_index 3 contain incorrect values")
 
 status = f_shum_read_lookup(ff_id, lookup_r, message)
@@ -751,8 +751,8 @@ DO j = 2, n_fields_test
 END DO
 
 CALL assert_equals(lookup, lookup_r,                                           &
-                   INT(f_shum_lookup_dim1_len, KIND=int32),                    &
-                   INT(n_fields_test, KIND=int32),                             &
+                   f_shum_lookup_dim1_len,                                    &
+                   n_fields_test,                                              &
                   "Re-read lookup contains incorrect values")
 
 DO k = 1, n_fields_test
@@ -770,7 +770,7 @@ DO k = 1, n_fields_test
            SIZE(r64_field_data_r, 1, KIND=int64),                              &
            "Re-read real 64-bit data array incorrect length")
       CALL assert_equals(r64_field_data, r64_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read real 64-bit data array contains incorrect values")
     ! Integer 64-bit data fields
     CASE(2,7,9)
@@ -785,7 +785,7 @@ DO k = 1, n_fields_test
            SIZE(i64_field_data_r, 1, KIND=int64),                              &
            "Re-read integer 64-bit data array incorrect length")
       CALL assert_equals(i64_field_data, i64_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read integer 64-bit data array contains incorrect values")
     ! Real 32-bit data fields
     CASE(3,6,12)
@@ -800,7 +800,7 @@ DO k = 1, n_fields_test
            SIZE(r32_field_data, 1, KIND=int64),                                &
            "Re-read real 32-bit data array incorrect length")
       CALL assert_equals(r32_field_data, r32_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read real 32-bit data array contains incorrect values")
     ! Integer 32-bit data fields
     CASE(4,8,11)
@@ -815,7 +815,7 @@ DO k = 1, n_fields_test
            SIZE(i32_field_data, 1, KIND=int64),                                &
            "Re-read integer 32-bit data array incorrect length")
       CALL assert_equals(i32_field_data, i32_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read integer 32-bit data array contains incorrect values")
   END SELECT
 END DO
@@ -862,7 +862,7 @@ USE f_shum_lookup_indices_mod, ONLY:                                           &
 USE f_shum_fixed_length_header_indices_mod, ONLY:                              &
   int_const_start, int_const_dim, real_const_start, real_const_dim,            &
   lev_dep_const_start, lev_dep_const_dim1, lev_dep_const_dim2,                 &
-  row_dep_const_start, row_dep_const_dim1, row_dep_const_dim2,                 &  
+  row_dep_const_start, row_dep_const_dim1, row_dep_const_dim2,                 &
   col_dep_const_start, col_dep_const_dim1, col_dep_const_dim2,                 &
   additional_const_start, additional_const_dim1, additional_const_dim2,        &
   extra_const_start, extra_const_dim, temp_histfile_start, temp_histfile_dim,  &
@@ -872,7 +872,7 @@ USE f_shum_fixed_length_header_indices_mod, ONLY:                              &
   lookup_start, lookup_dim1, lookup_dim2, data_start, data_dim,                &
   num_prognostic_fields
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
 CHARACTER(LEN=500)  :: message = ""
@@ -939,7 +939,7 @@ INTEGER(KIND=int64), ALLOCATABLE :: i64_field_data_r(:)
 REAL(KIND=real32),   ALLOCATABLE :: r32_field_data_r(:)
 INTEGER(KIND=int32), ALLOCATABLE :: i32_field_data_r(:)
 
-INTEGER :: i, j, k
+INTEGER(KIND=int64) :: i, j, k
 INTEGER :: failures_at_entry
 INTEGER :: failures_at_exit
 
@@ -948,13 +948,13 @@ LOGICAL(KIND=bool) :: check
 ! Get the number of failed tests prior to this test starting
 CALL get_failed_count(failures_at_entry)
 
-! Create a temporary file to use for testing 
+! Create a temporary file to use for testing
 ALLOCATE(CHARACTER(shum_tmpdir_len + LEN(tempfile)) :: scratch_filename)
 scratch_filename = shum_tmpdir // '/' // tempfile
 
 status = f_shum_create_file(scratch_filename, n_fields_test + 2, ff_id, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                    "Failed to create new file: "//TRIM(message))
 
 DO i = 1, f_shum_fixed_length_header_len
@@ -966,7 +966,7 @@ fixed_length_header(1) = 20_int64
 
 status = f_shum_write_fixed_length_header(ff_id, fixed_length_header, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to write fixed_length_header: "//TRIM(message))
 
 DO i = 1, int_const_dim_test
@@ -975,7 +975,7 @@ END DO
 
 status = f_shum_write_integer_constants(ff_id, integer_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to write integer_constants: "//TRIM(message))
 
 DO i = 1, real_const_dim_test
@@ -984,7 +984,7 @@ END DO
 
 status = f_shum_write_real_constants(ff_id, real_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to write real_constants: "//TRIM(message))
 
 DO i = 1, lev_const_dim1_test
@@ -996,7 +996,7 @@ END DO
 
 status = f_shum_write_level_dependent_constants(ff_id, level_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                    "Failed to write level_dependent_constants: "//TRIM(message))
 
 DO i = 1, row_const_dim1_test
@@ -1008,7 +1008,7 @@ END DO
 
 status = f_shum_write_row_dependent_constants(ff_id, row_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                      "Failed to write row_dependent_constants: "//TRIM(message))
 
 DO i = 1, col_const_dim1_test
@@ -1020,12 +1020,12 @@ END DO
 
 status = f_shum_write_column_dependent_constants(ff_id, col_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                   "Failed to write column_dependent_constants: "//TRIM(message))
 
 status = f_shum_write_additional_parameters(ff_id, addl_params, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                        "Failed to write additional_parameters: "//TRIM(message))
 
 DO i = 1, extra_const_dim_test
@@ -1034,7 +1034,7 @@ END DO
 
 status = f_shum_write_extra_constants(ff_id, extra_constants, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                              "Failed to write extra_constants: "//TRIM(message))
 
 DO i = 1, temp_hist_dim_test
@@ -1043,7 +1043,7 @@ END DO
 
 status = f_shum_write_temp_histfile(ff_id, temp_histfile, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                "Failed to write temp_histfile: "//TRIM(message))
 
 DO i = 1, comp_ind_1_dim_test
@@ -1052,7 +1052,7 @@ END DO
 
 status = f_shum_write_compressed_index(ff_id, comp_index_1, 1_int64, message)
 
-CALL assert_equals(0_int64, status,                                          & 
+CALL assert_equals(0_int64, status,                                          &
                           "Failed to write compressed_index 1: "//TRIM(message))
 
 DO i = 1, comp_ind_1_dim_test
@@ -1061,7 +1061,7 @@ END DO
 
 status = f_shum_write_compressed_index(ff_id, comp_index_2, 2_int64, message)
 
-CALL assert_equals(0_int64, status,                                          & 
+CALL assert_equals(0_int64, status,                                          &
                           "Failed to write compressed_index 2: "//TRIM(message))
 
 
@@ -1071,7 +1071,7 @@ END DO
 
 status = f_shum_write_compressed_index(ff_id, comp_index_3, 3_int64, message)
 
-CALL assert_equals(0_int64, status,                                          & 
+CALL assert_equals(0_int64, status,                                          &
                           "Failed to write compressed_index 3: "//TRIM(message))
 
 DO i = 1, f_shum_lookup_dim1_len
@@ -1152,7 +1152,7 @@ CALL assert_equals(0_int64, status, "Failed to re-open file: "//TRIM(message))
 
 status = f_shum_read_fixed_length_header(ff_id, fixed_length_header_r, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                          "Failed to read fixed_length_header: "//TRIM(message))
 
 DO i = int_const_dim, f_shum_fixed_length_header_len
@@ -1201,39 +1201,39 @@ fixed_length_header(extra_const_start) =                                       &
 
 fixed_length_header(temp_histfile_dim) = temp_hist_dim_test
 fixed_length_header(temp_histfile_start) =                                     &
-  fixed_length_header(extra_const_start) + fixed_length_header(extra_const_dim)  
+  fixed_length_header(extra_const_start) + fixed_length_header(extra_const_dim)
 
 fixed_length_header(comp_field_index1_dim) = comp_ind_1_dim_test
 fixed_length_header(comp_field_index1_start) =                                 &
   fixed_length_header(temp_histfile_start) +                                   &
-  fixed_length_header(temp_histfile_dim)  
+  fixed_length_header(temp_histfile_dim)
 
 fixed_length_header(comp_field_index2_dim) = comp_ind_2_dim_test
 fixed_length_header(comp_field_index2_start) =                                 &
   fixed_length_header(comp_field_index1_start) +                               &
-  fixed_length_header(comp_field_index1_dim)  
+  fixed_length_header(comp_field_index1_dim)
 
 fixed_length_header(comp_field_index3_dim) = comp_ind_3_dim_test
 fixed_length_header(comp_field_index3_start) =                                 &
   fixed_length_header(comp_field_index2_start) +                               &
-  fixed_length_header(comp_field_index2_dim)  
+  fixed_length_header(comp_field_index2_dim)
 
 fixed_length_header(lookup_dim1) = f_shum_lookup_dim1_len
 fixed_length_header(lookup_dim2) = n_fields_test
 fixed_length_header(lookup_start) =                                            &
   fixed_length_header(comp_field_index3_start) +                               &
-  fixed_length_header(comp_field_index3_dim)  
+  fixed_length_header(comp_field_index3_dim)
 
 fixed_length_header(data_start) = 524289_int64
 fixed_length_header(data_dim)   = 534528_int64
 
 CALL assert_equals(fixed_length_header, fixed_length_header_r,                 &
-  INT(f_shum_fixed_length_header_len, KIND=int32),                             &
+  f_shum_fixed_length_header_len,                                              &
   "Re-read fixed_length_header does not contain expected values")
 
 status = f_shum_read_integer_constants(ff_id, integer_constants_r, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                    "Failed to read integer_constants: "//TRIM(message))
 
 check = ALLOCATED(integer_constants_r)
@@ -1243,7 +1243,7 @@ CALL assert_equals(int_const_dim_test, SIZE(integer_constants_r, KIND=int64),  &
                    "Re-read integer_constants incorrect size")
 
 CALL assert_equals(integer_constants, integer_constants_r,                     &
-                   INT(int_const_dim_test, KIND=int32),                        &
+                   int_const_dim_test,                                         &
                    "Re-read integer_constants contain incorrect values")
 
 status = f_shum_read_real_constants(ff_id, real_constants_r, message)
@@ -1258,7 +1258,7 @@ CALL assert_equals(real_const_dim_test, SIZE(real_constants_r, KIND=int64),    &
                    "Re-read real_constants incorrect size")
 
 CALL assert_equals(real_constants, real_constants_r,                           &
-                   INT(real_const_dim_test, KIND=int32),                       &
+                   real_const_dim_test,                                        &
                    "Re-read real_constants contain incorrect values")
 
 status = f_shum_read_level_dependent_constants(                                &
@@ -1280,12 +1280,12 @@ CALL assert_equals(lev_const_dim2_test,                                        &
                    "Re-read level_dependent_constants incorrect 2nd dimension")
 
 CALL assert_equals(level_constants, level_constants_r,                         &
-                   INT(lev_const_dim1_test, KIND=int32),                       &
-                   INT(lev_const_dim2_test, KIND=int32),                       &
+                   lev_const_dim1_test,                                        &
+                   lev_const_dim2_test,                                        &
                    "Re-read level_dependent_constants contain incorrect values")
 
 status = f_shum_read_row_dependent_constants(ff_id, row_constants_r, message)
-                                                
+
 CALL assert_equals(0_int64, status,                                            &
                    "Failed to read row_dependent_constants: "//TRIM(message))
 
@@ -1302,8 +1302,8 @@ CALL assert_equals(row_const_dim2_test,                                        &
                    "Re-read row_dependent_constants incorrect 2nd dimension")
 
 CALL assert_equals(row_constants, row_constants_r,                             &
-                   INT(row_const_dim1_test, KIND=int32),                       &
-                   INT(row_const_dim2_test, KIND=int32),                       &
+                   row_const_dim1_test,                                        &
+                   row_const_dim2_test,                                        &
                    "Re-read row_dependent_constants contain incorrect values")
 
 status = f_shum_read_column_dependent_constants(ff_id, col_constants_r, message)
@@ -1324,8 +1324,8 @@ CALL assert_equals(col_const_dim2_test,                                        &
                    "Re-read column_dependent_constants incorrect 2nd dimension")
 
 CALL assert_equals(col_constants, col_constants_r,                             &
-                   INT(col_const_dim1_test, KIND=int32),                       &
-                   INT(col_const_dim2_test, KIND=int32),                       &
+                   col_const_dim1_test,                                        &
+                   col_const_dim2_test,                                        &
                   "Re-read column_dependent_constants contain incorrect values")
 
 status = f_shum_read_additional_parameters(ff_id, addl_params_r, message)
@@ -1346,8 +1346,8 @@ CALL assert_equals(addl_param_dim2_test,                                       &
                    "Re-read additional_parameters incorrect 2nd dimension")
 
 CALL assert_equals(addl_params, addl_params_r,                                 &
-                   INT(addl_param_dim1_test, KIND=int32),                      &
-                   INT(addl_param_dim2_test, KIND=int32),                      &
+                   addl_param_dim1_test,                                       &
+                   addl_param_dim2_test,                                       &
                   "Re-read additional_parameters contain incorrect values")
 
 status = f_shum_read_extra_constants(ff_id, extra_constants_r, message)
@@ -1362,7 +1362,7 @@ CALL assert_equals(extra_const_dim_test, SIZE(extra_constants_r, KIND=int64),  &
                    "Re-read extra_constants incorrect size")
 
 CALL assert_equals(extra_constants, extra_constants_r,                         &
-                   INT(extra_const_dim_test, KIND=int32),                      &
+                   extra_const_dim_test,                                       &
                    "Re-read extra_constants contain incorrect values")
 
 status = f_shum_read_temp_histfile(ff_id, temp_histfile_r, message)
@@ -1377,7 +1377,7 @@ CALL assert_equals(temp_hist_dim_test, SIZE(temp_histfile_r, KIND=int64),      &
                    "Re-read temp_histfile incorrect size")
 
 CALL assert_equals(temp_histfile, temp_histfile_r,                             &
-                   INT(temp_hist_dim_test, KIND=int32),                        &
+                   temp_hist_dim_test,                                         &
                    "Re-read temp_histfile contain incorrect values")
 
 status = f_shum_read_compressed_index(ff_id, comp_index_1_r, 1_int64, message)
@@ -1393,7 +1393,7 @@ CALL assert_equals(comp_ind_1_dim_test, SIZE(comp_index_1_r, KIND=int64),      &
                    "Re-read compressed_index 1 incorrect size")
 
 CALL assert_equals(comp_index_1, comp_index_1_r,                               &
-                   INT(comp_ind_1_dim_test, KIND=int32),                       &
+                   comp_ind_1_dim_test,                                        &
                    "Re-read compressed_index 1 contain incorrect values")
 
 status = f_shum_read_compressed_index(ff_id, comp_index_2_r, 2_int64, message)
@@ -1409,7 +1409,7 @@ CALL assert_equals(comp_ind_2_dim_test, SIZE(comp_index_2_r, KIND=int64),      &
                    "Re-read compressed_index 2 incorrect size")
 
 CALL assert_equals(comp_index_2, comp_index_2_r,                               &
-                   INT(comp_ind_2_dim_test, KIND=int32),                       &
+                   comp_ind_2_dim_test,                                        &
                    "Re-read compressed_index 2 contain incorrect values")
 
 status = f_shum_read_compressed_index(ff_id, comp_index_3_r, 3_int64, message)
@@ -1425,7 +1425,7 @@ CALL assert_equals(comp_ind_3_dim_test, SIZE(comp_index_3_r, KIND=int64),      &
                    "Re-read compressed_index 3 incorrect size")
 
 CALL assert_equals(comp_index_3, comp_index_3_r,                               &
-                   INT(comp_ind_3_dim_test, KIND=int32),                       &
+                   comp_ind_3_dim_test,                                        &
                    "Re-read compressed_index 3 contain incorrect values")
 
 status = f_shum_read_lookup(ff_id, lookup_r, message)
@@ -1460,8 +1460,8 @@ DO j = 2, n_fields_test
 END DO
 
 CALL assert_equals(lookup, lookup_r,                                           &
-                   INT(f_shum_lookup_dim1_len, KIND=int32),                    &
-                   INT(n_fields_test, KIND=int32),                             &
+                   f_shum_lookup_dim1_len,                                     &
+                   n_fields_test,                                              &
                   "Re-read lookup contains incorrect values")
 
 DO k = 1, n_fields_test
@@ -1479,7 +1479,7 @@ DO k = 1, n_fields_test
            SIZE(r64_field_data_r, 1, KIND=int64),                              &
            "Re-read real 64-bit data array incorrect length")
       CALL assert_equals(r64_field_data, r64_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read real 64-bit data array contains incorrect values")
     ! Integer 64-bit data fields
     CASE(2,7,9)
@@ -1494,7 +1494,7 @@ DO k = 1, n_fields_test
            SIZE(i64_field_data_r, 1, KIND=int64),                              &
            "Re-read integer 64-bit data array incorrect length")
       CALL assert_equals(i64_field_data, i64_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read integer 64-bit data array contains incorrect values")
     ! Real 32-bit data fields
     CASE(3,6,12)
@@ -1509,7 +1509,7 @@ DO k = 1, n_fields_test
            SIZE(r32_field_data, 1, KIND=int64),                                &
            "Re-read real 32-bit data array incorrect length")
       CALL assert_equals(r32_field_data, r32_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read real 32-bit data array contains incorrect values")
     ! Integer 32-bit data fields
     CASE(4,8,11)
@@ -1524,7 +1524,7 @@ DO k = 1, n_fields_test
            SIZE(i32_field_data, 1, KIND=int64),                                &
            "Re-read integer 32-bit data array incorrect length")
       CALL assert_equals(i32_field_data, i32_field_data_r,                     &
-           INT(rows*columns, KIND=int32),                                      &
+           rows*columns,                                                       &
            "Re-read integer 32-bit data array contains incorrect values")
   END SELECT
 END DO
@@ -1548,7 +1548,7 @@ SUBROUTINE test_stashmaster_read
 
 USE f_shum_stashmaster_mod, ONLY: shum_STASHmaster, f_shum_read_stashmaster
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64)    :: status
 CHARACTER(LEN=500)     :: message = ""
@@ -1569,14 +1569,14 @@ LOGICAL(KIND=bool)  :: check
 ! Get the number of failed tests prior to this test starting
 CALL get_failed_count(failures_at_entry)
 
-! Create a temporary file to use for testing 
+! Create a temporary file to use for testing
 ALLOCATE(CHARACTER(shum_tmpdir_len + LEN(tempfile)) :: scratch_filename)
 scratch_filename = shum_tmpdir // '/' // tempfile
 
 OPEN(scratch_test_unit, FILE=scratch_filename, STATUS="REPLACE",               &
   IOSTAT=status, IOMSG=message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                 "Failed to create STASHmaster: "//TRIM(message))
 
 ! Write a simple STASHmaster file
@@ -1615,17 +1615,17 @@ WRITE(scratch_test_unit, "(A)", IOSTAT=status, IOMSG=message)                  &
 "5|    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |"                //newline//&
 "#"                                                                                //newline
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                  "Failed to write STASHmaster: "//TRIM(message))
 
 CLOSE(scratch_test_unit, IOSTAT=status, IOMSG=message)
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                  "Failed to close STASHmaster: "//TRIM(message))
 
 ! Now try to read that file back in using the API
 status = f_shum_read_stashmaster(scratch_filename, STASHmaster, message)
 
-CALL assert_equals(0_int64, status,                                            & 
+CALL assert_equals(0_int64, status,                                            &
                                   "Failed to read STASHmaster: "//TRIM(message))
 ! Check that the stash codes we expect to be there are there
 check = ASSOCIATED(STASHmaster(2) % record)

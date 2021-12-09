@@ -1,31 +1,31 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 MODULE fruit_test_shum_spiral_search_mod
 
 USE fruit
-USE, INTRINSIC :: ISO_C_BINDING, ONLY: & 
+USE, INTRINSIC :: ISO_C_BINDING, ONLY: &
                   C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE, C_BOOL
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -43,7 +43,7 @@ PUBLIC :: fruit_test_shum_spiral_search
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
   INTEGER, PARAMETER :: real32 = C_FLOAT
-  INTEGER, PARAMETER :: bool   = C_BOOL                    
+  INTEGER, PARAMETER :: bool   = C_BOOL
 !------------------------------------------------------------------------------!
 
 ! The number of distinct test cases used
@@ -82,7 +82,7 @@ CALL run_test_case(                                                            &
 
 END SUBROUTINE fruit_test_shum_spiral_search
 
-! Functions used to provide sample arrays of lat/long data - the goal here 
+! Functions used to provide sample arrays of lat/long data - the goal here
 ! isn't for a numerical workout but easy to identify and work with arrays.
 !------------------------------------------------------------------------------!
 
@@ -123,11 +123,11 @@ END SUBROUTINE sample_6x6_data_64
 
 SUBROUTINE sample_6x6_data_32                                                  &
                              (latitude, longitude, lsm, unres_mask,            &
-                              index_unres, planet_radius ) 
-IMPLICIT NONE 
+                              index_unres, planet_radius )
+IMPLICIT NONE
 REAL(KIND=real32), INTENT(OUT) :: latitude(6)
 REAL(KIND=real32), INTENT(OUT) :: longitude(6)
-LOGICAL(KIND=bool), INTENT(OUT) :: lsm(36) 
+LOGICAL(KIND=bool), INTENT(OUT) :: lsm(36)
 LOGICAL(KIND=bool), INTENT(OUT) :: unres_mask(36)
 INTEGER(KIND=int32), INTENT(OUT) :: index_unres(5)
 REAL(KIND=real32)   :: planet_radius
@@ -139,7 +139,7 @@ REAL(KIND=real64)   :: planet_radius_64
 
 INTEGER(KIND=int32) :: i
 
-CALL sample_6x6_data_64(latitude_64, longitude_64, lsm, unres_mask,& 
+CALL sample_6x6_data_64(latitude_64, longitude_64, lsm, unres_mask,&
                              index_unres_64, planet_radius_64 )
 
 DO i=1,6
@@ -159,7 +159,7 @@ SUBROUTINE test_spiral6_search_arg64
 
 USE f_shum_spiral_search_mod, ONLY: f_shum_spiral_search_algorithm
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), PARAMETER :: no_point_unres = 5
 INTEGER(KIND=int64), PARAMETER :: points_phi = 6
@@ -223,7 +223,7 @@ DO i = 1,cases
     "Land Spiral search algorithm returned non-zero exit status"//case_info//  &
     " Message: "//TRIM(message))
 
-  CALL assert_equals(result_land, indices, INT(no_point_unres, KIND=int32),    &
+  CALL assert_equals(result_land, indices, no_point_unres,                     &
     "Resolved land indices do not agree with expected result"//case_info)
 
   constrained   = .TRUE.
@@ -238,7 +238,7 @@ DO i = 1,cases
     "Constrained Land Spiral search algorithm exit status.ne.-30"//case_info// &
     " Message: "//TRIM(message))
 
-  CALL assert_equals(result_land_con, indices, INT(no_point_unres, KIND=int32),&
+  CALL assert_equals(result_land_con, indices, no_point_unres,                 &
     "Resolved land indices do not agree with expected result"//case_info)
 
   is_land_field = .FALSE.
@@ -254,7 +254,7 @@ DO i = 1,cases
     "Sea Spiral search algorithm returned non-zero exit status"//case_info//   &
     " Message: "//TRIM(message))
 
-  CALL assert_equals(result_sea, indices, INT(no_point_unres, KIND=int32),    &
+  CALL assert_equals(result_sea, indices, no_point_unres,                      &
     "Resolved sea indices do not agree with expected result"//case_info)
 
 END DO
@@ -265,9 +265,9 @@ END SUBROUTINE test_spiral6_search_arg64
 
 SUBROUTINE test_spiral6_search_arg32
 
-USE f_shum_spiral_search_mod, ONLY: f_shum_spiral_search_algorithm 
+USE f_shum_spiral_search_mod, ONLY: f_shum_spiral_search_algorithm
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int32), PARAMETER :: no_point_unres = 5
 INTEGER(KIND=int32), PARAMETER :: points_phi = 6

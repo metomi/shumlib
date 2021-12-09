@@ -3,6 +3,22 @@
 ! For further details please refer to the file COPYRIGHT.txt
 ! which you should have received as part of this distribution.
 ! *****************************COPYRIGHT*******************************
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
+!*******************************************************************************
 MODULE f_shum_file_mod
 
 USE f_shum_field_mod, ONLY: shum_field_type
@@ -1312,7 +1328,7 @@ FUNCTION write_field(self, field_number) RESULT(status)
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1350,7 +1366,7 @@ FUNCTION write_field(self, field_number) RESULT(status)
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1385,14 +1401,14 @@ FUNCTION write_field(self, field_number) RESULT(status)
               DO j_value = 1, rows
                 DO i_value = 1, cols
                   IF (lsm_data(i_value, j_value) == 1_int64) THEN
-                    field_data_r32(k_count) =                                 &
-                                          tmp_field_data_r64(i_value, j_value)
+                    field_data_r32(k_count) =                                  &
+                          REAL(tmp_field_data_r64(i_value, j_value),KIND=real32)
                     k_count = k_count + 1
                   END IF
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1423,14 +1439,14 @@ FUNCTION write_field(self, field_number) RESULT(status)
               DO j_value = 1, rows
                 DO i_value = 1, cols
                   IF (lsm_data(i_value, j_value) == 1_int64) THEN
-                    field_data_i32(k_count) =                                 &
-                                          tmp_field_data_i64(i_value, j_value)
+                    field_data_i32(k_count) =                                  &
+                            INT(tmp_field_data_i64(i_value, j_value),KIND=int32)
                     k_count = k_count + 1
                   END IF
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1483,7 +1499,7 @@ FUNCTION write_field(self, field_number) RESULT(status)
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1521,7 +1537,7 @@ FUNCTION write_field(self, field_number) RESULT(status)
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1556,14 +1572,14 @@ FUNCTION write_field(self, field_number) RESULT(status)
               DO j_value = 1, rows
                 DO i_value = 1, cols
                   IF (lsm_data(i_value, j_value) == 0_int64) THEN
-                    field_data_r32(k_count) =                                 &
-                                          tmp_field_data_r64(i_value, j_value)
+                    field_data_r32(k_count) =                                  &
+                          REAL(tmp_field_data_r64(i_value, j_value),KIND=real32)
                     k_count = k_count + 1
                   END IF
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
@@ -1594,14 +1610,14 @@ FUNCTION write_field(self, field_number) RESULT(status)
               DO j_value = 1, rows
                 DO i_value = 1, cols
                   IF (lsm_data(i_value, j_value) == 0_int64) THEN
-                    field_data_i32(k_count) =                                 &
-                                          tmp_field_data_i64(i_value, j_value)
+                    field_data_i32(k_count) =                                  &
+                            INT(tmp_field_data_i64(i_value, j_value),KIND=int32)
                     k_count = k_count + 1
                   END IF
                 END DO
               END DO
 
-              ! Compressed fields have rows=cols=0 by convention, so we need 
+              ! Compressed fields have rows=cols=0 by convention, so we need
               ! to obey this
               lookup(lbrow) = 0_int64
               lookup(lbnpt) = 0_int64
