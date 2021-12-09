@@ -27,16 +27,14 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86]
 #
-# This script was used to install shumlib version 2019.10.1
+# This script was used to install shumlib version 2020.01.1
 # and was intended for use with the UM at UM 11.5
 #
-#PBS -q shared
-#PBS -S /bin/bash
-#PBS -l ncpus=4
-#PBS -l mem=2048MB
-#PBS -l walltime=00:30:00
 
 set -eu
+
+# set up no IEEE list
+NO_IEEE_LIST=${NO_IEEE_LIST:-"xc40_haswell_gnu_4.9.1 xc40_ivybridge_gnu_4.9.1"}
 
 # Ensure directory is correct
 cd $(readlink -f $(dirname $0)/..)
@@ -44,9 +42,11 @@ cd $(readlink -f $(dirname $0)/..)
 # Take the platform name as an argument
 # (purely so we can maintain one script rather than 2)
 PLATFORM=${1:-}
+
 if [ -z "${PLATFORM}" ] ; then
-    echo "Please provide platform as first (and only) argument"
-    echo "Either x86 or xc40"
+    echo "Please provide platform or specific build as argument"
+    echo "e.g. x86, xc40 or grep this file for THIS to see the "
+    echo "other options for specific builds"
     exit 1
 fi
 
@@ -65,10 +65,29 @@ LIB_DIRS=$(ls -d shum_* | xargs)
 # "build" directory in the working copy - like the Makefile would)
 BUILD_DESTINATION=${BUILD_DESTINATION:-$PWD/build}
 
+# This list dictates which threading variants of Shumlib will be installed
+# (all versions defined will always be built + tested, but only those set
+# by this list will end up in the BUILD_DESTINATION directory)
+INSTALL_LIBS=${INSTALL_LIBS:-"openmp no-openmp thread_utils serial_thread_utils"}
+
+# Function for testing membership of a list
+function contains {
+    local elt
+    for elt in $2 ; do
+        [[ "$elt" == "$1" ]] && return 0;
+    done
+    return 1
+}
+
 # Functions which build given libraries and tests for those libraries
 function build_test_clean {
     local config=$1
     shift
+    if [[ " $NO_IEEE_LIST " =~ " $THIS " ]] ; then
+      export SHUM_HAS_IEEE_ARITHMETIC="false"
+    else
+      unset SHUM_HAS_IEEE_ARITHMETIC
+    fi
     echo make -f make/$config.mk clean-temp
     make -f make/$config.mk clean-temp
     echo make -f make/$config.mk $*
@@ -79,8 +98,11 @@ function build_test_clean {
     make -f make/$config.mk clean-temp
 }
 
-# Function which executes the above function four time - once for each of the
-# possible OpenMP state and Thread_Utils state combinations
+# Function which executes the above function several times - once for each of 
+# the possible OpenMP state and Thread_Utils state combinations. Note that
+# the build will only be copied to the destination install directory if the
+# variable LIBDIR_OUT is set - this is done selectively depending on which
+# builds are required to be installed (according to the INSTALL_LIBS variable)
 function build_openmp_onoff {
     local config=$1
     local dir=$2
@@ -89,23 +111,54 @@ function build_openmp_onoff {
     TEMP_BUILD_DIR=$(mktemp -d)
     cp -r * $TEMP_BUILD_DIR
     cd $TEMP_BUILD_DIR
-    # Perform the build
-    export LIBDIR_OUT=$dir/openmp
+
+    # OpenMP
+    unset LIBDIR_OUT
+    if contains "openmp" "$INSTALL_LIBS" ; then
+        export LIBDIR_OUT=$dir/openmp
+    fi
     export SHUM_OPENMP=true
     export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=false
     build_test_clean $config $*
-    export LIBDIR_OUT=$dir/no-openmp
+
+    # No-OpenMP
+    unset LIBDIR_OUT
+    if contains "no-openmp" "$INSTALL_LIBS" ; then
+        export LIBDIR_OUT=$dir/no-openmp
+    fi
     export SHUM_OPENMP=false
     export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=false
     build_test_clean $config $*
-    export LIBDIR_OUT=$dir/thread_utils
+
+    # Thread Utils + OpenMP
+    unset LIBDIR_OUT
+    if contains "thread_utils" "$INSTALL_LIBS" ; then
+        export LIBDIR_OUT=$dir/thread_utils
+    fi
     export SHUM_OPENMP=true
     export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=true
     build_test_clean $config $*
-    export LIBDIR_OUT=$dir/serial_thread_utils
+
+    # Thread Utils, No-OpenMP
+    unset LIBDIR_OUT
+    if contains "serial_thread_utils" "$INSTALL_LIBS" ; then
+        export LIBDIR_OUT=$dir/serial_thread_utils
+    fi
     export SHUM_OPENMP=false
     export SHUM_USE_C_OPENMP_VIA_THREAD_UTILS=true
     build_test_clean $config $*
+
+    # Unset threading - not practically a useful install; more of a test
+    # of the Makefiles; this checks to see what happens if the environment
+    # variables that control the build threading are not set
+    unset LIBDIR_OUT
+    if contains "unset_threading" "$INSTALL_LIBS" ; then
+        export LIBDIR_OUT=$dir/unset_threading
+    fi
+    unset SHUM_OPENMP
+    unset SHUM_USE_C_OPENMP_VIA_THREAD_UTILS
+    build_test_clean $config $*
+
     # Tidy up the temporary directory
     rm -rf $TEMP_BUILD_DIR
 }
@@ -144,15 +197,15 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-THIS="x86_nag_6.1_gcc"
+THIS="x86_nag_6.2_gcc"
 if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
-    # NagFor/GCC (nagfor 6.1.0)
+    # NagFor/GCC (nagfor 6.2.0)
     (
     source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
-    module load nagfor/6.1.0_64
+    module load nagfor/6.2.0_64
     CONFIG=meto-x86-nagfor-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-6.1.0-gcc-4.4.7
+    LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-6.2.0-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR all_libs
     )
     if [ $? -ne 0 ] ; then
@@ -208,7 +261,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-cray/5.2.82
-    module swap cce cce/8.3.4
+    module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap cce/8.3.4
     module load craype-haswell
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -233,7 +288,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-cray/5.2.82
-    module swap cce cce/8.3.4
+    module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap cce/8.3.4
     module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -257,7 +314,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-cray/5.2.82
-    module swap cce cce/8.4.3
+    module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap cce/8.4.3
     module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -280,9 +339,10 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-cray/5.2.82
-    module swap cce cce/8.5.8
-    module load craype-haswell
     module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap cce/8.5.8
+    module load craype-haswell
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
@@ -304,9 +364,10 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-cray/5.2.82
-    module swap cce cce/8.5.8
-    module load craype-ivybridge
     module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap cce/8.5.8
+    module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
@@ -328,7 +389,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-intel/5.2.82
-    module swap intel intel/15.0.0.090
+    module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap intel/15.0.0.090
     module load craype-haswell
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -349,7 +412,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-intel/5.2.82
-    module swap intel intel/15.0.0.090
+    module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap intel/15.0.0.090
     module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -370,9 +435,10 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-intel/5.2.82
-    module swap intel intel/17.0.0.098
-    module load craype-haswell
     module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap intel/17.0.0.098
+    module load craype-haswell
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
@@ -392,9 +458,10 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-intel/5.2.82
-    module swap intel intel/17.0.0.098
-    module load craype-ivybridge
     module load cdt/17.03
+    module load cray-mpich/7.0.4
+    module swap intel/17.0.0.098
+    module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
@@ -414,7 +481,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-gnu/5.2.82
-    module swap gcc gcc/4.9.1
+    module load cdt/17.03
+    module load cray-mpich/7.5.3
+    module swap gcc/4.9.1
     module load craype-haswell
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -435,7 +504,9 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-gnu/5.2.82
-    module swap gcc gcc/4.9.1
+    module load cdt/17.03
+    module load cray-mpich/7.5.3
+    module swap gcc/4.9.1
     module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
@@ -456,9 +527,10 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-gnu/5.2.82
-    module swap gcc gcc/6.3.0
-    module load craype-haswell
     module load cdt/17.03
+    module load cray-mpich/7.5.3
+    module swap gcc/6.3.0
+    module load craype-haswell
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
@@ -478,9 +550,10 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     (
     module purge
     module load PrgEnv-gnu/5.2.82
-    module swap gcc gcc/6.3.0
-    module load craype-ivybridge
     module load cdt/17.03
+    module load cray-mpich/7.5.3
+    module swap gcc/6.3.0
+    module load craype-ivybridge
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
@@ -493,4 +566,3 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
         exit 1
     fi
 fi
-

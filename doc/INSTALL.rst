@@ -11,9 +11,15 @@ Prerequisites
 
  - Either "make" or any tool supporting standard make syntax (e.g. "gmake").
 
- - A Fortran compiler capable of (at least) the 2003 standard.
+ - A Fortran compiler capable of (at least) the 2003 standard. It should also
+   support the extensions from the ISO/IEC TS 29113:2012 standard on further
+   interoperability of Fortran with C (or Fortran 2018 or later, when these
+   extentions become part of the main standard).
 
  - A C compiler capable of (at least) the c99 standard.
+
+ - A method to pre-process fortran source files is also required for some
+   libraries.
 
 Configuration files
 *******************
@@ -198,6 +204,49 @@ multiple libraries for and wish to install to a non-default location:
 
 This would produce the libraries twice, allowing including applications to link
 to the appropriate version depending on their own OpenMP status.
+
+Preprocessed options
+%%%%%%%%%%%%%%%%%%%%
+
+Some libraries may contain pre-processed options. Shumlib should build sucessfully
+with the defaults provided by the makefile. However, ocassionally users may wish to
+select specific options from the command line for portability and/or performance 
+reasons. In these cases, the default options can be overridden with environment
+variables. These environment valiables can be set either to true or false.
+
+The currently supported options (environment variables) are:
+
+ - ``SHUM_HAS_IEEE_ARITHMETIC``: if true, allows the build to make use of 
+   functionality from the intrinsic ``IEEE_ARITHMETIC`` Fortran module.
+
+ - ``SHUM_EVAL_NAN_BY_BITS``: if true, forces the interrogation of the sepcial NaN
+   (not a number) floating-point value to be done by bit-wise inspection methods.
+   This will override other methods, such as ``IEEE_ARITHMETIC`` functionality even
+   if it would otherwise be availible.
+
+ - ``SHUM_EVAL_DENORMAL_BY_BITS``: if true, forces the interrogation of special
+   denormal floating-point values to be done by bit-wise inspection methods. This
+   will override other methods, such as ``IEEE_ARITHMETIC`` functionality even
+   if it would otherwise be availible.
+
+
+Similarly to how multiple versions of shumlib could be build with differing OpenMP 
+options above, we can select different pre-processing options for different builds
+too:
+
+.. parsed-literal:: 
+
+    export LIBDIR_OUT=/home/wilfred/shumlib/ieee_arithmetic
+    export SHUM_HAS_IEEE_ARITHMETIC=true
+    make -f <configuration>
+    make -f <configuration> clean-temp
+
+    export LIBDIR_OUT=/home/wilfred/shumlib/bitwise_eval
+    export SHUM_HAS_IEEE_ARITHMETIC=false
+    export SHUM_EVAL_NAN_BY_BITS=true
+    export SHUM_EVAL_DENORMAL_BY_BITS=true
+    make -f <configuration>
+    make -f <configuration> clean-temp
 
 Group/Site Make Scripts
 %%%%%%%%%%%%%%%%%%%%%%%

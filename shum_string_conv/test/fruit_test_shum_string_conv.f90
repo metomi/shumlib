@@ -141,7 +141,7 @@ USE f_shum_string_conv_mod, ONLY: f_shum_f2c_string, f_shum_c2f_string
 IMPLICIT NONE
 
 CHARACTER(KIND=C_CHAR, LEN=1) :: c_string(50)
-CHARACTER(LEN=14), ALLOCATABLE :: f_string
+CHARACTER(LEN=14) :: f_string
 
 CALL set_case_name("test_c2f_string_nolen")
 
@@ -237,6 +237,8 @@ USE f_shum_string_conv_mod, ONLY: f_shum_f2c_string, f_shum_c2f_string
 
 IMPLICIT NONE
 
+INTEGER :: size_tmp
+
 CHARACTER(LEN=50) :: f_string
 CHARACTER(KIND=C_CHAR, LEN=1), ALLOCATABLE :: c_string(:)
 
@@ -244,7 +246,10 @@ CALL set_case_name("test_f2c_string")
 
 f_string = ""
 f_string = "test fortran string"
-c_string = f_shum_f2c_string(f_string)
+size_tmp = SIZE(f_shum_f2c_string(f_string))
+
+ALLOCATE(c_string(size_tmp))
+c_string(1:size_tmp) = f_shum_f2c_string(f_string)
 
 CALL assert_equals(LEN(f_string) + 1, SIZE(c_string),                          &
     "Returned C string not 1 character longer than input string")
@@ -255,6 +260,8 @@ CALL assert_equals(C_NULL_CHAR, c_string(SIZE(c_string)),                      &
 CALL assert_equals(f_string // C_NULL_CHAR,                                    &
     f_shum_c2f_string(c_string, SIZE(c_string,KIND=int64)),                    &
     "Contents of string are different after conversion")
+
+DEALLOCATE(c_string)
 
 END SUBROUTINE test_f2c_string
 

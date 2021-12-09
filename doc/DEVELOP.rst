@@ -200,7 +200,7 @@ There are a few more generic targets which apply to all available libraries. The
 
 i) The ``all_libs`` target builds all the available libraries (and dependencies) as required. Note that this is the default target if none is explicitly given.
 
-ii) The ``all_tests`` target builds all the available libraries (and dependencies) as required.
+ii) The ``all_tests`` target builds all the available tests (and dependencies) as required.
 
 iii) The ``check`` target is equivalent to ``all_libs`` followed by ``all_tests`` and ``run_tests`` (ie. build all libraries, then build and run all available tests).
 
@@ -242,6 +242,10 @@ commands that compile each object should specify the output include directory
 (i.e. with ``-I${LIBDIR_OUT}/include``) so that any headers (or "mod" files)
 are picked up correctly.
 
+Some libraries may require a pre-processing step, in which case the makefile
+will generate the required ``.f90`` file by pre-processing the proveded 
+``.F90`` file.
+
 Structure of the testing makefiles
 ''''''''''''''''''''''''''''''''''
 
@@ -254,6 +258,8 @@ Note that this file doesn't build *executables*, only the object files. See the
 section on FRUIT testing for details of how these are used to produce the final
 testing code.
 
+Note that, as above, some tests may require a pre-processing step to generate
+the required ``.f90`` files.
 
 FRUIT Testing
 %%%%%%%%%%%%%

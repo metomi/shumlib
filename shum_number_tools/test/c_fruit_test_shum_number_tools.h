@@ -1,5 +1,3 @@
-#ifndef THREAD_UTILS_INC
-
 /* *********************************COPYRIGHT**********************************/
 /* (C) Crown copyright Met Office. All rights reserved.                       */
 /* For further details please refer to the file LICENCE.txt                   */
@@ -22,42 +20,19 @@
 /* If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 */
 /******************************************************************************/
 
-#define THREAD_UTILS_INC
+#if !defined(C_FRUIT_TEST_SHUM_NUMBER_TOOLS_H)
 
-#include <stdint.h>
+#define C_FRUIT_TEST_SHUM_NUMBER_TOOLS_H
 
-extern int64_t f_shum_threadFlush         (void);
+/******************************************************************************/
+/* Prototypes                                                                 */
+/******************************************************************************/
 
-extern int64_t f_shum_taskYield           (void);
-
-extern int64_t f_shum_newLock             (void);
-
-extern int64_t f_shum_releaseLock         (int64_t *);
-
-extern int64_t f_shum_Lock                (int64_t *);
-
-extern int64_t f_shum_TestLock            (int64_t *);
-
-extern int64_t f_shum_unLock              (int64_t *);
-
-extern int64_t f_shum_threadID            (void);
-
-extern int64_t f_shum_inPar               (void);
-
-extern int64_t f_shum_numThreads          (void);
-
-extern void    f_shum_startOMPparallel    (void **,
-                                           void (*)(void **const));
-
-extern void    f_shum_startOMPparallelfor (void **,
-                                           void (*)(void **const,
-                                                 const int64_t *const restrict,
-                                                 const int64_t *const restrict,
-                                                 const int64_t *const restrict),
-                                           const int64_t *,
-                                           const int64_t *,
-                                           const int64_t *);
-
-extern int64_t f_shum_LockQueue           (int64_t *);
+extern float  c_test_generate_finf       (void);
+extern double c_test_generate_dinf       (void);
+extern float  c_test_generate_fnan       (void);
+extern double c_test_generate_dnan       (void);
+extern void   c_test_generate_fdenormal  (float *);
+extern void   c_test_generate_ddenormal  (double *);
 
 #endif

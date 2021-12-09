@@ -45,6 +45,47 @@ $(error If specified in the environment SHUM_USE_C_OPENMP_VIA_THREAD_UTILS \
 environment variable must be set to either "true" or "false")
 endif
 
+# Check IEEE arithmetic has been correctly set
+SHUM_HAS_IEEE_ARITHMETIC ?= false
+ifeq (${SHUM_HAS_IEEE_ARITHMETIC}, true)
+# This is handled in the Machine specific makefile
+else ifeq (${SHUM_HAS_IEEE_ARITHMETIC}, false)
+# This is handled in the Machine specific makefile
+else
+$(error If specified in the environment SHUM_HAS_IEEE_ARITHMETIC \
+environment variable must be set to either "true" or "false")
+endif
+SHUM_EVAL_NAN_BY_BITS ?= false
+ifeq (${SHUM_EVAL_NAN_BY_BITS}, true)
+# This is handled in the Machine specific makefile
+else ifeq (${SHUM_EVAL_NAN_BY_BITS}, false)
+# This is handled in the Machine specific makefile
+else
+$(error If specified in the environment SHUM_EVAL_NAN_BY_BITS \
+environment variable must be set to either "true" or "false")
+endif
+SHUM_EVAL_DENORMAL_BY_BITS ?= false
+ifeq (${SHUM_EVAL_DENORMAL_BY_BITS}, true)
+# This is handled in the Machine specific makefile
+else ifeq (${SHUM_EVAL_DENORMAL_BY_BITS}, false)
+# This is handled in the Machine specific makefile
+else
+$(error If specified in the environment SHUM_EVAL_DENORMAL_BY_BITS \
+environment variable must be set to either "true" or "false")
+endif
+
+
+# Check compilers are defined
+ifndef FC
+$(error FC is not set)
+endif
+ifndef CC
+$(error CC is not set)
+endif
+ifndef FPP
+$(error FPP is not set)
+endif
+
 # Default target - build all available libraries
 #--------------------------------------------------------------------------------
 .PHONY: default
@@ -68,7 +109,7 @@ ${SHUM_TMPDIR}:
 
 # Setup path to directory containing common/shared components; these include
 # functions that provide Shumlib version information and the C Precision Bomb
-# (which will protect against compilation on platforms where the assumptions 
+# (which will protect against compilation on platforms where the assumptions
 # about precision made in the libraries is invalid)
 #--------------------------------------------------------------------------------
 COMMON_DIR=${DIR_ROOT}/common
@@ -143,10 +184,20 @@ FFCLASS_PREREQ=FFILE PACK
 CONSTS=shum_constants
 CONSTS_PREREQ=
 
+# Number Tools
+#---------------
+NUMTOOLS=shum_number_tools
+ifeq (${SHUM_EVAL_NAN_BY_BITS}, true)
+NUMTOOLS_PREREQ=CONSTS
+else
+NUMTOOLS_PREREQ=
+endif
+
+
 # All libs vars
 #--------------
 ALL_LIBS_VARS=CONSTS BSWAP STR_CONV DATA_CONV PACK THREAD_UTILS LLEQ \
-	      FFILE HORIZ_INTERP SPIRAL FFCLASS
+	      FFILE HORIZ_INTERP SPIRAL FFCLASS NUMTOOLS
 ALL_LIBS=$(foreach lib,${ALL_LIBS_VARS},${${lib}})
 
 # Forward targets (targets with "VAR" names)
@@ -248,4 +299,3 @@ clean-build:
 	rmdir ${LIBDIR_ROOT} || :
 
 clean: clean-temp clean-build
-

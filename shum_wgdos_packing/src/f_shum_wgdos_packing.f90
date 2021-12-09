@@ -416,7 +416,7 @@ END IF
 
 cols = stride
 rows = SIZE(field)/cols
-field2d(1:cols, 1:rows) => field(:)
+field2d(1:cols, 1:rows) => field(1:(rows*cols))
 len_packed_field = SIZE(packed_field, 1, KIND=int64)
 
 status = f_shum_wgdos_pack_expl_arg64(                                         &
@@ -515,6 +515,8 @@ FUNCTION f_shum_wgdos_pack_expl_arg64(                                         &
     field, cols, rows, accuracy, rmdi, packed_field, len_packed_field,         &
     n_packed_words, message) RESULT(status)
 
+!$ USE omp_lib
+
 IMPLICIT NONE
 
 INTEGER(KIND=int64) :: status
@@ -529,35 +531,21 @@ INTEGER(KIND=int32), INTENT(OUT) :: packed_field(len_packed_field)
 INTEGER(KIND=int64), INTENT(OUT) :: n_packed_words
 CHARACTER(LEN=*),    INTENT(OUT) :: message
 
-INTEGER(KIND=int64) :: i, j, npoint, nshft, ival
-INTEGER(KIND=int64) :: iexp, iman
-INTEGER(KIND=int64) :: is1, is2, is3
-INTEGER(KIND=int64) :: nbits_bmap, nwords_bmap, nwords_data
-INTEGER(KIND=int64) :: nbits_pack, nvals_pack
-INTEGER(KIND=int64) :: i1, i2
+INTEGER(KIND=int64) :: i, j
+INTEGER(KIND=int64) :: i1
 
-REAL(KIND=real64)       :: aprec, bprec
+REAL(KIND=real64)   :: aprec, bprec
 
-LOGICAL :: obtmis, obtzer
 LOGICAL :: l_thread_error     ! Error flag for each OMP thread
+LOGICAL :: l_in_parallel      ! If .TRUE. the routine was called 
+                              ! inside a parallel region
 
-INTEGER(KIND=int64) :: ibase       ! Base values
-INTEGER(KIND=int64) :: ibit
-INTEGER(KIND=int64) :: nmiss       ! missing-data bitmaps
-INTEGER(KIND=int64) :: nzero       ! zero bitmaps
-INTEGER(KIND=int64) :: ibm         ! IBM repr of base
 INTEGER(KIND=int64) :: iword(rows) ! per row sizes
 
-INTEGER(KIND=int64) :: itmp(2*cols+32)             ! temporary storage
+INTEGER(KIND=int64) :: itmp(3)     ! temporary storage
 ! compression storage
 INTEGER(KIND=int64) :: icomp(2*cols+8,MAX(rows, INT(1,KIND=int64)))
 
-! start position in a row for data
-INTEGER(KIND=int64), PARAMETER :: istart = 1
-
-REAL(KIND=real64)    :: atmp(cols)
-REAL(KIND=real64)    :: base
-REAL(KIND=real64)    :: fmax
 
 ! GENERAL REMARK:
 ! All lengths and alignments in WGDOS packing are for 32-bit words,
@@ -571,290 +559,64 @@ aprec = 2.0_real64**accuracy
 bprec = 1.0_real64/aprec
 
 l_thread_error = .FALSE.
+
+! Check if we are already in a parallel region. If no, then use
+! PARALLEL DO. If yes, then use TASKS.
+l_in_parallel = .FALSE.
+!$ l_in_parallel = omp_in_parallel()
+
 ! Parallelisation is over rows - these can be be compressed
 ! independently of each other and combined into a single buffer
 ! at the end
+
+IF(l_in_parallel) THEN
+
+  DO j=1,rows
+
+!$OMP  TASK DEFAULT(NONE) FIRSTPRIVATE(j)                                      &
+!$OMP& PRIVATE(status)                                                         &
+!$OMP& SHARED(rows, field, cols, rmdi, aprec, bprec, iword, icomp,             &
+!$OMP&        l_thread_error )
+
+    status = f_shum_wgdos_pack_expl_arg64_row(                                 &
+      field, cols, rows, j, aprec, bprec, rmdi, icomp, iword)
+
+    IF(status /= 0) THEN
+      ! The following variable is shared between tasks. The value
+      ! changed here should be visible to all the threads after the
+      ! OMP FLUSH.
+      l_thread_error = .TRUE.
+    END IF
+!$OMP END TASK
+  END DO ! j
+
+!$OMP TASKWAIT
+!$OMP FLUSH
+
+ELSE
+
 !$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                              &
-!$OMP& PRIVATE(j, i, i2, iexp, iman, itmp, obtmis, obtzer, nbits_bmap, npoint, &
-!$OMP&         is1, is2, is3, nshft, nvals_pack, ibm, nbits_pack, nwords_data, &
-!$OMP&         ival, atmp, nwords_bmap, nzero, status, message, fmax, base,    &
-!$OMP&         ibase, ibit, nmiss)                                             &
+!$OMP& PRIVATE(j, status)                                                      &
 !$OMP& SHARED(rows, field, cols, rmdi, aprec, bprec, iword, icomp)             &
 !$OMP& REDUCTION(.OR.: l_thread_error)
-DO j=1,rows
+  DO j=1,rows
 
-  ! If this thread's error flag has been triggered we should not continue
-  ! (it is set below if any overflowing values are encountered)
-  IF (l_thread_error) CYCLE
+    ! If this thread's error flag has been triggered we should not continue
+    ! (it is set below if any overflowing values are encountered)
+    IF (l_thread_error) CYCLE
 
-  !     Find minimum and maximum value for every row,
-  !     count number of missing and zero numbers
-  !     + pack the non-MDI data.
-  base = HUGE(0.0_real64)
-  fmax = -HUGE(0.0_real64)
-  nmiss = 0
-  nzero = 0
+    status = f_shum_wgdos_pack_expl_arg64_row(                                 &
+      field, cols, rows, j, aprec, bprec, rmdi, icomp, iword)
 
-  DO i=1,cols
-    ! filter denormal numbers
-    IF (IBITS(TRANSFER(field(i,j),INT(0,KIND=int64)), 52, 11)==0) THEN
-      ! exponent bits = 0; => field(i,j) is denormal
-      atmp(i) = 0.0
-      base = MIN(base, REAL(0.0, KIND=real64))
-      fmax = MAX(fmax, REAL(0.0, KIND=real64))
-      nzero = nzero + 1
-
-    ELSE
-      ! exponent bits /= 0; => field(i,j) is normal
-      ! (or technically may be NaN, inf as well)
-      IF (field(i,j)/=rmdi) THEN
-
-        base = MIN(REAL(base,KIND=real64),field(i,j))
-        fmax = MAX(REAL(fmax,KIND=real64),field(i,j))
-
-        atmp(i) = NINT(field(i,j)*bprec, KIND=int64)
-        IF (atmp(i) == 0.0) nzero = nzero + 1
-
-      ELSE
-        nmiss = nmiss+1
-        atmp(i) = rmdi
-      END IF
-
-    END IF
-  END DO
-
-  IF (nmiss == cols) THEN
-  ! If we have a row of rmdi then lets set fmax and base to -1.0.  This is not
-  ! really defined anywhere - we want something sensible though but not rmdi or
-  ! 0.0 since they are special already.
-    fmax = -1.0
-    base = -1.0
-    ibase = -1
-    ! as a consequence of setting fmax to -1.0, ibit must be 0
-    ibit = 0
-  ELSE
-    ! nmiss must be in the range 0 <= nmiss < cols
-
-  !     ROUND BASE TO PRECISION REQUIRED
-  ibase = NINT(base*bprec, KIND=int64)
-  base  = ibase*aprec
-
- !     Find maximum scaled value
-   i = MAX(NINT(fmax*bprec, KIND=int64)-ibase, INT(0, KIND=int64))
-
-    IF (i > 2147483647) THEN
-      ! If the scaled value cannot be stored in a 32-bit integer
-      ! we cannot continue with the packing.  Set this thread's
-      ! error flag and skip the rest of this row (the flag will also
-      ! cause this thread to skip any remaining rows - see above)
+    IF(status /= 0) THEN
       l_thread_error = .TRUE.
-      CYCLE
     END IF
 
-  !     FIND NUMBER OF BITS REQUIRED TO STORE MAX DIFFERENCE
-  ibit = 0
-  i2 = 1
-  DO WHILE (i >= i2)
-    ibit = ibit + 1
-    i2 = i2*2
-  END DO
-
-  END IF
-
-  !     IBM floating point representation of base:
-  IF (base==0.0) THEN
-    ibm = 0
-  ELSE
-    base = ABS(base)
-    iexp = EXPONENT(base) + 256
-    iman = INT(FRACTION(base) * 16777216.0,KIND=int64)
-    ! IAND(iexp,3) is equivalent to MOD(iexp,4)
-    SELECT CASE (IAND(iexp, INT(3, KIND=int64)))
-      CASE (1_int64)
-        iman = ISHFT(iman, INT(-3, KIND=int64))
-      CASE (2_int64)
-        iman = ISHFT(iman, INT(-2, KIND=int64))
-      CASE (3_int64)
-        iman = ISHFT(iman, INT(-1, KIND=int64))
-    END SELECT
-    iexp = (iexp+3)/4
-    ibm = IOR(IAND(ISHFT(iexp,24),mask_expt_ibm),iman)
-    IF (ibase<0) ibm=IOR(ibm,mask_sign_ibm)
-  END IF
-
-  !     Fill data into output array
-
-  ! iword is the addressing (number of words) for this row
-  iword(j) = istart+2 ! the two header words are inserted at end
-
-  ! Check which bitmaps we need
-  obtmis = (nmiss>0)
-
-  ! Check if it is worthwile to use zero-bitmap:
-  obtzer = (ibit*nzero > cols)
-
-  ! Set itmp with the bitmap pattern
-  IF (obtmis) THEN
-    itmp(1:cols) = MERGE(1,0,atmp(:)==rmdi)
-    nbits_bmap = cols
-  ELSE
-    nbits_bmap = 0
-  END IF
-
-  ! The bitmap is actually non-zero rather than zeroes.
-  IF (obtzer) THEN
-    itmp(nbits_bmap+1:nbits_bmap+cols) = MERGE(1,0,atmp(:)/=0.0)
-    nbits_bmap = nbits_bmap+cols
-  END IF
-
-  ! Insert bitmap - this is done row-by-row into icomp.
-  IF (nbits_bmap>0) THEN
-
-    ! add 1's to the end since bitmaps should be padded with 1's
-    itmp(nbits_bmap+1:nbits_bmap+31) = 1
-
-    ! The number of words to be used for bitmap
-    nwords_bmap = (nbits_bmap+31)/32
-
-    ! Compress itmp
-
-    ! Combine 4 contiguous 1-bit-items to one 4-bit-item
-    DO i=1,nwords_bmap*8
-      itmp(i) = IOR(ior(ISHFT(itmp(4*i-3),3),                     &
-                        ISHFT(itmp(4*i-2),2)),                    &
-                    IOR(ISHFT(itmp(4*i-1),1),itmp(4*i)))
-    END DO
-
-    ! Combine 4 contiguous 4-bit-items to one 16-bit-item
-    DO i=1,nwords_bmap*2
-      itmp(i) = IOR(ior(ISHFT(itmp(4*i-3),12),                    &
-                        ISHFT(itmp(4*i-2), 8)),                   &
-                    IOR(ISHFT(itmp(4*i-1), 4),itmp(4*i)))
-    END DO
-
-    ! Combine 2 contiguous 16-bit-items to the final destination
-    DO i=1,nwords_bmap
-      icomp(iword(j)+i-1,j) = IOR(ISHFT(itmp(2*i-1),16),itmp(2*i))
-    END DO
-
-    iword(j) = iword(j) + nwords_bmap
-
-  END IF
-
-  ! Insert data
-
-  IF (ibit>0) THEN
-
-    ! Get rid of missing values
-    IF (obtmis) THEN
-      npoint = 0
-      DO i=1,cols
-        IF (atmp(i)/=rmdi) THEN
-          npoint = npoint+1
-          atmp(npoint) = atmp(i)
-        END IF
-      END DO
-    ELSE
-      npoint = cols
-    END IF
-
-    ! Now get rid of zero values
-    IF (obtzer) THEN
-      ival = npoint
-      npoint = 0
-      !CDIR NODEP
-      DO i=1,ival
-        IF (atmp(i)/=0.0) THEN
-          npoint = npoint+1
-          atmp(npoint) = atmp(i)
-        END IF
-      END DO
-    END IF
-
-    ! Number of words used for the compressed data
-    nwords_data = (npoint*ibit+31)/32
-
-    ! Use scaled value and find difference from base
-    DO i=1,npoint
-      itmp(i) =                                                                &
-               MAX(NINT(atmp(i), KIND=int64)-ibase, INT(0, KIND=int64))
-    END DO
-
-    ! As long as ibit is <=16 we can combine two contiguous
-    ! items to one with the double number of bits, halving the
-    ! number of words to be compressed
-    nbits_pack = ibit
-    nvals_pack = npoint
-
-    DO WHILE (nbits_pack <= 16)
-      itmp(nvals_pack+1) = 0 ! for odd numbers
-      DO i=1,(nvals_pack+1)/2
-        itmp(i) = IOR(ISHFT(itmp(2*i-1),nbits_pack),itmp(2*i))
-      END DO
-      nbits_pack = 2*nbits_pack
-      nvals_pack = (nvals_pack+1)/2
-    END DO
-
-    IF (nbits_pack == 32) THEN
-      ! This is the case if ibit is 1, 2, 4, 8 or 16
-      ! We have not much to do, just copy itmp
-      DO i=1,nwords_data
-        icomp(iword(j)+i-1,j) = itmp(i)
-      END DO
-
-    ELSE
-
-      ! Shift every value in itmp to the left and append
-      ! the bits of the following 2 words
-      is1 = 64-nbits_pack   ! amount to shift itmp(i)
-      is2 = 64-2*nbits_pack ! amount to shift itmp(i+1)
-      is3 = 64-3*nbits_pack ! amount to shift itmp(i+2)
-
-      itmp(nvals_pack+1) = 0
-      itmp(nvals_pack+2) = 0
-
-      DO i=1,nvals_pack
-        itmp(i) = IOR(ior(ISHFT(itmp(i  ),is1),                   &
-                          ISHFT(itmp(i+1),is2)),                  &
-                          ISHFT(itmp(i+2),is3))
-      END DO
-
-      ! Now itmp contains enough data so that we can cut out
-      ! the compressed data words
-      DO i=1,nwords_data
-
-        ! Word which contains compressed data word:
-        ival = itmp(((i-1)*32)/nbits_pack + 1)
-
-        ! Number of bits we have to shift to the left
-        ! so that we have the compressed data word left packed:
-        nshft = MOD((i-1)*32,nbits_pack)
-
-        ival = ISHFT(ival,nshft)
-
-        ! Shift to the right half and mask out upper bits
-        ! (for the case that ISHFT does an arithmetic shift)
-        icomp(iword(j)+i-1,j) = IAND(ISHFT(ival,-32),mask32)
-
-      END DO
-    END IF
-
-    iword(j) = iword(j) + nwords_data
-
-  END IF
-
-  ! Now insert the header for this row:
-  ! First word of compressed data: IBM representation of base
-  ! Second word of compressed data:
-  ! 16 bits: ibit + flags
-  ! 16 bits: number of words of data following
-  icomp(istart,j) = ibm
-  IF (obtzer) ibit = ibit + 128
-  IF (obtmis) ibit = ibit + 32
-  icomp(istart+1,j) = IOR(ISHFT(ibit,16),iword(j)-istart-2)
-
-END DO ! j
+  END DO ! j
 !$OMP END PARALLEL DO
+
+END IF
+
 IF (l_thread_error) THEN
   status = 2
   message = "Unable to WGDOS pack to this accuracy"
@@ -904,6 +666,321 @@ END IF
 status = 0
 
 END FUNCTION f_shum_wgdos_pack_expl_arg64
+
+!------------------------------------------------------------------------------!
+
+FUNCTION f_shum_wgdos_pack_expl_arg64_row(                                     &
+    field, cols, rows, j, aprec, bprec, rmdi, icomp, iword) RESULT(status)
+
+IMPLICIT NONE
+
+INTEGER(KIND=int64) :: status
+
+INTEGER(KIND=int64), INTENT(IN)  :: cols
+INTEGER(KIND=int64), INTENT(IN)  :: rows
+REAL(KIND=real64),   INTENT(IN)  :: field(cols, rows)
+REAL(KIND=real64),   INTENT(IN)  :: rmdi
+INTEGER(KIND=int64), INTENT(IN)  :: j
+REAL(KIND=real64),   INTENT(IN)  :: aprec, bprec
+
+INTEGER(KIND=int64), INTENT(INOUT) ::                                          &
+  icomp(2*cols+8,MAX(rows, INT(1,KIND=int64)))
+INTEGER(KIND=int64), INTENT(INOUT) :: iword(rows) ! per row sizes
+
+INTEGER(KIND=int64) :: i, npoint, nshft, ival
+INTEGER(KIND=int64) :: iexp, iman
+INTEGER(KIND=int64) :: is1, is2, is3
+INTEGER(KIND=int64) :: nbits_bmap, nwords_bmap, nwords_data
+INTEGER(KIND=int64) :: nbits_pack, nvals_pack
+INTEGER(KIND=int64) :: i2
+
+LOGICAL :: obtmis, obtzer
+
+
+INTEGER(KIND=int64) :: ibase       ! Base values
+INTEGER(KIND=int64) :: ibit
+INTEGER(KIND=int64) :: nmiss       ! missing-data bitmaps
+INTEGER(KIND=int64) :: nzero       ! zero bitmaps
+INTEGER(KIND=int64) :: ibm         ! IBM repr of base
+
+INTEGER(KIND=int64) :: itmp(2*cols+32)             ! temporary storage
+
+! start position in a row for data
+INTEGER(KIND=int64), PARAMETER :: istart = 1
+
+REAL(KIND=real64)    :: atmp(cols)
+REAL(KIND=real64)    :: base
+REAL(KIND=real64)    :: fmax
+
+
+status = 0
+
+!     Find minimum and maximum value for every row,
+!     count number of missing and zero numbers
+!     + pack the non-MDI data.
+base = HUGE(0.0_real64)
+fmax = -HUGE(0.0_real64)
+nmiss = 0
+nzero = 0
+
+DO i=1,cols
+  ! filter denormal numbers
+  IF (IBITS(TRANSFER(field(i,j),INT(0,KIND=int64)), 52, 11)==0) THEN
+    ! exponent bits = 0; => field(i,j) is denormal
+    atmp(i) = 0.0
+    base = MIN(base, REAL(0.0, KIND=real64))
+    fmax = MAX(fmax, REAL(0.0, KIND=real64))
+    nzero = nzero + 1
+
+  ELSE
+    ! exponent bits /= 0; => field(i,j) is normal
+    ! (or technically may be NaN, inf as well)
+    IF (field(i,j)/=rmdi) THEN
+
+      base = MIN(REAL(base,KIND=real64),field(i,j))
+      fmax = MAX(REAL(fmax,KIND=real64),field(i,j))
+
+      atmp(i) = NINT(field(i,j)*bprec, KIND=int64)
+      IF (atmp(i) == 0.0) nzero = nzero + 1
+
+    ELSE
+      nmiss = nmiss+1
+      atmp(i) = rmdi
+    END IF
+
+  END IF
+END DO
+
+IF (nmiss == cols) THEN
+  ! If we have a row of rmdi then lets set fmax and base to -1.0.  This is not
+  ! really defined anywhere - we want something sensible though but not rmdi or
+  ! 0.0 since they are special already.
+  fmax = -1.0
+  base = -1.0
+  ibase = -1
+  ! as a consequence of setting fmax to -1.0, ibit must be 0
+  ibit = 0
+ELSE
+  ! nmiss must be in the range 0 <= nmiss < cols
+
+  !     ROUND BASE TO PRECISION REQUIRED
+  ibase = NINT(base*bprec, KIND=int64)
+  base  = ibase*aprec
+
+  !     Find maximum scaled value
+  i = MAX(NINT(fmax*bprec, KIND=int64)-ibase, INT(0, KIND=int64))
+
+  IF (i > 2147483647) THEN
+    ! If the scaled value cannot be stored in a 32-bit integer
+    ! we cannot continue with the packing.
+    status = 2
+    RETURN
+  END IF
+
+  !     FIND NUMBER OF BITS REQUIRED TO STORE MAX DIFFERENCE
+  ibit = 0
+  i2 = 1
+  DO WHILE (i >= i2)
+    ibit = ibit + 1
+    i2 = i2*2
+  END DO
+
+END IF
+
+!     IBM floating point representation of base:
+IF (base==0.0) THEN
+  ibm = 0
+ELSE
+  base = ABS(base)
+  iexp = EXPONENT(base) + 256
+  iman = INT(FRACTION(base) * 16777216.0,KIND=int64)
+  ! IAND(iexp,3) is equivalent to MOD(iexp,4)
+  SELECT CASE (IAND(iexp, INT(3, KIND=int64)))
+  CASE (1_int64)
+    iman = ISHFT(iman, INT(-3, KIND=int64))
+  CASE (2_int64)
+    iman = ISHFT(iman, INT(-2, KIND=int64))
+  CASE (3_int64)
+    iman = ISHFT(iman, INT(-1, KIND=int64))
+  END SELECT
+  iexp = (iexp+3)/4
+  ibm = IOR(IAND(ISHFT(iexp,24),mask_expt_ibm),iman)
+  IF (ibase<0) ibm=IOR(ibm,mask_sign_ibm)
+END IF
+
+!     Fill data into output array
+
+! iword is the addressing (number of words) for this row
+iword(j) = istart+2 ! the two header words are inserted at end
+
+! Check which bitmaps we need
+obtmis = (nmiss>0)
+
+! Check if it is worthwile to use zero-bitmap:
+obtzer = (ibit*nzero > cols)
+
+! Set itmp with the bitmap pattern
+IF (obtmis) THEN
+  itmp(1:cols) = MERGE(1,0,atmp(:)==rmdi)
+  nbits_bmap = cols
+ELSE
+  nbits_bmap = 0
+END IF
+
+! The bitmap is actually non-zero rather than zeroes.
+IF (obtzer) THEN
+  itmp(nbits_bmap+1:nbits_bmap+cols) = MERGE(1,0,atmp(:)/=0.0)
+  nbits_bmap = nbits_bmap+cols
+END IF
+
+! Insert bitmap - this is done row-by-row into icomp.
+IF (nbits_bmap>0) THEN
+
+  ! add 1's to the end since bitmaps should be padded with 1's
+  itmp(nbits_bmap+1:nbits_bmap+31) = 1
+
+  ! The number of words to be used for bitmap
+  nwords_bmap = (nbits_bmap+31)/32
+
+  ! Compress itmp
+
+  ! Combine 4 contiguous 1-bit-items to one 4-bit-item
+  DO i=1,nwords_bmap*8
+    itmp(i) = IOR(ior(ISHFT(itmp(4*i-3),3),                     &
+      ISHFT(itmp(4*i-2),2)),                    &
+      IOR(ISHFT(itmp(4*i-1),1),itmp(4*i)))
+  END DO
+
+  ! Combine 4 contiguous 4-bit-items to one 16-bit-item
+  DO i=1,nwords_bmap*2
+    itmp(i) = IOR(ior(ISHFT(itmp(4*i-3),12),                    &
+      ISHFT(itmp(4*i-2), 8)),                   &
+      IOR(ISHFT(itmp(4*i-1), 4),itmp(4*i)))
+  END DO
+
+  ! Combine 2 contiguous 16-bit-items to the final destination
+  DO i=1,nwords_bmap
+    icomp(iword(j)+i-1,j) = IOR(ISHFT(itmp(2*i-1),16),itmp(2*i))
+  END DO
+
+  iword(j) = iword(j) + nwords_bmap
+
+END IF
+
+! Insert data
+
+IF (ibit>0) THEN
+
+  ! Get rid of missing values
+  IF (obtmis) THEN
+    npoint = 0
+    DO i=1,cols
+      IF (atmp(i)/=rmdi) THEN
+        npoint = npoint+1
+        atmp(npoint) = atmp(i)
+      END IF
+    END DO
+  ELSE
+    npoint = cols
+  END IF
+
+  ! Now get rid of zero values
+  IF (obtzer) THEN
+    ival = npoint
+    npoint = 0
+    !CDIR NODEP
+    DO i=1,ival
+      IF (atmp(i)/=0.0) THEN
+        npoint = npoint+1
+        atmp(npoint) = atmp(i)
+      END IF
+    END DO
+  END IF
+
+  ! Number of words used for the compressed data
+  nwords_data = (npoint*ibit+31)/32
+
+  ! Use scaled value and find difference from base
+  DO i=1,npoint
+    itmp(i) =                                                                &
+      MAX(NINT(atmp(i), KIND=int64)-ibase, INT(0, KIND=int64))
+  END DO
+
+  ! As long as ibit is <=16 we can combine two contiguous
+  ! items to one with the double number of bits, halving the
+  ! number of words to be compressed
+  nbits_pack = ibit
+  nvals_pack = npoint
+
+  DO WHILE (nbits_pack <= 16)
+    itmp(nvals_pack+1) = 0 ! for odd numbers
+    DO i=1,(nvals_pack+1)/2
+      itmp(i) = IOR(ISHFT(itmp(2*i-1),nbits_pack),itmp(2*i))
+    END DO
+    nbits_pack = 2*nbits_pack
+    nvals_pack = (nvals_pack+1)/2
+  END DO
+
+  IF (nbits_pack == 32) THEN
+    ! This is the case if ibit is 1, 2, 4, 8 or 16
+    ! We have not much to do, just copy itmp
+    DO i=1,nwords_data
+      icomp(iword(j)+i-1,j) = itmp(i)
+    END DO
+
+  ELSE
+
+    ! Shift every value in itmp to the left and append
+    ! the bits of the following 2 words
+    is1 = 64-nbits_pack   ! amount to shift itmp(i)
+    is2 = 64-2*nbits_pack ! amount to shift itmp(i+1)
+    is3 = 64-3*nbits_pack ! amount to shift itmp(i+2)
+
+    itmp(nvals_pack+1) = 0
+    itmp(nvals_pack+2) = 0
+
+    DO i=1,nvals_pack
+      itmp(i) = IOR(ior(ISHFT(itmp(i  ),is1),                   &
+        ISHFT(itmp(i+1),is2)),                  &
+        ISHFT(itmp(i+2),is3))
+    END DO
+
+    ! Now itmp contains enough data so that we can cut out
+    ! the compressed data words
+    DO i=1,nwords_data
+
+      ! Word which contains compressed data word:
+      ival = itmp(((i-1)*32)/nbits_pack + 1)
+
+      ! Number of bits we have to shift to the left
+      ! so that we have the compressed data word left packed:
+      nshft = MOD((i-1)*32,nbits_pack)
+
+      ival = ISHFT(ival,nshft)
+
+      ! Shift to the right half and mask out upper bits
+      ! (for the case that ISHFT does an arithmetic shift)
+      icomp(iword(j)+i-1,j) = IAND(ISHFT(ival,-32),mask32)
+
+    END DO
+  END IF
+
+  iword(j) = iword(j) + nwords_data
+
+END IF
+
+! Now insert the header for this row:
+! First word of compressed data: IBM representation of base
+! Second word of compressed data:
+! 16 bits: ibit + flags
+! 16 bits: number of words of data following
+icomp(istart,j) = ibm
+IF (obtzer) ibit = ibit + 128
+IF (obtmis) ibit = ibit + 32
+icomp(istart+1,j) = IOR(ISHFT(ibit,16),iword(j)-istart-2)
+
+
+END FUNCTION f_shum_wgdos_pack_expl_arg64_row
 
 !------------------------------------------------------------------------------!
 
@@ -1138,6 +1215,11 @@ nop(1) = IAND(packed_field(5),mask16)
 
 DO j=2,rows
   istart(j) = istart(j-1) + nop(j-1) + 2
+  IF (istart(j)-1 > size(packed_field)) THEN
+    status = 2
+    message='Compressed data inconsistent'
+    RETURN
+  END IF
   nop(j) = IAND(packed_field(istart(j)-1),mask16)
   IF (istart(j)+nop(j)-1 > num) THEN
     status = 2

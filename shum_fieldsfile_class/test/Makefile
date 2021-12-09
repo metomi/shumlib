@@ -13,7 +13,7 @@ fruit_test_shum_fieldsfile_class.o: fruit_test_shum_fieldsfile_class.f90 ${LIBDI
 
 # Dynamic version
 #-------------------------------------------------------------------------------
-fruit_test_shum_fieldsfile_class_PIC.o: fruit_test_shum_fieldsfile_class.f90 ${LIBDIR_OUT}/lib/libshum_fieldsfile_class.a
+fruit_test_shum_fieldsfile_class_PIC.o: fruit_test_shum_fieldsfile_class.f90 ${LIBDIR_OUT}/lib/libshum_fieldsfile_class.so
 	${FC} -c ${FCFLAGS_DYNAMIC} ${FCFLAGS} ${FCFLAGS_PIC} $< \
 	-I${LIBDIR_OUT}/include -o $@ ${FCFLAGS_DYNAMIC_TRAIL}
 

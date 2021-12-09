@@ -14,7 +14,7 @@ fruit_test_shum_latlon_eq_grids.o: fruit_test_shum_latlon_eq_grids.f90 ${LIBDIR_
 
 # Dynamic version
 #-------------------------------------------------------------------------------
-fruit_test_shum_latlon_eq_grids_PIC.o: fruit_test_shum_latlon_eq_grids.f90 ${LIBDIR_OUT}/lib/libshum_latlon_eq_grids.a
+fruit_test_shum_latlon_eq_grids_PIC.o: fruit_test_shum_latlon_eq_grids.f90 ${LIBDIR_OUT}/lib/libshum_latlon_eq_grids.so
 	${FC} -c ${FCFLAGS_DYNAMIC} ${FCFLAGS} ${FCFLAGS_PIC} $< \
 	-I${LIBDIR_OUT}/include -o $@ ${FCFLAGS_DYNAMIC_TRAIL}
 

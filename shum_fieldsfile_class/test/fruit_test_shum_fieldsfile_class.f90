@@ -646,7 +646,8 @@ CALL assert_equals(0_int64, status%icode,                                      &
 CALL assert_equals(comp_ind_2_dim_test, SIZE(comp_index_2_r, KIND=int64),      &
                    "Re-read compressed_index 2 incorrect size")
 
-CALL assert_equals(comp_index_2, comp_index_2_r,                               &
+CALL assert_equals(TRANSFER(comp_index_2,[0_int64]),                           &
+                   TRANSFER(comp_index_2_r,[0_int64]),                         &
                    comp_ind_2_dim_test,                                        &
                    "Re-read compressed_index 2 contain incorrect values")
 
@@ -658,7 +659,8 @@ CALL assert_equals(0_int64, status%icode,                                      &
 CALL assert_equals(comp_ind_3_dim_test, SIZE(comp_index_3_r, KIND=int64),      &
                    "Re-read compressed_index 3 incorrect size")
 
-CALL assert_equals(comp_index_3, comp_index_3_r,                               &
+CALL assert_equals(TRANSFER(comp_index_3,[0_int64]),                           &
+                   TRANSFER(comp_index_3_r,[0_int64]),                         &
                    comp_ind_3_dim_test,                                        &
                    "Re-read compressed_index 3 contain incorrect values")
 

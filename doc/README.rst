@@ -29,5 +29,8 @@ installation/build guide which details how to configure and build Shumlib
 (``INSTALL.rst``), a series of API Reference guides which describe the exposed
 interfaces for each library (``API-SHUM-\*.rst``), and a Developer's Guide which
 contains more in-depth information for developers of Shumlib itself
-(``DEVELOP.rst``).
+(``DEVELOP.rst``). Additionally, there are some technical papers 
+(``TECHNICAL-\*.rst``) which go into more in-depth technical detail about
+some aspects of Shumlib, which are not necessarily required knowledge for all
+developers or users.
 
