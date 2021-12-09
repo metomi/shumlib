@@ -61,16 +61,17 @@
 
 /* Include file for Portable data conversion constants                */
 #include "c_shum_data_conv.h"
+#include "c_shum_word_bytes.h"
 
 /* Prototype functions */
 static void read_number (c_shum_dataformat format, size_t size, size_t offset,
-                         uint64_t in_number, uint64_t *out_sign, 
-                         int64_t *out_expo,  uint64_t *out_mant, 
+                         uint64_t in_number, uint64_t *out_sign,
+                         int64_t *out_expo,  uint64_t *out_mant,
                          size_t *mant_bits_read);
 
 static void write_number (c_shum_dataformat format, size_t size, size_t offset,
-                          uint64_t *out_number, uint64_t in_sign, 
-                          int64_t in_expo, uint64_t in_mant, 
+                          uint64_t *out_number, uint64_t in_sign,
+                          int64_t in_expo, uint64_t in_mant,
                           size_t mant_bits_read);
 
 /**********************************************************************/
@@ -79,10 +80,10 @@ static void write_number (c_shum_dataformat format, size_t size, size_t offset,
 /* interface to read_number/write_number                              */
 /**********************************************************************/
 
-int64_t c_shum_ieee2ieg (c_shum_datatypes *data_type, int64_t *num, 
-                         void *ieg_num_out, int64_t *offset_out, 
-                         void *cri_num_in,  int64_t *stride, 
-                         int64_t *size_num_in, int64_t *size_num_out, 
+int64_t c_shum_ieee2ieg (c_shum_datatypes *data_type, int64_t *num,
+                         void *ieg_num_out, int64_t *offset_out,
+                         void *cri_num_in,  int64_t *stride,
+                         int64_t *size_num_in, int64_t *size_num_out,
                          char *message, int64_t message_len)
 {
 /* Local variables */
@@ -273,10 +274,10 @@ for (i=0; i < *num; i++){
 /* interface to read_number/write_number                             */
 /*********************************************************************/
 
-int64_t c_shum_ieg2ieee (c_shum_datatypes *data_type, int64_t *num, 
-                         void *ieg_num_in, int64_t *offset_in, 
-                         void *cri_num_out, int64_t *stride, 
-                         int64_t *size_num_out, int64_t *size_num_in, 
+int64_t c_shum_ieg2ieee (c_shum_datatypes *data_type, int64_t *num,
+                         void *ieg_num_in, int64_t *offset_in,
+                         void *cri_num_out, int64_t *stride,
+                         int64_t *size_num_out, int64_t *size_num_in,
                          char *message, int64_t message_len)
 {
 /* Local variables */
@@ -469,7 +470,7 @@ return errorcode ;
 /* interface to read_number/write_number                             */
 /*********************************************************************/
 
-int64_t c_shum_ieee2ibm (c_shum_datatypes *data_type, int64_t *num, 
+int64_t c_shum_ieee2ibm (c_shum_datatypes *data_type, int64_t *num,
                          void *ibm_num_out, int64_t *offset_out,
                          void *cri_num_in, int64_t *stride,
                          int64_t *size_num_in, int64_t *size_num_out,
@@ -859,8 +860,8 @@ for (i=0; i<*num; i++){
 /*********************************************************************/
 
 static void read_number (c_shum_dataformat format, size_t size, size_t offset,
-                         uint64_t in_number, uint64_t *out_sign, 
-                         int64_t *out_expo, uint64_t *out_mant, 
+                         uint64_t in_number, uint64_t *out_sign,
+                         int64_t *out_expo, uint64_t *out_mant,
                          size_t *mant_bits_read)
 {
 
@@ -944,7 +945,7 @@ switch (format){
   break;
 }
 
-if ( (offset != 0) 
+if ( (offset != 0)
      || (size != (*mant_bits_read + expo_bit_size + 1))
      || ((8*WORD64BYTES - offset - size) != 0) ){
   /* For offsets and size differences */
@@ -1037,7 +1038,7 @@ size:  bit size of number read / wrote */
 /*********************************************************************/
 
 static void write_number (c_shum_dataformat format, size_t size, size_t offset,
-                          uint64_t *out_number, uint64_t in_sign, 
+                          uint64_t *out_number, uint64_t in_sign,
                           int64_t in_expo, uint64_t in_mant,
                           size_t mant_bits_read)
 {

@@ -27,8 +27,8 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86]
 #
-# This script was used to install shumlib version 2020.01.1
-# and was intended for use with the UM at UM 11.5
+# This script was used to install shumlib version 2021.07.1
+# and was intended for use with the UM at UM 12.0
 #
 
 set -eu
@@ -98,7 +98,7 @@ function build_test_clean {
     make -f make/$config.mk clean-temp
 }
 
-# Function which executes the above function several times - once for each of 
+# Function which executes the above function several times - once for each of
 # the possible OpenMP state and Thread_Utils state combinations. Note that
 # the build will only be copied to the destination install directory if the
 # variable LIBDIR_OUT is set - this is done selectively depending on which
@@ -182,13 +182,18 @@ fi
 
 THIS="x86_ifort_16.0_clang"
 if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
-    # Intel/Clang  (ifort 16)
+    # Intel/Clang  (ifort 16 / clang 12.0.0)
     (
     source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
+    module use /project/extrasoftware/modulefiles.rhel7
     module load ifort/16.0_64  # From METO_LINUX family in rose-stem
+    module unload libraries/gcc
+    module load gcc/8.1.0
+    module load llvm/12.0.0
+
     CONFIG=meto-x86-ifort15+-clang
-    LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-16.0.1-clang-3.4.2
+    LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-16.0.1-clang-12.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
     )
     if [ $? -ne 0 ] ; then
@@ -238,12 +243,29 @@ fi
 THIS="x86_gnu_6.1.0"
 if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     (
-    source /etc/profile.d/metoffice.d/modules.sh || :
-    source /data/users/lfric/modules/setup
+    module use /data/users/lfric/modules/modulefiles.rhel7
     module purge
     module load environment/lfric/gnu/6.1.0
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-6.1.0-gcc-6.1.0
+    build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
+
+# Gfortran/GCC 10.2.0
+# Using LFRic module
+THIS="x86_gnu_10.2.0"
+if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
+    (
+    module use /data/users/lfric/modules/modulefiles.rhel7
+    module purge
+    module load environment/lfric/gnu/10.2.0
+    CONFIG=meto-x86-gfortran-gcc
+    LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-10.2.0-gcc-10.2.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
     )
     if [ $? -ne 0 ] ; then

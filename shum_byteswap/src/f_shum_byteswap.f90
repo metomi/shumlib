@@ -108,6 +108,8 @@ END INTERFACE
 !------------------------------------------------------------------------------!
 INTERFACE f_shum_byteswap
 MODULE PROCEDURE                                                               &
+  shum_byteswap_cptr_int64args,                                                &
+  shum_byteswap_cptr_int32args,                                                &
   shum_byteswap_1d_int64_int64args,                                            &
   shum_byteswap_2d_int64_int64args,                                            &
   shum_byteswap_1d_int64_int32args,                                            &
@@ -127,6 +129,68 @@ MODULE PROCEDURE                                                               &
 END INTERFACE
 
 CONTAINS
+
+!------------------------------------------------------------------------------!
+
+FUNCTION shum_byteswap_cptr_int64args                                          &
+                           (bytes, swap_words, word_len, message) RESULT(status)
+
+USE, INTRINSIC :: iso_c_binding, ONLY: C_NULL_CHAR, C_PTR
+
+IMPLICIT NONE
+
+TYPE(C_PTR),         INTENT(INOUT)         :: bytes
+INTEGER(KIND=int64), INTENT(IN)            :: swap_words
+INTEGER(KIND=int64), INTENT(IN)            :: word_len
+CHARACTER(LEN=*),    INTENT(OUT)           :: message
+
+INTEGER(KIND=int64)                        :: status
+CHARACTER(KIND=C_CHAR, LEN=1), ALLOCATABLE :: cmessage(:)
+
+ALLOCATE(cmessage(LEN(message)+1))
+cmessage(1) = C_NULL_CHAR
+
+status = c_shum_byteswap(bytes,                                                &
+                         swap_words,                                           &
+                         word_len,                                             &
+                         cmessage,                                             &
+                         LEN(message, KIND=int64) + 1)
+message = f_shum_c2f_string(cmessage)
+
+DEALLOCATE(cmessage)
+
+END FUNCTION shum_byteswap_cptr_int64args
+
+!------------------------------------------------------------------------------!
+
+FUNCTION shum_byteswap_cptr_int32args                                          &
+                           (bytes, swap_words, word_len, message) RESULT(status)
+
+USE, INTRINSIC :: iso_c_binding, ONLY: C_NULL_CHAR, C_PTR
+
+IMPLICIT NONE
+
+TYPE(C_PTR),         INTENT(INOUT)         :: bytes
+INTEGER(KIND=int32), INTENT(IN)            :: swap_words
+INTEGER(KIND=int32), INTENT(IN)            :: word_len
+CHARACTER(LEN=*),    INTENT(OUT)           :: message
+
+INTEGER(KIND=int32)                        :: status
+CHARACTER(KIND=C_CHAR, LEN=1), ALLOCATABLE :: cmessage(:)
+
+ALLOCATE(cmessage(LEN(message)+1))
+cmessage(1) = C_NULL_CHAR
+
+status = c_shum_byteswap(bytes,                                                &
+                         INT(swap_words, KIND=int64),                          &
+                         INT(word_len, KIND=int64),                            &
+                         cmessage,                                             &
+                         LEN(message, KIND=int64) + 1)
+message = f_shum_c2f_string(cmessage)
+
+DEALLOCATE(cmessage)
+
+END FUNCTION shum_byteswap_cptr_int32args
 
 !------------------------------------------------------------------------------!
 
@@ -779,4 +843,3 @@ END FUNCTION shum_byteswap_2d_real32_int32args
 !------------------------------------------------------------------------------!
 
 END MODULE f_shum_byteswap_mod
-

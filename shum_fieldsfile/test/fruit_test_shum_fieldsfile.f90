@@ -1553,7 +1553,7 @@ IMPLICIT NONE
 INTEGER(KIND=int64)    :: status
 CHARACTER(LEN=500)     :: message = ""
 CHARACTER(LEN=1)       :: newline
-TYPE(shum_STASHmaster) :: STASHmaster(99999)
+TYPE(shum_STASHmaster), ALLOCATABLE :: STASHmaster(:)
 
 CHARACTER(LEN=*), PARAMETER   :: tempfile="fruit_test_fieldsfile_STASHmaster"
 CHARACTER(LEN=:), ALLOCATABLE :: scratch_filename
@@ -1568,6 +1568,8 @@ LOGICAL(KIND=bool)  :: check
 
 ! Get the number of failed tests prior to this test starting
 CALL get_failed_count(failures_at_entry)
+
+ALLOCATE(STASHmaster(99999))
 
 ! Create a temporary file to use for testing
 ALLOCATE(CHARACTER(shum_tmpdir_len + LEN(tempfile)) :: scratch_filename)
@@ -1667,6 +1669,10 @@ IF (failures_at_exit - failures_at_entry == 0) THEN
   OPEN(scratch_test_unit, FILE=scratch_filename, STATUS="OLD")
   CLOSE(scratch_test_unit, STATUS="DELETE")
 END IF
+
+! These are always allocated
+DEALLOCATE(scratch_filename)
+DEALLOCATE(STASHmaster)
 
 END SUBROUTINE test_stashmaster_read
 

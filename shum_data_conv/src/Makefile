@@ -17,8 +17,8 @@ include ${COMMON_DIR}/Makefile-version
 
 # Static library - uses archiver to create library
 #-------------------------------------------------------------------------------
-c_shum_data_conv.o: c_shum_data_conv.c c_shum_data_conv.h 
-	${CC} ${CCFLAGS} -c $<
+c_shum_data_conv.o: c_shum_data_conv.c c_shum_data_conv.h ${COMMON_DIR}/c_shum_word_bytes.h
+	${CC} ${CCFLAGS} -I${COMMON_DIR} -c $<
 
 f_shum_data_conv.o: f_shum_data_conv.f90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
@@ -30,8 +30,8 @@ libshum_data_conv.a: c_shum_data_conv.o f_shum_data_conv.o ${VERSION_OBJECTS}
 # are suffixed to keep them separate to the above (since the dynamic library
 # required position-independent-code flags whilst the static version does not)
 #-------------------------------------------------------------------------------
-c_shum_data_conv_PIC.o: c_shum_data_conv.c c_shum_data_conv.h 
-	${CC} ${CCFLAGS} ${CCFLAGS_PIC} -c $< -o $@
+c_shum_data_conv_PIC.o: c_shum_data_conv.c c_shum_data_conv.h ${COMMON_DIR}/c_shum_word_bytes.h
+	${CC} ${CCFLAGS} ${CCFLAGS_PIC} -I${COMMON_DIR} -c $< -o $@
 
 f_shum_data_conv_PIC.o: f_shum_data_conv.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
@@ -42,5 +42,5 @@ libshum_data_conv.so: c_shum_data_conv_PIC.o f_shum_data_conv_PIC.o ${VERSION_OB
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}

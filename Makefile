@@ -112,7 +112,7 @@ ${SHUM_TMPDIR}:
 # (which will protect against compilation on platforms where the assumptions
 # about precision made in the libraries is invalid)
 #--------------------------------------------------------------------------------
-COMMON_DIR=${DIR_ROOT}/common
+COMMON_DIR=${DIR_ROOT}/common/src
 
 # The FRUIT source itself
 #------------------------

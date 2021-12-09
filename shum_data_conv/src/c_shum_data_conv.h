@@ -116,57 +116,51 @@ typedef enum C_SHUM_DATATYPES {
        } c_shum_datatypes;
 
 extern int64_t c_shum_ibm2ieee(
-                      c_shum_datatypes *data_type, 
-                             int64_t   *num, 
-                             void      *ibm_num_in, 
-                             int64_t   *offset_in, 
-                             void      *cri_num_out, 
-                             int64_t   *stride, 
-                             int64_t   *size_num_out, 
+                      c_shum_datatypes *data_type,
+                             int64_t   *num,
+                             void      *ibm_num_in,
+                             int64_t   *offset_in,
+                             void      *cri_num_out,
+                             int64_t   *stride,
+                             int64_t   *size_num_out,
                              int64_t   *size_num_in,
                              char      *message,
                              int64_t    message_len);
 
 extern int64_t c_shum_ieee2ibm(
-                      c_shum_datatypes *data_type, 
-                             int64_t   *num, 
+                      c_shum_datatypes *data_type,
+                             int64_t   *num,
                              void      *ibm_num_out,
-                             int64_t   *offset_out, 
-                             void      *cri_num_in, 
+                             int64_t   *offset_out,
+                             void      *cri_num_in,
                              int64_t   *stride,
-                             int64_t   *size_num_in, 
+                             int64_t   *size_num_in,
                              int64_t   *size_num_out,
                              char      *message,
                              int64_t    message_len);
 
 extern int64_t c_shum_ieee2ieg(
-                      c_shum_datatypes *data_type, 
-                             int64_t   *num, 
+                      c_shum_datatypes *data_type,
+                             int64_t   *num,
                              void      *ieg_num_out,
-                             int64_t   *offset_out, 
-                             void      *cri_num_in, 
+                             int64_t   *offset_out,
+                             void      *cri_num_in,
                              int64_t   *stride,
-                             int64_t   *size_num_in, 
+                             int64_t   *size_num_in,
                              int64_t   *size_num_out,
                              char      *message,
                              int64_t    message_len);
 
 extern int64_t c_shum_ieg2ieee(
-                      c_shum_datatypes *data_type, 
-                             int64_t   *num, 
+                      c_shum_datatypes *data_type,
+                             int64_t   *num,
                              void      *ieg_num_in,
-                             int64_t   *offset_in, 
-                             void      *cri_num_out, 
+                             int64_t   *offset_in,
+                             void      *cri_num_out,
                              int64_t   *stride,
-                             int64_t   *size_num_out, 
+                             int64_t   *size_num_out,
                              int64_t   *size_num_in,
                              char      *message,
                              int64_t    message_len);
-
-/* Number of bytes in a word of a specific bit size */
-#define WORD8BYTES  1 /*  8 bit */
-#define WORD16BYTES 2 /* 16 bit */
-#define WORD32BYTES 4 /* 32 bit */
-#define WORD64BYTES 8 /* 64 bit */
 
 #endif
