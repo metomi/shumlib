@@ -76,6 +76,7 @@ INTEGER(KIND=int32), POINTER :: comp_field(:)
 
 CALL C_F_POINTER(comp_field_ptr, comp_field, [3])
 
+message = ""
 status = f_shum_read_wgdos_header(                                             &
     comp_field, num_words, accuracy, cols, rows, message)
 
@@ -117,6 +118,7 @@ TYPE(C_PTR)                :: field_cptr
 field_cptr = C_LOC(field)
 CALL C_F_POINTER (field_cptr, field2d, [cols,rows])
 
+message = ""
 status = f_shum_wgdos_pack(field2d, acc, rmdi, comp_field,                     &
                            num_words, message)
 NULLIFY(field2d)
@@ -159,6 +161,7 @@ TYPE(C_PTR)                :: field_cptr
 field_cptr = C_LOC(field)
 CALL C_F_POINTER (field_cptr, field2d, [cols,rows])
 
+message = ""
 status = f_shum_wgdos_unpack(comp_field, rmdi, field2d, message)
 NULLIFY(field2d)
 

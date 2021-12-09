@@ -56,4 +56,6 @@ extern void    f_shum_startOMPparallelfor (void **,
                                            const int64_t *,
                                            const int64_t *);
 
+extern int64_t f_shum_LockQueue           (int64_t *);
+
 #endif

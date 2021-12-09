@@ -234,6 +234,57 @@ This method gets the fixed-length header in the file object.
             occurred and in that case the ``message`` variable in the object
             will contain information about the problem.
 
+
+``set_fixed_length_header_by_index``
+''''''''''''''''''''''''''''''''''''
+
+This method sets a value in the fixed-length header in the file object.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%set_fixed_length_header_by_index(num_index, value_to_set)``
+
+    **Input**
+        ``num_index (64-bit INTEGER)``
+            The index of the position of the fixed length header to set.
+        ``value_to_set (64-bit INTEGER)``
+            The value to set in the fixed length header.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything else means an error has
+            occurred and in that case the ``message`` variable in the object
+            will contain information about the problem.
+
+
+``get_fixed_length_header_by_index``
+''''''''''''''''''''''''''''''''''''
+
+This method gets a value from the fixed-length header in the file object.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%get_fixed_length_header_by_index(num_index, value_to_get)``
+
+    **Input**
+        ``num_index (64-bit INTEGER)``
+            The index of the position of the fixed length header to retrieve.
+
+    **Output**
+        ``value_to_get (64-bit INTEGER)``
+            The value in that position in the fixed length header.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything else means an error has
+            occurred and in that case the ``message`` variable in the object
+            will contain information about the problem.
+
+
 ``set_integer_constants``
 '''''''''''''''''''''''''
 
@@ -270,6 +321,57 @@ This method gets the integer constants in the file object.
     **Input & Output**
         ``integer_constants (64-bit INTEGER)``
             The integer constants, which should be a 1D ``ALLOCATABLE`` array.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything else means an error has
+            occurred and in that case the ``message`` variable in the object
+            will contain information about the problem.
+
+
+``set_integer_constants_by_index``
+''''''''''''''''''''''''''''''''''
+
+This method sets one of the integer constants in the file object.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%set_integer_constants_by_index(num_index, value_to_set)``
+
+    **Input**
+        ``num_index (64-bit INTEGER)``
+            The index of the position of the integer constants to set.
+        ``value_to_set (64-bit INTEGER)``
+            The value to set in the integer constants.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything else means an error has
+            occurred and in that case the ``message`` variable in the object
+            will contain information about the problem.
+
+
+``get_integer_constants_by_index``
+''''''''''''''''''''''''''''''''''
+
+This method gets one of the integer constants in the file object.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%get_integer_constants_by_index(num_index, value_to_get)``
+
+    **Input**
+        ``num_index (64-bit INTEGER)``
+            The index of the position of the integer constants to retrieve.
+
+    **Output**
+        ``value_to_get (64-bit INTEGER)``
+            The value in that position in the integer constants.
+
 
     **Return Value**
         ``status (shum_ff_status_type)``
@@ -321,6 +423,57 @@ This method gets the real constants header in the file object.
             occurred and in that case the ``message`` variable in the object
             will contain information about the problem.
 
+
+
+``set_real_constants_by_index``
+''''''''''''''''''''''''''''''''''
+
+This method sets one of the real constants in the file object.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%set_real_constants_by_index(num_index, value_to_set)``
+
+    **Input**
+        ``num_index (64-bit INTEGER)``
+            The index of the position of the real constants to set.
+        ``value_to_set (64-bit REAL)``
+            The value to set in the real constants.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything else means an error has
+            occurred and in that case the ``message`` variable in the object
+            will contain information about the problem.
+
+
+``get_real_constants_by_index``
+''''''''''''''''''''''''''''''''''
+
+This method gets one of the real constants in the file object.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%get_real_constants_by_index(num_index, value_to_get)``
+
+    **Input**
+        ``num_index (64-bit INTEGER)``
+            The index of the position of the real constants to retrieve.
+
+    **Output**
+        ``value_to_get (64-bit REAL)``
+            The value in that position in the real constants.
+
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything else means an error has
+            occurred and in that case the ``message`` variable in the object
+            will contain information about the problem.
 
 
 ``set_level_dependent_constants``

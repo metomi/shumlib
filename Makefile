@@ -54,6 +54,9 @@ OUTDIR_TESTS=${LIBDIR_OUT}/tests
 ${OUTDIR_TESTS}:
 	mkdir -p ${LIBDIR_OUT}/tests
 
+${SHUM_TMPDIR}:
+	mkdir -p ${SHUM_TMPDIR}
+
 # Setup path to directory containing common/shared components; these include
 # functions that provide Shumlib version information and the C Precision Bomb
 # (which will protect against compilation on platforms where the assumptions 
@@ -207,7 +210,7 @@ test: ${FRUIT} $(addsuffix _tests, $(patsubst lib%.so, %, $(notdir $(wildcard ${
 	${MAKE} -C ${DIR_ROOT} run_tests
 
 # 'make run_tests' runs the currently built tests
-run_tests:
+run_tests: ${SHUM_TMPDIR}
 	${MAKE} -C ${DIR_ROOT}/${FRUIT} -f Makefile-driver
 	${LIBDIR_OUT}/tests/fruit_tests_static.exe
 	${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe

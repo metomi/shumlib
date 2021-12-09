@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash --login
 # *********************************COPYRIGHT************************************
 # (C) Crown copyright Met Office. All rights reserved.                       
 # For further details please refer to the file LICENCE.txt                   
@@ -27,10 +27,19 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86] 
 #
-# This script was used to install shumlib version 2018.06.1
-# and is based on the families etc. from the UM at UM 11.1
+# This script was used to install shumlib version 2018.10.1
+# and is based on the families etc. from the UM at UM 11.2
+#
+#PBS -q shared
+#PBS -S /bin/bash
+#PBS -l ncpus=4
+#PBS -l mem=2048MB
+#PBS -l walltime=00:30:00
 
 set -eu
+
+# Ensure directory is correct
+cd $(readlink -f $(dirname $0)/..)
 
 # Take the platform name as an argument 
 # (purely so we can maintain one script rather than 2)
@@ -56,7 +65,7 @@ LIB_DIRS=$(ls -d shum_* | xargs)
 # "build" directory in the working copy - like the Makefile would)
 BUILD_DESTINATION=${BUILD_DESTINATION:-$PWD/build}
 
-# Function which builds given libraries and tests for those libraries
+# Functions which build given libraries and tests for those libraries
 function build_test_clean {
     local config=$1
     shift
@@ -64,8 +73,8 @@ function build_test_clean {
     make -f make/$config.mk clean-temp
     echo make -f make/$config.mk $*
     make -f make/$config.mk $*
-    echo timeout 5m make -f make/$config.mk test || :
-    timeout 5m make -f make/$config.mk test || :
+    echo make -f make/$config.mk test
+    make -f make/$config.mk test
     echo make -f make/$config.mk clean-temp
     make -f make/$config.mk clean-temp
 }
@@ -76,83 +85,117 @@ function build_openmp_onoff {
     local config=$1
     local dir=$2
     shift 2
+    # Copy source to temporary build directory and switch there
+    TEMP_BUILD_DIR=$(mktemp -d)
+    cp -r * $TEMP_BUILD_DIR
+    cd $TEMP_BUILD_DIR
+    # Perform the build
     export LIBDIR_OUT=$dir/openmp
     export SHUM_OPENMP=true
     build_test_clean $config $*
     export LIBDIR_OUT=$dir/no-openmp
     export SHUM_OPENMP=false
     build_test_clean $config $*
+    # Tidy up the temporary directory
+    rm -rf $TEMP_BUILD_DIR
 }
 
-if [ $PLATFORM == "x86" ] ; then
-
-    # Ensure the module command will be available
-    source /etc/profile.d/metoffice.d/modules.sh
-
-    # Intel/GCC (ifort 12) - Note that the "fieldsfile_class" 
-    # lib doesn't work with ifort 12, so we exclude it
-    module purge
-    module load ifort/12.0_64  
-    CONFIG=meto-x86-ifort12+-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-12.0.4-gcc-4.4.7
-    build_openmp_onoff $CONFIG $LIBDIR $(sed "s/\bshum_fieldsfile_class\b//g" \
-                                         <<< $LIB_DIRS)
-
-    # Intel/Clang (ifort 12) - Note that the "fieldsfile_class" 
-    # lib doesn't work with ifort 12, so we exclude it
-    module purge
-    module load ifort/12.0_64  
-    CONFIG=meto-x86-ifort12+-clang
-    LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-12.0.4-clang-3.4.2
-    build_openmp_onoff $CONFIG $LIBDIR $(sed "s/\bshum_fieldsfile_class\b//g" \
-                                         <<< $LIB_DIRS)
-
-    # Intel/GCC (ifort 16)
+# Intel/GCC (ifort 16)
+THIS="x86_ifort_16.0_gcc"
+if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
+    (
+    source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
     module load ifort/16.0_64  # From METO_LINUX family in rose-stem
     CONFIG=meto-x86-ifort15+-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-16.0.1-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
+THIS="x86_ifort_16.0_clang"
+if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     # Intel/Clang  (ifort 16)
+    (
+    source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
     module load ifort/16.0_64  # From METO_LINUX family in rose-stem
     CONFIG=meto-x86-ifort15+-clang
     LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-16.0.1-clang-3.4.2
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # NagFor/GCC (nagfor 6.0.0)
+THIS="x86_nag_6.1_gcc"
+if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
+    # NagFor/GCC (nagfor 6.1.0)
+    (
+    source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
-    module load nagfor/6.0.0_64
+    module load nagfor/6.1.0_64
     CONFIG=meto-x86-nagfor-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-6.0.0-gcc-4.4.7
+    LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-6.1.0-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Portland/GCC (pgfortran 15.7) - Note that the "fieldsfile_class" 
-    # lib doesn't work with portland, so we exclude it
+# Portland/GCC (pgfortran 16.10) - Note that the "fieldsfile_class" 
+# lib doesn't work with portland, so we exclude it
+THIS="x86_pgfortran_16.10_gcc"
+if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
+    (
+    source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
-    module load pgfortran/15.7_64
+    module load pgfortran/16.10_64
     CONFIG=meto-x86-portland-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-pgfortran-15.7.0-gcc-4.4.7
+    LIBDIR=$BUILD_DESTINATION/meto-x86-pgfortran-16.10.0-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR $(sed "s/\bshum_fieldsfile_class\b//g" \
                                          <<< $LIB_DIRS)
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Gfortran/GCC 6.1.0
-    # Have to use Lfric module as default Gfortran is too old
+# Gfortran/GCC 6.1.0
+# Have to use Lfric module as default Gfortran is too old
+THIS="x86_gnu_6.1.0"
+if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
+    (
+    source /etc/profile.d/metoffice.d/modules.sh || :
     source /data/users/lfric/modules/setup
     module purge
     module load environment/lfric/gnu/6.1.0
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-6.1.0-gcc-6.1.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
-
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
 fi
 
-if [ $PLATFORM == "xc40" ] ; then
+# Crayftn/CrayCC Haswell 8.3.4 (Current system default)
+# - note that these earlier versions of CCE don't work correctly with the 
+# Fieldsfile read/write libraries, so we exclude them
+THIS="xc40_haswell_cray_8.3.4"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
 
-    # Crayftn/CrayCC Haswell 8.3.4 (Current system default)
-    # - note that these earlier versions of CCE don't work correctly with the 
-    # Fieldsfile read/write libraries, so we exclude them
+    (
     module purge
     module load PrgEnv-cray/5.2.82
     module swap cce cce/8.3.4
@@ -165,10 +208,19 @@ if [ $PLATFORM == "xc40" ] ; then
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
                                              -e "s/\bshum_fieldsfile\b//g" \
                                              <<< $LIB_DIRS)
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Crayftn/CrayCC Ivybridge 8.3.4 (Current system default)
-    # - note that these earlier versions of CCE don't work correctly with the 
-    # Fieldsfile read/write libraries, so we exclude them
+# Crayftn/CrayCC Ivybridge 8.3.4 (Current system default)
+# - note that these earlier versions of CCE don't work correctly with the 
+# Fieldsfile read/write libraries, so we exclude them
+THIS="xc40_ivybridge_cray_8.3.4"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-cray/5.2.82
     module swap cce cce/8.3.4
@@ -181,9 +233,18 @@ if [ $PLATFORM == "xc40" ] ; then
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
                                              -e "s/\bshum_fieldsfile\b//g" \
                                              <<< $LIB_DIRS)
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Crayftn/CrayCC Ivybridge 8.4.3 - note that these earlier versions of CCE don't 
-    # work correctly with the Fieldsfile read/write libraries, so we exclude them
+# Crayftn/CrayCC Ivybridge 8.4.3 - note that these earlier versions of CCE don't 
+# work correctly with the Fieldsfile read/write libraries, so we exclude them
+THIS="xc40_ivybridge_cray_8.4.3"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-cray/5.2.82
     module swap cce cce/8.4.3
@@ -196,8 +257,17 @@ if [ $PLATFORM == "xc40" ] ; then
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
                                              -e "s/\bshum_fieldsfile\b//g" \
                                              <<< $LIB_DIRS)
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Crayftn/CrayCC Haswell 8.5.8
+# Crayftn/CrayCC Haswell 8.5.8
+THIS="xc40_haswell_cray_8.5.8"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-cray/5.2.82
     module swap cce cce/8.5.8
@@ -208,9 +278,20 @@ if [ $PLATFORM == "xc40" ] ; then
     module load craype-network-aries
     CONFIG=meto-xc40-crayftn8.4.0+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-crayftn-8.5.8-craycc-8.5.8
-    build_openmp_onoff $CONFIG $LIBDIR all_libs
-  
-    # Crayftn/CrayCC Ivybridge 8.5.8
+    build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
+                                             -e "s/\bshum_fieldsfile\b//g" \
+                                             <<< $LIB_DIRS)
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
+
+# Crayftn/CrayCC Ivybridge 8.5.8
+THIS="xc40_ivybridge_cray_8.5.8"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-cray/5.2.82
     module swap cce cce/8.5.8
@@ -221,9 +302,20 @@ if [ $PLATFORM == "xc40" ] ; then
     module load craype-network-aries
     CONFIG=meto-xc40-crayftn8.4.0+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-crayftn-8.5.8-craycc-8.5.8
-    build_openmp_onoff $CONFIG $LIBDIR all_libs
+    build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
+                                             -e "s/\bshum_fieldsfile\b//g" \
+                                             <<< $LIB_DIRS)
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Ifort/Icc Haswell 15.0 (Current system default)
+# Ifort/Icc Haswell 15.0 (Current system default)
+THIS="xc40_haswell_intel_15.0"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-intel/5.2.82
     module swap intel intel/15.0.0.090
@@ -234,8 +326,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-ifort-15.0.0-icc-15.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Ifort/Icc Ivybridge 15.0 (Current system default)
+# Ifort/Icc Ivybridge 15.0 (Current system default)
+THIS="xc40_ivybridge_intel_15.0"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-intel/5.2.82
     module swap intel intel/15.0.0.090
@@ -246,8 +347,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-ifort-15.0.0-icc-15.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Ifort/Icc Haswell 17.0 
+# Ifort/Icc Haswell 17.0 
+THIS="xc40_haswell_intel_17.0"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-intel/5.2.82
     module swap intel intel/17.0.0.098
@@ -259,8 +369,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-ifort-17.0.0-icc-17.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Ifort/Icc Ivybridge 17.0
+# Ifort/Icc Ivybridge 17.0
+THIS="xc40_ivybridge_intel_17.0"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-intel/5.2.82
     module swap intel intel/17.0.0.098
@@ -272,8 +391,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-ifort-17.0.0-icc-17.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Gfortran/Gcc Haswell 4.9.1 (Current system default)
+# Gfortran/Gcc Haswell 4.9.1 (Current system default)
+THIS="xc40_haswell_gnu_4.9.1"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-gnu/5.2.82
     module swap gcc gcc/4.9.1
@@ -284,8 +412,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-gfortran-4.9.1-gcc-4.9.1
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Gfortran/Gcc Ivybridge 4.9.1 (Current system default)
+# Gfortran/Gcc Ivybridge 4.9.1 (Current system default)
+THIS="xc40_ivybridge_gnu_4.9.1"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-gnu/5.2.82
     module swap gcc gcc/4.9.1
@@ -296,8 +433,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-gfortran-4.9.1-gcc-4.9.1
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Gfortran/Gcc Haswell 6.3.0
+# Gfortran/Gcc Haswell 6.3.0
+THIS="xc40_haswell_gnu_6.3.0"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-gnu/5.2.82
     module swap gcc gcc/6.3.0
@@ -309,8 +455,17 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-gfortran-6.3.0-gcc-6.3.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
+fi
 
-    # Gfortran/Gcc Ivybridge 6.3.0
+# Gfortran/Gcc Ivybridge 6.3.0
+THIS="xc40_ivybridge_gnu_6.3.0"
+if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
+    (
     module purge
     module load PrgEnv-gnu/5.2.82
     module swap gcc gcc/6.3.0
@@ -322,6 +477,10 @@ if [ $PLATFORM == "xc40" ] ; then
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-gfortran-6.3.0-gcc-6.3.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
-
-
+    )
+    if [ $? -ne 0 ] ; then
+        >&2 echo "Error compiling for $THIS"
+        exit 1
+    fi
 fi
+

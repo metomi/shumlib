@@ -52,9 +52,12 @@
  *
  * iv) If we are using the Cray compiler (defines _CRAYC) with GNU extensions
  *     enabled (-hgnu): we can use GCC extensions, but not inline assembly.
- *     Therefore, fall-back to the non-standard intrinsic __builtin_bswap*()
+ *     Therefore, for __GNUC__ support greater than version 4.3 but less than
+ *     6.1, fall-back to the non-standard intrinsic __builtin_bswap*()
  *     functions, except for __builtin_bswap16, which isn't implemented, and
- *     so therefore use a directly implemented macro for bswap_16
+ *     so therefore use a directly implemented macro for bswap_16. (Note, some
+ *     later versions of the Cray compiler support __builtin_bswap16, but there
+ *     is no way to automatically differentiate these.)
  *
  * v) If none of the above are possible, implement the macros directly as
  *    bit-shift operations. This is much less efficient, but uses only
@@ -66,7 +69,44 @@
  *     non-standard intrinsic functions, or the <byteswap.h> headers
  *     repectively, as per that choice.
  *
+ * vii) If we are usining a version of the Cray compiler (defines _CRAYC) with
+ *      GNU extensions enabled (-hgnu) and has __GNUC__ greater than version
+ *      6.1, fall-back to the non-standard intrinsic __builtin_bswap*()
+ *      functions for all data sizes.
+ *
  */
+
+/*----------------*/
+/* Control macros */
+/*----------------*/
+
+/* Feature test macros */
+#if (defined(__GNUC__) && __GNUC__ >= 2)
+#define C_SHUM_BSWAP_HASGNU 1
+#else
+#define C_SHUM_BSWAP_HASGNU 0
+#endif
+
+#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                    \
+                          (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
+#define C_SHUM_BSWAP_HASGNU4_3 1
+#else
+#define C_SHUM_BSWAP_HASGNU4_3 0
+#endif
+
+#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                    \
+                          (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)))
+#define C_SHUM_BSWAP_HASGNU4_8 1
+#else
+#define C_SHUM_BSWAP_HASGNU4_8 0
+#endif
+
+#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 6) ||                                    \
+                          (__GNUC__ == 6 && __GNUC_MINOR__ >= 1)))
+#define C_SHUM_BSWAP_HASGNU6_1 1
+#else
+#define C_SHUM_BSWAP_HASGNU6_1 0
+#endif
 
 /* ensure test macros are unset */
 #undef C_USE_BSWAP_USERCHOICE
@@ -77,7 +117,9 @@
 #undef C_USE_BSWAP_BUILTINS_32
 #undef C_USE_BSWAP_BUILTINS_16
 
+/*------------*/
 /* test cases */
+/*------------*/
 
 /* test for user choice */
 
@@ -106,41 +148,42 @@
 
 /* test for used case */
 
-#ifndef C_USE_BSWAP_USERCHOICE
+#if defined(C_USE_BSWAP_USERCHOICE)
 
-#if defined __GNUC__ && __GNUC__ >= 2
+/* case vi) */
 
-#if defined __GNUC__ && __GNUC__       >= 4 \
-                     && __GNUC_MINOR__ >= 3 \
-                     && defined _CRAYC
+#elif C_SHUM_BSWAP_HASGNU && !C_SHUM_BSWAP_HASGNU4_3
+
+/* case i) */
+#define C_USE_BSWAP_BYTESWAP_H
+
+#elif C_SHUM_BSWAP_HASGNU6_1 && defined(_CRAYC)
+
+/* case vii) */
+#define C_USE_BSWAP_BUILTINS_64
+#define C_USE_BSWAP_BUILTINS_32
+#define C_USE_BSWAP_BUILTINS_16
+
+#elif C_SHUM_BSWAP_HASGNU4_3 && defined(_CRAYC)
 
 /* case iv) */
 #define C_USE_BSWAP_BUILTINS_64
 #define C_USE_BSWAP_BUILTINS_32
 #define C_USE_BSWAP_16_BITSHIFT
 
-#elif defined __GNUC__ && __GNUC__       >= 4 \
-                       && __GNUC_MINOR__ >= 8
+#elif C_SHUM_BSWAP_HASGNU4_8
 
 /* case iii) */
 #define C_USE_BSWAP_BUILTINS_64
 #define C_USE_BSWAP_BUILTINS_32
 #define C_USE_BSWAP_BUILTINS_16
 
-#elif defined __GNUC__ && __GNUC__       >= 4 \
-                       && __GNUC_MINOR__ >= 3
+#elif C_SHUM_BSWAP_HASGNU4_3
 
 /* case ii) */
 #define C_USE_BSWAP_BUILTINS_64
 #define C_USE_BSWAP_BUILTINS_32
 #define C_USE_BSWAP_16_BITSHIFT
-
-#else
-
-/* case i) */
-#define C_USE_BSWAP_BYTESWAP_H
-
-#endif
 
 #else
 
@@ -151,31 +194,27 @@
 
 #endif
 
-#else
+/*-----------------------*/
+/* Implementation macros */
+/*-----------------------*/
 
-/* case vi) */
-
-#endif
-
-/* implement macros */
-
-#ifdef C_USE_BSWAP_BUILTINS_64
+#if defined(C_USE_BSWAP_BUILTINS_64)
 #define bswap_64(x) __builtin_bswap64(x)
 #endif
 
-#ifdef C_USE_BSWAP_BUILTINS_32
+#if defined(C_USE_BSWAP_BUILTINS_32)
 #define bswap_32(x) __builtin_bswap32(x)
 #endif
 
-#ifdef C_USE_BSWAP_BUILTINS_16
+#if defined(C_USE_BSWAP_BUILTINS_16)
 #define bswap_16(x) __builtin_bswap16(x)
 #endif
 
-#ifdef C_USE_BSWAP_BYTESWAP_H
+#if defined(C_USE_BSWAP_BYTESWAP_H)
 #include <byteswap.h>
 #endif
 
-#ifdef C_USE_BSWAP_64_BITSHIFT
+#if defined(C_USE_BSWAP_64_BITSHIFT)
 
 #define bswap_64(x) \
                ((((x) & UINT64_C(0xff00000000000000)) >> 56) \
@@ -189,7 +228,7 @@
 
 #endif
 
-#ifdef C_USE_BSWAP_32_BITSHIFT
+#if defined(C_USE_BSWAP_32_BITSHIFT)
 
 #define bswap_32(x) \
                ((((x) & UINT32_C(0xff000000)) >> 24) \
@@ -199,12 +238,16 @@
 
 #endif
 
-#ifdef C_USE_BSWAP_16_BITSHIFT
+#if defined(C_USE_BSWAP_16_BITSHIFT)
 
 #define bswap_16(x) \
                ((((x) & UINT16_C(0xff00)) >>  8) \
               | (((x) & UINT16_C(0x00ff)) <<  8))
 
 #endif
+
+/* -------------------------------------------------------------------------- */
+/* End bswap() family of macros                                               */
+/* -------------------------------------------------------------------------- */
 
 #endif

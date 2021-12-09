@@ -212,6 +212,272 @@ INTERFACE
 
 !-------------!
 
+  SUBROUTINE c_test_lock(test_ret, lock) BIND(c, name="c_test_lock")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(IN) :: lock
+
+  END SUBROUTINE c_test_lock
+
+!-------------!
+
+  SUBROUTINE c_test_release_locked_lock(test_ret) &
+             BIND(c, name="c_test_release_locked_lock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_release_locked_lock
+
+!-------------!
+
+  SUBROUTINE c_test_lock_invalid_lock(test_ret) &
+             BIND(c, name="c_test_lock_invalid_lock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lock_invalid_lock
+
+!-------------!
+
+  SUBROUTINE c_test_lock_self_owned_lock(test_ret) &
+             BIND(c, name="c_test_lock_self_owned_lock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lock_self_owned_lock
+
+!-------------!
+
+  SUBROUTINE c_test_unlock(test_ret) &
+             BIND(c, name="c_test_unlock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_unlock
+
+!-------------!
+
+  SUBROUTINE c_test_unlock_invalid(test_ret) &
+             BIND(c, name="c_test_unlock_invalid")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_unlock_invalid
+
+!-------------!
+
+  SUBROUTINE c_test_lockqueue_invalid(test_ret) &
+             BIND(c, name="c_test_lockqueue_invalid")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lockqueue_invalid
+
+!-------------!
+
+  SUBROUTINE c_test_lockqueue_single(test_ret) &
+             BIND(c, name="c_test_lockqueue_single")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lockqueue_single
+
+!-------------!
+
+  SUBROUTINE c_test_unlock_already_unlocked(test_ret) &
+             BIND(c, name="c_test_unlock_already_unlocked")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_unlock_already_unlocked
+
+!-------------!
+
+  SUBROUTINE c_test_unlock_foreign(test_ret, lock) &
+             BIND(c, name="c_test_unlock_foreign")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(IN) :: lock
+
+  END SUBROUTINE c_test_unlock_foreign
+
+!-------------!
+
+  SUBROUTINE c_test_lock_blocking(test_ret, lock) &
+             BIND(c, name="c_test_lock_blocking")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(IN) :: lock
+
+  END SUBROUTINE c_test_lock_blocking
+
+!-------------!
+
+  SUBROUTINE c_test_lockqueue_multi(test_ret, lock) &
+             BIND(c, name="c_test_lockqueue_multi")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(IN) :: lock
+
+  END SUBROUTINE c_test_lockqueue_multi
+
+!-------------!
+
+  SUBROUTINE c_test_testlock_nonblocking(test_ret, lock) &
+             BIND(c, name="c_test_testlock_nonblocking")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(IN) :: lock
+
+  END SUBROUTINE c_test_testlock_nonblocking
+
+!-------------!
+
+  SUBROUTINE c_test_sweep_unlock_locks(test_ret) &
+             BIND(c, name="c_test_sweep_unlock_locks")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_sweep_unlock_locks
+
+!-------------!
+
+  SUBROUTINE c_test_lock_self_owned_testlock(test_ret) &
+             BIND(c, name="c_test_lock_self_owned_testlock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lock_self_owned_testlock
+
+!-------------!
+
+  SUBROUTINE c_test_release_locked_testlock(test_ret) &
+             BIND(c, name="c_test_release_locked_testlock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_release_locked_testlock
+
+!-------------!
+
+  SUBROUTINE c_test_lock_testlock(test_ret) &
+             BIND(c, name="c_test_lock_testlock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lock_testlock
+
+!-------------!
+
+  SUBROUTINE c_test_lock_invalid_testlock(test_ret) &
+             BIND(c, name="c_test_lock_invalid_testlock")
+
+    IMPORT :: C_BOOL
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+
+  END SUBROUTINE c_test_lock_invalid_testlock
+
+!-------------!
+
+  SUBROUTINE c_test_release_pending_locks(test_ret, lock) &
+             BIND(c, name="c_test_release_pending_locks")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(IN) :: lock
+
+  END SUBROUTINE c_test_release_pending_locks
+
+!-------------!
+
+  SUBROUTINE c_test_create_single_lock(test_ret, lock) &
+             BIND(c, name="c_test_create_single_lock")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(INOUT) :: lock
+
+  END SUBROUTINE c_test_create_single_lock
+
+!-------------!
+
 END INTERFACE
 
 !------------------------------------------------------------------------------!
@@ -239,17 +505,50 @@ WRITE(OUTPUT_UNIT, "()")
 WRITE(OUTPUT_UNIT, "(A,I0)")                                                   &
     "Testing shum_thread_utils at Shumlib version: ", version
 
+! Lock Functions
+
 CALL run_test_case(test_returns_valid_lock, "returns_valid_lock")
-CALL run_test_case(test_invalid_lock_release, "invlaid_lock_release")
+CALL run_test_case(test_invalid_lock_release, "invalid_lock_release")
 CALL run_test_case(test_create_and_release_lock, "create_and_release_lock")
 CALL run_test_case(test_create_many_locks, "create_many_locks")
 CALL run_test_case(test_backfill_locks, "test_backfill_locks")
+CALL run_test_case(test_lock_invalid_lock, "test_lock_invalid_lock")
+CALL run_test_case(test_lock, "test_lock")
+CALL run_test_case(test_release_locked_lock, "test_release_locked_lock")
+CALL run_test_case(test_unlock_invalid, "test_unlock_invalid")
+CALL run_test_case(test_unlock, "test_unlock")
+CALL run_test_case(test_unlock_already_unlocked, "test_unlock_already_unlocked")
+!$ CALL run_test_case(test_unlock_foreign, "test_unlock_foreign")
+CALL run_test_case(test_lock_self_owned_lock, "test_lock_self_owned_lock")
+!$ CALL run_test_case(test_lock_blocking, "test_lock_blocking")
+CALL run_test_case(test_lock_invalid_testlock, "test_lock_invalid_testlock")
+CALL run_test_case(test_lock_testlock, "test_lock_testlock")
+CALL run_test_case(test_release_locked_testlock,                               &
+                   "test_release_locked_testlock")
+CALL run_test_case(test_lock_self_owned_testlock,                              &
+                   "test_lock_self_owned_testlock")
+!$ CALL run_test_case(test_testlock_nonblocking, "test_testlock_nonblocking")
+CALL run_test_case(test_lockqueue_invalid, "test_lockqueue_invalid")
+CALL run_test_case(test_lockqueue_single, "test_lockqueue_single")
+!$ CALL run_test_case(test_lockqueue_multi, "test_lockqueue_multi")
+CALL run_test_case(test_release_pending_locks, "test_release_pending_locks")
+CALL run_test_case(test_sweep_unlock_locks, "test_sweep_unlock_locks")
+CALL run_test_case(test_sweep_release_locks, "test_sweep_release_locks")
+
+! OpenMP Attributes
+
 CALL run_test_case(test_inpar, "test_inpar")
 CALL run_test_case(test_threadid, "test_threadid")
-CALL run_test_case(test_flush, "test_flush")
 CALL run_test_case(test_numthreads, "test_numthreads")
+
+! Parallel Regions
+
 CALL run_test_case(test_startOMPparallel, "test_startOMPparallel")
 CALL run_test_case(test_startOMPparallelfor, "test_startOMPparallelfor")
+
+! OpenMP functions
+
+CALL run_test_case(test_flush, "test_flush")
 
 END SUBROUTINE fruit_test_shum_thread_utils
 
@@ -336,6 +635,337 @@ CALL c_test_sweep_release_locks(test_ret)
 CALL assert_true(test_ret, "Did not successfully release all locks in a sweep")
 
 END SUBROUTINE test_sweep_release_locks
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_sweep_unlock_locks
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_sweep_unlock_locks")
+CALL c_test_sweep_unlock_locks(test_ret)
+CALL assert_true(test_ret, "Did not successfully unlock all locks in a sweep")
+
+END SUBROUTINE test_sweep_unlock_locks
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_release_pending_locks
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+INTEGER(KIND=C_INT64_T) :: lock
+
+lock = -1
+
+CALL set_case_name("test_release_pending_locks")
+CALL c_test_create_single_lock(test_ret,lock)
+CALL assert_true(test_ret, "Did not generate single lock succesfully")
+CALL assert_true(LOGICAL(lock>0,KIND=C_BOOL),                                  &
+               "Did not generate single lock succesfully [invalid lock number]")
+
+!$ CALL omp_set_num_threads(3)
+!$OMP PARALLEL DEFAULT(NONE) SHARED(lock) REDUCTION(.AND.:test_ret)
+
+CALL c_test_release_pending_locks(test_ret,lock)
+
+!$OMP END PARALLEL
+
+CALL assert_true(test_ret,                                                     &
+                "Did not handle/detect release of a lock with pending requests")
+
+END SUBROUTINE test_release_pending_locks
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+INTEGER(KIND=C_INT64_T) :: lock
+
+lock = -1
+
+CALL set_case_name("test_lock")
+CALL c_test_lock(test_ret, lock)
+CALL assert_true(test_ret, "Did not correctly lock a valid lock")
+
+END SUBROUTINE test_lock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_unlock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_unlock")
+CALL c_test_unlock(test_ret)
+CALL assert_true(test_ret, "Did not correctly unlock a valid lock")
+
+END SUBROUTINE test_unlock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_unlock_foreign
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+INTEGER(KIND=C_INT64_T) :: lock
+
+!$ lock = -1
+
+!$ CALL set_case_name("test_unlock_foreign")
+
+!$ CALL c_test_create_single_lock(test_ret,lock)
+!$ CALL assert_true(test_ret, "Did not generate single lock succesfully")
+!$ CALL assert_true(LOGICAL(lock>0,KIND=C_BOOL),                               &
+!$             "Did not generate single lock succesfully [invalid lock number]")
+
+!$ CALL omp_set_num_threads(2)
+!$OMP PARALLEL DEFAULT(NONE) SHARED(lock) REDUCTION(.AND.:test_ret)
+!$ CALL c_test_unlock_foreign(test_ret, lock)
+!$OMP END PARALLEL
+!$ CALL assert_true(test_ret,                                                  &
+!$          "Did not correctly handle unlocking a lock owner by another thread")
+
+END SUBROUTINE test_unlock_foreign
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock_blocking
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+INTEGER(KIND=C_INT64_T) :: lock
+
+!$ CALL set_case_name("test_lock_blocking")
+
+!$ CALL c_test_create_single_lock(test_ret,lock)
+!$ CALL assert_true(test_ret, "Did not generate single lock succesfully")
+!$ CALL assert_true(LOGICAL(lock>0,KIND=C_BOOL),                               &
+!$             "Did not generate single lock succesfully [invalid lock number]")
+
+!$ CALL omp_set_num_threads(3)
+!$OMP PARALLEL DEFAULT(NONE) SHARED(lock) REDUCTION(.AND.:test_ret)
+!$ CALL c_test_lock_blocking(test_ret, lock)
+!$OMP END PARALLEL
+!$ CALL assert_true(test_ret,"Set locks did not correctly block another thread")
+
+END SUBROUTINE test_lock_blocking
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lockqueue_multi
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+INTEGER(KIND=C_INT64_T) :: lock
+
+!$ CALL set_case_name("test_lockqueue_multi")
+
+!$ CALL c_test_create_single_lock(test_ret,lock)
+!$ CALL assert_true(test_ret, "Did not generate single lock succesfully")
+!$ CALL assert_true(LOGICAL(lock>0,KIND=C_BOOL),                               &
+!$             "Did not generate single lock succesfully [invalid lock number]")
+
+!$ CALL omp_set_num_threads(3)
+!$OMP PARALLEL DEFAULT(NONE) SHARED(lock) REDUCTION(.AND.:test_ret)
+!$ CALL c_test_lockqueue_multi(test_ret, lock)
+!$OMP END PARALLEL
+!$ CALL assert_true(test_ret, "Set locks did not queue correctly")
+
+END SUBROUTINE test_lockqueue_multi
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_testlock_nonblocking
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+INTEGER(KIND=C_INT64_T) :: lock
+
+!$ CALL set_case_name("test_testlock_nonblocking")
+
+!$ CALL c_test_create_single_lock(test_ret,lock)
+!$ CALL assert_true(test_ret, "Did not generate single lock succesfully")
+!$ CALL assert_true(LOGICAL(lock>0,KIND=C_BOOL),                               &
+!$             "Did not generate single lock succesfully [invalid lock number]")
+
+!$ CALL omp_set_num_threads(3)
+!$OMP PARALLEL DEFAULT(NONE) SHARED(lock) REDUCTION(.AND.:test_ret)
+!$ CALL c_test_testlock_nonblocking(test_ret, lock)
+!$OMP END PARALLEL
+!$ CALL assert_true(test_ret,"Set locks did not correctly block another thread")
+
+END SUBROUTINE test_testlock_nonblocking
+
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock_invalid_lock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lock_invalid_lock")
+CALL c_test_lock_invalid_lock(test_ret)
+CALL assert_true(test_ret, "Did not handle/detect invalid lock request")
+
+END SUBROUTINE test_lock_invalid_lock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock_invalid_testlock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lock_invalid_testlock")
+CALL c_test_lock_invalid_testlock(test_ret)
+CALL assert_true(test_ret, "Did not handle/detect invalid testlock request")
+
+END SUBROUTINE test_lock_invalid_testlock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_release_locked_testlock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_release_locked_testlock")
+CALL c_test_release_locked_testlock(test_ret)
+CALL assert_true(test_ret,"Did not correctly handle the realeas of locked lock")
+
+END SUBROUTINE test_release_locked_testlock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock_testlock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lock_testlock")
+CALL c_test_lock_testlock(test_ret)
+CALL assert_true(test_ret, "Did not correctly lock a valid testlock")
+
+END SUBROUTINE test_lock_testlock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock_self_owned_testlock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lock_self_owned_testlock")
+CALL c_test_lock_self_owned_testlock(test_ret)
+CALL assert_true(test_ret,                                                     &
+                 "Did not handle/detect a lock request for a own testlock")
+
+END SUBROUTINE test_lock_self_owned_testlock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_unlock_already_unlocked
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_unlock_already_unlocked")
+CALL c_test_unlock_already_unlocked(test_ret)
+CALL assert_true(test_ret,                                                     &
+         "Did not handle/detect an unlock request for an already unlocked lock")
+
+END SUBROUTINE test_unlock_already_unlocked
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_unlock_invalid
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_unlock_invalid")
+CALL c_test_unlock_invalid(test_ret)
+CALL assert_true(test_ret, "Did not handle/detect invalid unlock request")
+
+END SUBROUTINE test_unlock_invalid
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lockqueue_single
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lockqueue_single")
+CALL c_test_lockqueue_single(test_ret)
+CALL assert_true(test_ret, "Did not handle a valid lockQueue request")
+
+END SUBROUTINE test_lockqueue_single
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lockqueue_invalid
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lockqueue_invalid")
+CALL c_test_lockqueue_invalid(test_ret)
+CALL assert_true(test_ret, "Did not handle/detect invalid lockQueue request")
+
+END SUBROUTINE test_lockqueue_invalid
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_lock_self_owned_lock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_lock_self_owned_lock")
+CALL c_test_lock_self_owned_lock(test_ret)
+CALL assert_true(test_ret,                                                     &
+                 "Did not handle/detect lock request for already owned lock")
+
+END SUBROUTINE test_lock_self_owned_lock
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_release_locked_lock
+
+IMPLICIT NONE
+
+LOGICAL(KIND=C_BOOL) :: test_ret
+
+CALL set_case_name("test_release_locked_lock")
+CALL c_test_release_locked_lock(test_ret)
+CALL assert_true(test_ret,"Did not correctly handle the realeas of locked lock")
+
+END SUBROUTINE test_release_locked_lock
 
 !------------------------------------------------------------------------------!
 

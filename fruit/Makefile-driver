@@ -7,18 +7,20 @@
 STATIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_static.exe
 DYNAMIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe
 
-# All of the libraries which have FRUIT tests
-FRUITTESTS=$(patsubst ../%/test,%,$(wildcard $(addprefix ../, $(addsuffix /test, ${ALL_LIBS}))))
+# All of the the built FRUIT tests objects
+FRUIT_BUILT_TESTS=$(wildcard                                                   \
+                    $(addprefix ../,                                           \
+                      $(addsuffix /test/fruit_test_*.o, ${ALL_LIBS})))
 
 # Currently built libraries
-FRUIT_CURRENT_LIBS=$(patsubst lib%.so, %, $(notdir $(wildcard ${LIBDIR_OUT}/lib/*.so)))
+FRUIT_CURRENT_LIBS=$(patsubst lib%.so, %,                                      \
+                     $(notdir $(wildcard ${LIBDIR_OUT}/lib/*.so)))
 
-# Intersection of the above - i.e. names of libraries which are both compiled
-# and have tests available (so we can compile only tests that actually exist)
-FRUIT_AVAILABLE_TESTS=$(foreach libname,                                       \
-                        ${FRUIT_CURRENT_LIBS},                                 \
-                        $(filter ${libname},                                   \
-                        ${FRUITTESTS}))
+# All of the libraries which have FRUIT tests built
+FRUIT_AVAILABLE_TESTS=$(strip                                                  \
+                        $(foreach libfile, ${ALL_LIBS},                        \
+                          $(if $(filter %${libfile}.o,                         \
+                                         ${FRUIT_BUILT_TESTS}),${libfile},)))
 
 .PHONY: test
 test: $(STATIC_EXEC) $(DYNAMIC_EXEC)

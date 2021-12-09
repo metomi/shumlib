@@ -22,7 +22,8 @@
 MODULE fruit_test_shum_wgdos_packing_mod
 
 USE fruit
-USE, INTRINSIC :: ISO_C_BINDING, ONLY: C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE
+USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         & 
+  C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE, C_LOC, C_F_POINTER
 
 IMPLICIT NONE 
 
@@ -191,29 +192,40 @@ END SUBROUTINE sample_unpacked_data_1d
 
 SUBROUTINE sample_packed_data(sample)
 IMPLICIT NONE 
-INTEGER(KIND=int32) :: sample(21)
 
-sample = [          21_int32,                                                  &
-                     1_int32,                                                  &
-                327686_int32,                                                  &
-            1092616192_int32,                                                  &
-                131073_int32,                                                  &
-              92274688_int32,                                                  &
-            1096810496_int32,                                                  &
-                131073_int32,                                                  &
-             377487360_int32,                                                  &
-            1103101952_int32,                                                  &
-                131073_int32,                                                  &
-              92274688_int32,                                                  &
-            1108344832_int32,                                                  &
-                131073_int32,                                                  &
-             377487360_int32,                                                  &
-            1108738048_int32,                                                  &
-                131073_int32,                                                  &
-              92274688_int32,                                                  &
-            1109000192_int32,                                                  &
-                131073_int32,                                                  &
-             377487360_int32   ]
+INTEGER(KIND=int32)          :: sample(21)
+INTEGER(KIND=int32), POINTER :: sample_pointer(:)
+INTEGER(KIND=int64), TARGET  :: sample64(11)
+
+! Define the data as a 64-bit array.  The reason for this is that although the
+! packing algorithm represents the data as 32-bit, the actual array is just a
+! stream of bits (which might not necessary map correctly onto 32-bit ints)
+! This isn't a problem in general usage because the packed arrays are merely
+! passed around, but here we need to set the values explicitly, so having a
+! full 64-bit int is more permissive and avoids compile errors.
+sample64 = [                                                                   &
+           4294967317_int64,                                                   &
+  4692750811720384518_int64,                                                   &
+   396316767208734721_int64,                                                   &
+      562955345199104_int64,                                                   &
+  4737786808371249152_int64,                                                   &
+   396316767208734721_int64,                                                   &
+      562955356733440_int64,                                                   &
+  4761993656368365568_int64,                                                   &
+   396316767208734721_int64,                                                   &
+      562955357388800_int64,                                                   &
+            377487360_int64   ]
+
+! Use a pointer array of the correct KIND and size
+ALLOCATE(sample_pointer(21))
+
+! And the C pointer trick to force it to point at the same memory location
+CALL C_F_POINTER(C_LOC(sample64), sample_pointer, [21_int64])
+
+! Now copy the values onto the actual ouput array and tidy up
+sample(:) = sample_pointer(:)
+
+NULLIFY(sample_pointer)
 
 END SUBROUTINE sample_packed_data
 
@@ -723,7 +735,8 @@ INTEGER(KIND=int64), PARAMETER :: len_packed = 24
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: expected_packed_data(len_packed)
+INTEGER(KIND=int32), POINTER :: expected_packed_data(:)
+INTEGER(KIND=int64), TARGET  :: expected_packed_data64(len_packed/2)
 REAL(KIND=real64)   :: expected_unpacked_data(len1_unpacked, len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
@@ -753,30 +766,33 @@ status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
 CALL assert_equals(0_int32, status,                                            &
     "Packing of array returned non-zero exit status")
 
-expected_packed_data = [ 24_int32,                                             &
-                          1_int32,                                             &
-                     327686_int32,                                             &
-                          0_int32,                                             &
-                     131073_int32,                                             &
-                  180355072_int32,                                             &
-                          0_int32,                                             &
-                    8585218_int32,                                             &
-                 -402653185_int32,                                             &
-                 1912602624_int32,                                             &
-                          0_int32,                                             &
-                    8650754_int32,                                             &
-                 -805306369_int32,                                             &
-                 1719664640_int32,                                             &
-                          0_int32,                                             &
-                          0_int32,                                             &
-                          0_int32,                                             &
-                    8650754_int32,                                             &
-                 1342177279_int32,                                             &
-                -1124073472_int32,                                             &
-                          0_int32,                                             &
-                    8650754_int32,                                             &
-                -1207959553_int32,                                             &
-                 -554696704_int32     ]
+! Define the expected data as a 64-bit array.  The reason for this is that 
+! although the packing algorithm represents the data as 32-bit, the actual 
+! array is just a stream of bits (which might not necessary map correctly 
+! onto 32-bit ints) This isn't a problem in general usage because the 
+! packed arrays are merely passed around, but here we need to set the values 
+! explicitly, so having a full 64-bit int array is more permissive and avoids 
+! compile errors
+expected_packed_data64 = [                                                     &
+  4294967320_int64,                                                            &
+  327686_int64,                                                                &
+  774619135907856385_int64,                                                    &
+  36873230539030528_int64,                                                     &
+  8214565724216098815_int64,                                                   &
+  37154705515741184_int64,                                                     &
+  7385903392377274367_int64,                                                   &
+  0_int64,                                                                     &
+  37154705515741184_int64,                                                     &
+ -4827858799198994433_int64,                                                   &
+  37154705515741184_int64,                                                     &
+ -2382404199791984641_int64 ]
+
+! Use a pointer array of the correct KIND and size
+ALLOCATE(expected_packed_data(len_packed))
+
+! And the C pointer trick to force it to point at the same memory location
+CALL C_F_POINTER(C_LOC(expected_packed_data64),                                &
+                 expected_packed_data, [len_packed])
 
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
@@ -819,7 +835,8 @@ INTEGER(KIND=int64), PARAMETER :: len_packed = 26
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: expected_packed_data(len_packed)
+INTEGER(KIND=int32), POINTER :: expected_packed_data(:)
+INTEGER(KIND=int64), TARGET  :: expected_packed_data64(len_packed/2)
 REAL(KIND=real64)   :: expected_unpacked_data(len1_unpacked, len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
@@ -849,32 +866,34 @@ status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
 CALL assert_equals(0_int32, status,                                            &
     "Packing of array returned non-zero exit status")
 
-expected_packed_data = [ 26_int32,                                             &
-                          1_int32,                                             &
-                     327686_int32,                                             &
-                 1094713344_int32,                                             &
-                    2162690_int32,                                             &
-                 -939524097_int32,                                             &
-                  536870912_int32,                                             &
-                 1096810496_int32,                                             &
-                    2162690_int32,                                             &
-                  536870911_int32,                                             &
-                 1610612736_int32,                                             &
-                 1103101952_int32,                                             &
-                    2228226_int32,                                             &
-                  939524095_int32,                                             &
-                  134217728_int32,                                             &
-                -1055916032_int32,                                             &
-                    2097153_int32,                                             &
-                         -1_int32,                                             &
-                 1108738048_int32,                                             &
-                    2228226_int32,                                             &
-                -1207959553_int32,                                             &
-                  536870912_int32,                                             &
-                 1109000192_int32,                                             &
-                    2228226_int32,                                             &
-                 1342177279_int32,                                             &
-                  402653184_int32  ]
+! Define the expected data as a 64-bit array.  The reason for this is that 
+! although the packing algorithm represents the data as 32-bit, the actual 
+! array is just a stream of bits (which might not necessary map correctly 
+! onto 32-bit ints) This isn't a problem in general usage because the 
+! packed arrays are merely passed around, but here we need to set the values 
+! explicitly, so having a full 64-bit int array is more permissive and avoids 
+! compile errors
+expected_packed_data64 = [                                                     &
+  4294967322_int64,                                                            &
+  4701758010975125510_int64,                                                   &
+ -4035225270416769022_int64,                                                   &
+  4710765210766409728_int64,                                                   &
+  2305843004920889346_int64,                                                   &
+  4737786809604374528_int64,                                                   &
+  4035225261831225346_int64,                                                   &
+ -4535124824627871744_int64,                                                   &
+ -4292870143_int64,                                                            &
+  9570158906834944_int64,                                                      &
+  2305843012300701695_int64,                                                   &
+  9570158907097088_int64,                                                      &
+  1729382258252447743_int64   ]
+
+! Use a pointer array of the correct KIND and size
+ALLOCATE(expected_packed_data(len_packed))
+
+! And the C pointer trick to force it to point at the same memory location
+CALL C_F_POINTER(C_LOC(expected_packed_data64),                                &
+                 expected_packed_data, [len_packed])
 
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")
@@ -917,7 +936,8 @@ INTEGER(KIND=int64), PARAMETER :: len_packed = 22
 REAL(KIND=real64)   :: unpacked_data(len1_unpacked, len2_unpacked)
 INTEGER(KIND=int32) :: packed_data(len1_unpacked*len2_unpacked)
 
-INTEGER(KIND=int32) :: expected_packed_data(len_packed)
+INTEGER(KIND=int32), POINTER :: expected_packed_data(:)
+INTEGER(KIND=int64), TARGET  :: expected_packed_data64(len_packed/2)
 REAL(KIND=real64)   :: expected_unpacked_data(len1_unpacked, len2_unpacked)
 
 INTEGER(KIND=int64) :: num_words
@@ -948,28 +968,32 @@ status = f_shum_wgdos_pack(unpacked_data, accuracy, mdi, packed_data,          &
 CALL assert_equals(0_int32, status,                                            &
     "Packing of array returned non-zero exit status")
 
-expected_packed_data = [ 22_int32,                                             &
-                          1_int32,                                             &
-                     327686_int32,                                             &
-                          0_int32,                                             &
-                    2228226_int32,                                             &
-                 -939524097_int32,                                             &
-                  201326592_int32,                                             &
-                          0_int32,                                             &
-                   10682370_int32,                                             &
-                  436207615_int32,                                             &
-                -2147483648_int32,                                             &
-                          0_int32,                                             &
-                    2097153_int32,                                             &
-                 1476395007_int32,                                             &
-                -1055916032_int32,                                             &
-                    2097153_int32,                                             &
-                         -1_int32,                                             &
-                          0_int32,                                             &
-                          0_int32,                                             &
-                 1109000192_int32,                                             &
-                     131073_int32,                                             &
-                  377487360_int32  ]
+! Define the expected data as a 64-bit array.  The reason for this is that 
+! although the packing algorithm represents the data as 32-bit, the actual 
+! array is just a stream of bits (which might not necessary map correctly 
+! onto 32-bit ints) This isn't a problem in general usage because the 
+! packed arrays are merely passed around, but here we need to set the values 
+! explicitly, so having a full 64-bit int array is more permissive and avoids 
+! compile errors
+expected_packed_data64 = [                                                     &
+  4294967318_int64,                                                            &
+  327686_int64,                                                                &
+ -4035225270416703486_int64,                                                   &
+  201326592_int64,                                                             &
+  1873497440701841410_int64,                                                   &
+  2147483648_int64,                                                            &
+  6341068271044788225_int64,                                                   &
+  9007206788759552_int64,                                                      &
+  4294967295_int64,                                                            &
+  4763119555897720832_int64,                                                   &
+  1621295865853509633_int64   ]
+
+! Use a pointer array of the correct KIND and size
+ALLOCATE(expected_packed_data(len_packed))
+
+! And the C pointer trick to force it to point at the same memory location
+CALL C_F_POINTER(C_LOC(expected_packed_data64),                                &
+                 expected_packed_data, [len_packed])
 
 CALL assert_equals(len_packed, num_words,                                      &
     "Number of packed words is incorrect")

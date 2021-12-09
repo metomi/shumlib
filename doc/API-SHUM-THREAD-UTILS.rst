@@ -151,7 +151,7 @@ this thread abandons trying to obtain ownership of the lock.
             successful acquisition of the lock. Is equal to alreadyLockedCode
             if the lock is already locked. Else it is equal to failCode.
 
-``f_shum_Unlock``
+``f_shum_unLock``
 ''''''''''''''''''''''''''''
 
 This will unlock the lock "l" if:
@@ -165,7 +165,7 @@ If these conditions are met it returns successCode, else it returns failCode
         ``c_shum_thread_utils.h``
 
     **Syntax**
-        ``result = f_shum_Unlock(l)``
+        ``result = f_shum_unLock(l)``
 
     **Arguments**
         ``l (int64_t)``
@@ -344,3 +344,26 @@ each receive a contiguous sub-range.
                 ``incr (const int64_t *const restrict)``
                     The first argument is ``incr``, a pointer to a value passed
                     on from the parent.
+
+``f_shum_LockQueue``
+''''''''''''''''''''
+
+Returns the length of the pending lock queue for a given lock.
+
+    **Required header/s**
+        ``c_shum_thread_utils.h``
+
+    **Syntax**
+        ``length = f_shum_LockQueue(lock)``
+
+    **Arguments**
+        ``lock (int64_t *)``
+            The lock to query the queue length of.
+
+    **Return Value**
+        ``(int64_t)``
+            The length of the pending lock queue. Returns zero if the lock was
+            not valid. (Note: the queue length may also be zero, so there is
+            no way to determin if the ``lock`` argument passed was valid
+            purely from the return code.)
+

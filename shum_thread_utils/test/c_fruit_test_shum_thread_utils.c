@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
 #include "c_shum_thread_utils.h"
 #include "c_fruit_test_shum_thread_utils.h"
 
@@ -90,6 +92,401 @@ void c_test_invalid_lock_release(bool *test_ret)
 
 /******************************************************************************/
 
+void c_test_lockqueue_invalid(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res = 0;
+  *test_ret = false;
+
+  res = f_shum_LockQueue(&lock);
+
+  *test_ret = (res==0);
+
+}
+
+/******************************************************************************/
+
+void c_test_unlock_foreign(bool *test_ret, int64_t *lock)
+{
+  int64_t res = 0;
+  *test_ret = false;
+
+  int64_t tid = f_shum_threadID();
+
+  /* trigger valiables are used to provide (weak) synchronisation */
+  static volatile sig_atomic_t trigger1 = 0;
+  static volatile sig_atomic_t trigger2 = 0;
+
+  if (tid==0)
+  {
+    res = f_shum_Lock(lock);
+    trigger1 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger1!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==1)
+  {
+    res = f_shum_unLock(lock);
+    trigger2 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger2!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==0)
+  {
+    res = f_shum_unLock(lock);
+  }
+
+
+  switch(tid)
+  {
+    case 0:
+      *test_ret = (res==0);
+      break;
+
+    case 1:
+      *test_ret = (res!=0);
+      break;
+
+    default:
+      *test_ret = false;
+  }
+
+}
+
+/******************************************************************************/
+
+void c_test_lock_blocking(bool *test_ret, int64_t *lock)
+{
+  int64_t res = 0;
+  *test_ret = false;
+
+  int64_t tid = f_shum_threadID();
+
+  /* trigger valiables are used to provide (weak) synchronisation */
+  static volatile sig_atomic_t trigger1 = 0;
+  static volatile sig_atomic_t trigger2 = 0;
+  static volatile sig_atomic_t trigger3 = 0;
+
+  if (tid==0)
+  {
+    res += f_shum_Lock(lock);
+    trigger1 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger1!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==1)
+  {
+    trigger3 = 1;
+    f_shum_threadFlush();
+    res += f_shum_Lock(lock);
+    f_shum_threadFlush();
+    /* Test if trigger2 has not been set...
+     * if it has not, we have got there too fast,
+     * and so mustn't have blocked at the lock.
+     */
+    if (trigger2==0)
+    {
+      res += 1;
+    }
+  }
+
+  while(trigger2!=1 && tid!=2)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==2)
+  {
+    while(trigger3!=1)
+    {
+      /* spin */
+      f_shum_threadFlush();
+    }
+    f_shum_threadFlush();
+    sleep(1);
+    trigger2 = 1;
+    f_shum_threadFlush();
+  }
+  else
+  {
+    res += f_shum_unLock(lock);
+  }
+
+  switch(tid)
+  {
+    case 0:
+    case 1:
+    case 2:
+      *test_ret = (res==0);
+      break;
+
+    default:
+      *test_ret = false;
+  }
+
+}
+
+/******************************************************************************/
+
+void c_test_lockqueue_multi(bool *test_ret, int64_t *lock)
+{
+  int64_t res = 0;
+  int64_t resx = 0;
+  uint64_t breaker =0x0000000000000000;
+  *test_ret = false;
+
+  int64_t tid = f_shum_threadID();
+
+  /* trigger valiables are used to provide (weak) synchronisation */
+  static volatile sig_atomic_t trigger1 = 0;
+  static volatile sig_atomic_t trigger2 = 0;
+  static volatile sig_atomic_t trigger3 = 0;
+  static volatile sig_atomic_t trigger4 = 0;
+
+  /* this should add zero, as there are no locks */
+  res += f_shum_LockQueue(lock);
+
+  if (tid==1)
+  {
+    trigger1 = 1;
+    f_shum_threadFlush();
+  }
+
+  if (tid==2)
+  {
+    trigger2 = 1;
+    f_shum_threadFlush();
+  }
+
+  if (tid==0)
+  {
+    while(trigger1!=1)
+    {
+      /* spin */
+      f_shum_threadFlush();
+    }
+    f_shum_threadFlush();
+    while(trigger2!=1)
+    {
+      /* spin */
+      f_shum_threadFlush();
+    }
+    f_shum_threadFlush();
+    res += f_shum_Lock(lock);
+    trigger3 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger3!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+
+  f_shum_threadFlush();
+
+  if (tid==1)
+  {
+    res += f_shum_Lock(lock);
+    f_shum_threadFlush();
+  }
+
+  if (tid==2)
+  {
+    while(f_shum_LockQueue(lock)!=1)
+    {
+      /* spin */
+      f_shum_threadFlush();
+    }
+    f_shum_threadFlush();
+    trigger4 = 1;
+    f_shum_threadFlush();
+    res += f_shum_Lock(lock);
+  }
+
+  while(trigger4!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  /* there is a race here between thread 0 and 2. */
+  while(tid==0 && f_shum_LockQueue(lock)!=2)
+  {
+    /* spin */
+    breaker++;
+    if(breaker==0xFFFFFFFFFFFFFFFF)
+    {
+      /* prevent a deadlock, but if we get here the test will fail */
+      resx = 1;
+      break;
+    }
+  }
+
+  /* there is a race here between thread 1 and 2. */
+  while(tid==1 && f_shum_LockQueue(lock)!=1)
+  {
+    /* spin */
+    breaker++;
+    if(breaker==0xFFFFFFFFFFFFFFFF)
+    {
+      /* prevent a deadlock, but if we get here the test will fail */
+      resx = 1;
+      break;
+    }
+  }
+
+  /* there is a race here between thread 1 and 2. */
+  if ( tid==2 )
+  {
+    while(f_shum_LockQueue(lock)==1)
+    {
+      /* ensure lock release is ordered */
+      resx += f_shum_unLock(lock);
+      resx += f_shum_Lock(lock);
+    }
+  }
+
+  res += f_shum_LockQueue(lock);
+
+  res += f_shum_unLock(lock);
+
+  switch(tid)
+  {
+    case 0:
+      *test_ret = (res==2) && (resx==0);
+      break;
+
+    case 1:
+      *test_ret = (res==1) && (resx==0);
+      break;
+
+    case 2:
+      *test_ret = (res==0) && (resx==0);
+      break;
+
+    default:
+      *test_ret = false;
+  }
+
+}
+
+/******************************************************************************/
+
+void c_test_testlock_nonblocking(bool *test_ret, int64_t *lock)
+{
+  int64_t res = 0;
+  *test_ret = false;
+
+  int64_t tid = f_shum_threadID();
+
+  /* trigger valiables are used to provide (weak) synchronisation */
+  static volatile sig_atomic_t trigger1 = 0;
+  static volatile sig_atomic_t trigger2 = 0;
+  static volatile sig_atomic_t trigger3 = 0;
+
+  if (tid==0)
+  {
+    res += f_shum_Lock(lock);
+    trigger1 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger1!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==1)
+  {
+    int64_t res_capture =0;
+    trigger3 = 1;
+    f_shum_threadFlush();
+    res_capture = f_shum_TestLock(lock);
+    f_shum_threadFlush();
+    /* Test if trigger2 has not been set...
+     * if it has, we have got there too slowly,
+     * and so probably have blocked at the lock.
+     */
+    if (trigger2!=0)
+    {
+      res += 1;
+    }
+
+    f_shum_threadFlush();
+
+    if (res_capture==-1)
+    {
+      res += res_capture;
+    }
+  }
+
+  while(trigger2!=1 && tid!=2)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==2)
+  {
+    while(trigger3!=1)
+    {
+      /* spin */
+      f_shum_threadFlush();
+    }
+    f_shum_threadFlush();
+    sleep(1);
+    trigger2 = 1;
+    f_shum_threadFlush();
+  }
+  else
+  {
+    res += f_shum_unLock(lock);
+  }
+
+  switch(tid)
+  {
+    case 0:
+    case 1:
+    case 2:
+      *test_ret = (res==0);
+      break;
+
+    default:
+      *test_ret = false;
+  }
+
+}
+
+/******************************************************************************/
+
 void c_test_create_and_release_lock(bool *test_ret)
 {
   int64_t lock = -1;
@@ -105,6 +502,19 @@ void c_test_create_and_release_lock(bool *test_ret)
 
   *test_ret = (res1==0 && res2!=0);
 
+}
+
+/******************************************************************************/
+
+void c_test_create_single_lock(bool *test_ret, int64_t *lock)
+{
+  int64_t res1 = 0;
+
+  *test_ret = false;
+
+  *lock = f_shum_newLock();
+
+  *test_ret = (res1==0);
 }
 
 /******************************************************************************/
@@ -193,6 +603,424 @@ void c_test_sweep_release_locks(bool *test_ret)
   }
 
 }
+
+/******************************************************************************/
+
+void c_test_sweep_unlock_locks(bool *test_ret)
+{
+  int64_t res=0;
+  int64_t i;
+  int64_t max;
+
+  *test_ret = true;
+
+  max = f_shum_newLock();
+
+  if (max<2500)
+  {
+    max=2500;
+  }
+
+  for (i=0;i<max;i++)
+  {
+    res = f_shum_unLock(&i);
+
+    *test_ret = ( *test_ret
+                  && (res==1||res==0)
+                );
+
+    if (!*test_ret) break;
+  }
+
+}
+
+/******************************************************************************/
+
+void c_test_lock(bool *test_ret, int64_t *lock)
+{
+  int64_t res = 0;
+
+  *test_ret = false;
+
+  *lock = f_shum_newLock();
+
+  res = f_shum_Lock(lock);
+
+  *test_ret = (res==0);
+}
+
+/******************************************************************************/
+
+void c_test_release_pending_locks(bool *test_ret, int64_t *lock)
+{
+  /* trigger valiables are used to provide (weak) synchronisation */
+  static volatile sig_atomic_t trigger1 = 0;
+  static volatile sig_atomic_t trigger2 = 0;
+  static volatile sig_atomic_t trigger3 = 0;
+  static volatile sig_atomic_t trigger4 = 0;
+  static volatile sig_atomic_t trigger5 = 0;
+
+  /* result comparison variables */
+  static volatile sig_atomic_t res3t1 = 0;
+  static volatile sig_atomic_t res3t2 = 0;
+
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+  int64_t res3 = 0;
+  bool res4 = false;
+
+  int64_t tid = f_shum_threadID();
+
+  *test_ret = false;
+
+  if (tid==0)
+  {
+    res1 = f_shum_Lock(lock);
+    trigger1 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger1!=1)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  if (tid==1)
+  {
+    res1 = f_shum_Lock(lock);
+  }
+
+  if (tid==2)
+  {
+    while(f_shum_LockQueue(lock)!=1)
+    {
+      /* spin */
+    }
+    f_shum_threadFlush();
+    res1 = f_shum_Lock(lock);
+  }
+
+  while(trigger2!=1 && tid!=0)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  while(f_shum_LockQueue(lock)!=2-tid && f_shum_inPar())
+  {
+    /* spin */
+    if (f_shum_LockQueue(lock)==1 && tid==2)
+    {
+      /* ensure lock release is ordered */
+      res2 = f_shum_unLock(lock);
+      res1 = f_shum_Lock(lock);
+    }
+  }
+  f_shum_threadFlush();
+
+  while(trigger3!=1 && tid==2)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  res2 = f_shum_unLock(lock);
+  /* there is a potential race to this point, so threads 1 and 2
+   * could both have unlocked by the time we get to the release.
+   * This means the succesfull thread could be 1 or 2 (but not both).
+   */
+  res3 = f_shum_releaseLock(lock);
+
+  if (tid==0)
+  {
+    trigger2 = 1;
+    f_shum_threadFlush();
+  }
+
+  if (tid==1)
+  {
+    trigger3 = 1;
+    trigger4 = 1;
+    res3t1 = (sig_atomic_t)res3;
+    f_shum_threadFlush();
+  }
+
+  if (tid==2)
+  {
+    res3t2 = (sig_atomic_t)res3;
+    trigger5 = 1;
+    f_shum_threadFlush();
+  }
+
+  while(trigger4!=1 && tid!=0)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  while(trigger5!=1 && tid!=0)
+  {
+    /* spin */
+    f_shum_threadFlush();
+  }
+  f_shum_threadFlush();
+
+  f_shum_threadFlush();
+
+  /* check the results were what we expected */
+  if (!f_shum_inPar())
+  {
+    res4=true;
+  }
+  else
+  {
+    switch(tid)
+    {
+      case 0:
+        res4=(res3!=0);
+        break;
+
+      case 1:
+      case 2:
+      {
+        int64_t ires3t1, ires3t2;
+
+        ires3t1 = (int)res3t1;
+        ires3t2 = (int)res3t2;
+
+        res4 = (res3==0) || (res3==1);
+        res4 = res4 && (ires3t1!=ires3t2);
+        break;
+      }
+
+      default:
+        res4=false;
+        break;
+    }
+  }
+
+  *test_ret = (res1==0 && res2==0 && res4==true);
+}
+
+/******************************************************************************/
+
+void c_test_lock_testlock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res = f_shum_TestLock(&lock);
+
+  *test_ret = (res==0);
+}
+
+
+/******************************************************************************/
+
+void c_test_unlock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_Lock(&lock);
+  res2 = f_shum_unLock(&lock);
+
+  *test_ret = (res1==0 && res2==0);
+}
+
+/******************************************************************************/
+
+void c_test_unlock_invalid(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res = 0;
+
+  *test_ret = false;
+
+  res = f_shum_unLock(&lock);
+
+  *test_ret = (res!=0);
+}
+
+/******************************************************************************/
+
+void c_test_lock_invalid_lock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res = f_shum_Lock(&lock);
+
+  *test_ret = (res==0);
+}
+
+/******************************************************************************/
+
+void c_test_lock_invalid_testlock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res = f_shum_TestLock(&lock);
+
+  *test_ret = (res==0);
+}
+
+/******************************************************************************/
+
+void c_test_unlock_already_unlocked(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+  int64_t res3 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_Lock(&lock);
+  res2 = f_shum_unLock(&lock);
+  res3 = f_shum_unLock(&lock);
+
+  *test_ret = (res1==0 && res2==0 && res3!=0);
+}
+
+/******************************************************************************/
+
+void c_test_release_locked_lock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_Lock(&lock);
+  res2 = f_shum_releaseLock(&lock);
+
+  *test_ret = (res1==0 && res2!=0);
+}
+
+/******************************************************************************/
+
+void c_test_release_locked_testlock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_TestLock(&lock);
+  res2 = f_shum_releaseLock(&lock);
+
+  *test_ret = (res1==0 && res2!=0);
+}
+
+/******************************************************************************/
+
+void c_test_lock_self_owned_lock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+  int64_t res3 = 0;
+  int64_t res4 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_Lock(&lock);
+  res2 = f_shum_Lock(&lock);
+
+  res3 = f_shum_unLock(&lock);
+
+  res4 = f_shum_releaseLock(&lock);
+
+  *test_ret = (res1==0 && res2!=0 && res3==0 && res4==0);
+}
+
+
+/******************************************************************************/
+
+void c_test_lockqueue_single(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+  int64_t res3 = 0;
+  int64_t res4 = 0;
+  int64_t res5 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_LockQueue(&lock);
+
+  res2 = f_shum_Lock(&lock);
+
+  res3 = f_shum_LockQueue(&lock);
+
+  res4 = f_shum_unLock(&lock);
+
+  res5 = f_shum_releaseLock(&lock);
+
+  *test_ret = (res1==0 && res2==0 && res3==0 && res4==0 && res5==0);
+}
+
+/******************************************************************************/
+
+void c_test_lock_self_owned_testlock(bool *test_ret)
+{
+  int64_t lock = -1;
+  int64_t res1 = 0;
+  int64_t res2 = 0;
+  int64_t res3 = 0;
+  int64_t res4 = 0;
+
+  *test_ret = false;
+
+  lock = f_shum_newLock();
+
+  res1 = f_shum_TestLock(&lock);
+  res2 = f_shum_TestLock(&lock);
+
+  res3 = f_shum_unLock(&lock);
+
+  res4 = f_shum_releaseLock(&lock);
+
+  *test_ret = (res1==0 && res2!=0 && res3==0 && res4==0);
+}
+
 
 /******************************************************************************/
 
