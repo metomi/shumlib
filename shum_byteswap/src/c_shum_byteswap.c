@@ -213,7 +213,7 @@ INLINEQUAL void c_shum_byteswap_par_swap16(void **const array,
     const int64_t cincr=*incr;
 
 #if defined(_OPENMP) && !defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
-    #pragma omp parallel for default(none) private(i)
+    #pragma omp parallel for default(shared) private(i)
 #endif
     for (i=0; i<=span; i=i+1)
     {

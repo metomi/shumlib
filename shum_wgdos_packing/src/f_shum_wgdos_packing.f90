@@ -531,13 +531,14 @@ INTEGER(KIND=int32), INTENT(OUT) :: packed_field(len_packed_field)
 INTEGER(KIND=int64), INTENT(OUT) :: n_packed_words
 CHARACTER(LEN=*),    INTENT(OUT) :: message
 
-INTEGER(KIND=int64) :: i, j
+INTEGER(KIND=int64) :: i, j, jj, nthreads
+INTEGER(KIND=int64) :: jj_size
 INTEGER(KIND=int64) :: i1
 
 REAL(KIND=real64)   :: aprec, bprec
 
 LOGICAL :: l_thread_error     ! Error flag for each OMP thread
-LOGICAL :: l_in_parallel      ! If .TRUE. the routine was called 
+LOGICAL :: l_in_parallel      ! If .TRUE. the routine was called
                               ! inside a parallel region
 
 INTEGER(KIND=int64) :: iword(rows) ! per row sizes
@@ -595,25 +596,34 @@ IF(l_in_parallel) THEN
 
 ELSE
 
-!$OMP  PARALLEL DO DEFAULT(NONE) SCHEDULE(STATIC)                              &
-!$OMP& PRIVATE(j, status)                                                      &
+!$OMP  PARALLEL  DEFAULT(NONE)                                                 &
+!$OMP& PRIVATE(j, status, jj, jj_size, nthreads)                               &
 !$OMP& SHARED(rows, field, cols, rmdi, aprec, bprec, iword, icomp)             &
 !$OMP& REDUCTION(.OR.: l_thread_error)
-  DO j=1,rows
+
+  nthreads = 1
+!$ nthreads = omp_get_num_threads()
+
+  jj_size = (rows+nthreads-1)/nthreads
+  j = 1
+!$ j = omp_get_thread_num() + 1
+
+  DO jj = (j-1)*jj_size+1, MIN(j*jj_size,rows)
 
     ! If this thread's error flag has been triggered we should not continue
     ! (it is set below if any overflowing values are encountered)
     IF (l_thread_error) CYCLE
 
     status = f_shum_wgdos_pack_expl_arg64_row(                                 &
-      field, cols, rows, j, aprec, bprec, rmdi, icomp, iword)
+      field, cols, rows, jj, aprec, bprec, rmdi, icomp, iword)
 
     IF(status /= 0) THEN
       l_thread_error = .TRUE.
     END IF
 
-  END DO ! j
-!$OMP END PARALLEL DO
+  END DO ! jj
+
+!$OMP END PARALLEL
 
 END IF
 
