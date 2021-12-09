@@ -613,10 +613,12 @@ IF (ALLOCATED(integer_constants) .AND. (SIZE(integer_constants) /= DIM)) THEN
     RETURN
   END IF
 END IF
-ALLOCATE(integer_constants(DIM), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for integer_constants"
-  RETURN
+IF (.NOT. ALLOCATED(integer_constants)) THEN
+  ALLOCATE(integer_constants(DIM), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for integer_constants"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -684,10 +686,12 @@ IF (ALLOCATED(real_constants) .AND. (SIZE(real_constants) /= DIM)) THEN
     RETURN
   END IF
 END IF
-ALLOCATE(real_constants(DIM), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for real_constants"
-  RETURN
+IF (.NOT. ALLOCATED(real_constants)) THEN
+  ALLOCATE(real_constants(DIM), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for real_constants"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -760,10 +764,12 @@ IF (ALLOCATED(level_dependent_constants)                                       &
     RETURN
   END IF
 END IF
-ALLOCATE(level_dependent_constants(dim1, dim2), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for level_dependent_constants"
-  RETURN
+IF (.NOT. ALLOCATED(level_dependent_constants)) THEN
+  ALLOCATE(level_dependent_constants(dim1, dim2), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for level_dependent_constants"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -839,10 +845,12 @@ IF (ALLOCATED(row_dependent_constants)                                         &
     RETURN
   END IF
 END IF
-ALLOCATE(row_dependent_constants(dim1, dim2), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for row_dependent_constants"
-  RETURN
+IF (.NOT. ALLOCATED(row_dependent_constants)) THEN
+  ALLOCATE(row_dependent_constants(dim1, dim2), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for row_dependent_constants"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -917,10 +925,12 @@ IF (ALLOCATED(column_dependent_constants)                                      &
     RETURN
   END IF
 END IF
-ALLOCATE(column_dependent_constants(dim1, dim2), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for column_dependent_constants"
-  RETURN
+IF (.NOT. ALLOCATED(column_dependent_constants)) THEN
+  ALLOCATE(column_dependent_constants(dim1, dim2), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for column_dependent_constants"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -996,10 +1006,12 @@ IF (ALLOCATED(additional_parameters)                                           &
     RETURN
   END IF
 END IF
-ALLOCATE(additional_parameters(dim1, dim2), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for additional_parameters"
-  RETURN
+IF (.NOT. ALLOCATED(additional_parameters)) THEN
+  ALLOCATE(additional_parameters(dim1, dim2), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for additional_parameters"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -1070,10 +1082,12 @@ IF (ALLOCATED(extra_constants) .AND. (SIZE(extra_constants) /= DIM)) THEN
     RETURN
   END IF
 END IF
-ALLOCATE(extra_constants(DIM), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for extra_constants"
-  RETURN
+IF (.NOT. ALLOCATED(extra_constants)) THEN
+  ALLOCATE(extra_constants(DIM), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for extra_constants"
+    RETURN
+  ENDIF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -1141,10 +1155,12 @@ IF (ALLOCATED(temp_histfile) .AND. (SIZE(temp_histfile) /= DIM)) THEN
     RETURN
   END IF
 END IF
-ALLOCATE(temp_histfile(DIM), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for temp_histfile"
-  RETURN
+IF (.NOT. ALLOCATED(temp_histfile)) THEN
+  ALLOCATE(temp_histfile(DIM), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for temp_histfile"
+    RETURN
+  END IF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and
@@ -1227,10 +1243,12 @@ IF (ALLOCATED(compressed_index) .AND. (SIZE(compressed_index) /= DIM)) THEN
     RETURN
   END IF
 END IF
-ALLOCATE(compressed_index(DIM), STAT=STATUS)
-IF (STATUS /= 0) THEN
-  message = "Unable to allocate memory for compressed_index"
-  RETURN
+IF (.NOT. ALLOCATED(compressed_index)) THEN
+  ALLOCATE(compressed_index(DIM), STAT=STATUS)
+  IF (STATUS /= 0) THEN
+    message = "Unable to allocate memory for compressed_index"
+    RETURN
+  ENDIF
 END IF
 
 ! Now read in the file data (TODO: replace this with proper "buffin" and

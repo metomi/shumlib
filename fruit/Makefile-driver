@@ -1,11 +1,19 @@
-# NOTE: This makefile assumes that any library tests and libraries have 
+# NOTE: This makefile assumes that any library tests and libraries have
 # already been built, including the "compiled_libs.inc" listing file; it
 # will create a dynamic FRUIT test driver program which runs the main
 # test function from any included library tests.
 
-# Setup variables to store the target objects
+# Store targets we intend to build
+ifeq (${SHUM_BUILD_STATIC}, true)
 STATIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_static.exe
+else
+STATIC_EXEC=
+endif
+ifeq (${SHUM_BUILD_DYNAMIC}, true)
 DYNAMIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe
+else
+DYNAMIC_EXEC=
+endif
 
 # All of the the built FRUIT tests objects
 FRUIT_BUILT_TESTS=$(wildcard                                                   \
@@ -82,7 +90,7 @@ fruit_driver.f90: ${TEST_DYNAMIC} ${TEST_STATIC}
 	@echo "END PROGRAM fruit_driver" >> $@
 
 # Note: In both cases below the linking flags are included *twice*; this is
-# intentional, because some compilers strip away un-used symbols as they 
+# intentional, because some compilers strip away un-used symbols as they
 # include each library... This might remove symbol dependencies for other
 # libraries (depending on the order of the flags); the second inclusion means
 # the compiler will have a chance to pick up any previously missed symbols

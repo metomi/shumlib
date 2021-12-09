@@ -181,11 +181,12 @@ CHARACTER(KIND=C_CHAR, LEN=1), ALLOCATABLE :: cmessage(:)
 ALLOCATE(cmessage(LEN(message)+1))
 cmessage(1) = C_NULL_CHAR
 
-status = c_shum_byteswap(bytes,                                                &
-                         INT(swap_words, KIND=int64),                          &
-                         INT(word_len, KIND=int64),                            &
-                         cmessage,                                             &
-                         LEN(message, KIND=int64) + 1)
+status = INT(c_shum_byteswap(bytes,                                            &
+                             INT(swap_words, KIND=int64),                      &
+                             INT(word_len, KIND=int64),                        &
+                             cmessage,                                         &
+                             LEN(message, KIND=int64) + 1)                     &
+             , KIND=int32)
 message = f_shum_c2f_string(cmessage)
 
 DEALLOCATE(cmessage)
@@ -303,8 +304,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-                KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -344,8 +345,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-                KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -465,8 +466,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-               KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -506,8 +507,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-               KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -627,8 +628,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-               KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -668,8 +669,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-               KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -789,8 +790,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-               KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)
@@ -830,8 +831,8 @@ ELSE
                                INT(swap_words, KIND=int64),                    &
                                INT(word_len, KIND=int64),                      &
                                cmessage,                                       &
-                               LEN(message, KIND=int64) + 1),                  &
-               KIND=int32)
+                               LEN(message, KIND=int64) + 1)                   &
+               , KIND=int32)
   message = f_shum_c2f_string(cmessage)
 
   DEALLOCATE(cmessage)

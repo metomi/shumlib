@@ -22,6 +22,10 @@ SHUM_TMPDIR ?= $(shell mktemp -d)
 # Setup Base directory. This is included as the base in all paths
 DIR_ROOT ?= ${PWD}
 
+# Set switches controlling what type of test executables are built
+SHUM_BUILD_DYNAMIC ?= true
+SHUM_BUILD_STATIC ?= true
+
 # Setup the flags which will be passed to all compilations - add the openMP
 # flags based on the setting below (defaults to true)
 SHUM_OPENMP ?= true
@@ -277,8 +281,12 @@ test: ${FRUIT} $(addsuffix _tests, $(patsubst lib%.so, %, $(notdir $(wildcard ${
 # 'make run_tests' runs the currently built tests
 run_tests: ${SHUM_TMPDIR}
 	${MAKE} -C ${DIR_ROOT}/${FRUIT} -f Makefile-driver
+ifeq (${SHUM_BUILD_STATIC}, true)
 	${LIBDIR_OUT}/tests/fruit_tests_static.exe
+endif
+ifeq (${SHUM_BUILD_DYNAMIC}, true)
 	${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe
+endif
 
 # dummy target for fruit
 fruit_tests:

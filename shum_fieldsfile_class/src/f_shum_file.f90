@@ -53,6 +53,7 @@ INTEGER(KIND=INT64), PARAMETER :: stash_land_sea_mask = 30
 TYPE, PUBLIC :: shum_file_type
   PRIVATE
   CHARACTER(LEN=:), ALLOCATABLE            :: filename
+  LOGICAL                                  :: fixed_length_header_read=.FALSE.
   INTEGER(KIND=INT64)                      :: file_identifier = um_imdi
   INTEGER(KIND=INT64)                      :: fixed_length_header(             &
                            f_shum_fixed_length_header_len) = um_imdi
@@ -111,7 +112,9 @@ TYPE, PUBLIC :: shum_file_type
   PROCEDURE :: get_compressed_index
   ! Field accessors/methods
   PROCEDURE :: get_field
+  PROCEDURE :: find_field_indices_in_file
   PROCEDURE :: find_fields_in_file
+  PROCEDURE :: find_forecast_time
   ! File manipulation
   PROCEDURE :: set_filename
   PROCEDURE :: get_filename
@@ -146,18 +149,18 @@ IF (ALLOCATED(self%filename)) DEALLOCATE(self%filename)
 self%filename = fname
 INQUIRE(FILE=fname, EXIST=exists)
 
-IF (exists) THEN
-  IF (PRESENT(overwrite)) THEN
-    IF (overwrite) THEN
-      read_only = .FALSE.
-    ELSE
-      read_only = .TRUE.
-    END IF
-  ELSE
-    read_only = .TRUE.
+! Assume file is opened as read only unless overwrite is specified and true
+read_only = .TRUE.
+IF (PRESENT(overwrite)) THEN
+  IF (overwrite) THEN
+    read_only = .FALSE.
   END IF
-ELSE
-  read_only = .FALSE.
+END IF
+! If read only and file does not exist, return with error code
+IF ((read_only) .AND. (.NOT. exists)) THEN
+  STATUS%icode = 1_int64
+  STATUS%message = "Missing input file ("//TRIM(fname)//")"
+  RETURN
 END IF
 
 IF (read_only) THEN
@@ -209,7 +212,7 @@ USE f_shum_lookup_indices_mod, ONLY:                                           &
     lbrow, lbnpt, lbuser4
 
 USE f_shum_fixed_length_header_indices_mod, ONLY:                              &
-    dataset_type, lookup_dim2, grid_staggering
+    dataset_type, lookup_dim2, grid_staggering, vert_coord_type
 IMPLICIT NONE
 CLASS(shum_file_type), INTENT(IN OUT)   :: self
 
@@ -221,8 +224,15 @@ INTEGER(KIND=INT64)              :: p_lookup
 REAL(KIND=REAL64) :: temp_lookup_real(len_real_lookup)
 
 INTEGER(KIND=INT64), PARAMETER :: grid_stagger_endgame = 6
+INTEGER(KIND=INT64), PARAMETER :: grid_stagger_arakawa_a = 1
+INTEGER(KIND=INT64), PARAMETER :: pressure_vert_coord=3
+
+INTEGER(KIND=INT64), PARAMETER :: dump_type = 1
+INTEGER(KIND=INT64), PARAMETER :: fieldsfile_type = 3
+INTEGER(KIND=INT64), PARAMETER :: ancil_type = 4
 
 LOGICAL :: is_variable_resolution = .FALSE.
+LOGICAL :: grid_supported
 
 TYPE(shum_ff_status_type) :: STATUS    ! Return status object
 
@@ -234,20 +244,34 @@ STATUS%icode = f_shum_read_fixed_length_header(                                &
 IF (STATUS%icode /= shumlib_success) THEN
   RETURN
 END IF
+self%fixed_length_header_read = .TRUE.
 
-IF (self%fixed_length_header(grid_staggering) /= grid_stagger_endgame) THEN
+! These conditions need to be met for supported files
+IF (self%fixed_length_header(grid_staggering) == grid_stagger_endgame) THEN
+  ! an endgame file
+  grid_supported=.TRUE.
+
+ELSE IF (self%fixed_length_header(grid_staggering) == grid_stagger_arakawa_a .AND.&
+         self%fixed_length_header(vert_coord_type) == pressure_vert_coord ) THEN
+  ! A background error file
+  grid_supported=.TRUE.
+ELSE
+  grid_supported=.FALSE.
+END IF
+IF (.NOT. grid_supported) THEN
   STATUS%icode = 1_int64
-  STATUS%message = 'This software only supports the Endgame grid.'
+  STATUS%message = 'This software only supports the Endgame and background error files.'
   RETURN
 END IF
 
-
-! Check this is a instantaneous dump or a fieldsfile - if it's an ancil, obs
+! Check this is a instantaneous dump, fieldsfile or ancil - if it's an obs
 ! mean dump or LBC file, abort
-IF (self%fixed_length_header(dataset_type) /= 1_int64 .AND.                    &
-    self%fixed_length_header(dataset_type) /= 3_int64) THEN
+IF (self%fixed_length_header(dataset_type) /= dump_type .AND.                  &
+    self%fixed_length_header(dataset_type) /= fieldsfile_type .AND.            &
+    self%fixed_length_header(dataset_type) /= ancil_type) THEN
   STATUS%icode = 1_int64
-  STATUS%message = 'File is not a fieldsfile or instantaneous dump'
+  STATUS%message = 'File is not a fieldsfile, instantaneous dump or ancil'
+  RETURN
 END IF
 
 STATUS%icode = f_shum_read_integer_constants(                                  &
@@ -266,12 +290,14 @@ IF (STATUS%icode /= shumlib_success) THEN
   RETURN
 END IF
 
-STATUS%icode = f_shum_read_level_dependent_constants(                          &
-                                   self%file_identifier,                       &
-                                   self%level_dependent_constants,             &
-                                   STATUS%message)
-IF (STATUS%icode /= shumlib_success) THEN
-  RETURN
+! Ancillary files do not include level dependent constants so they are not read here
+! See section 3.4 from UMDP F03
+IF (self%fixed_length_header(dataset_type) /= ancil_type ) THEN
+  STATUS%icode = f_shum_read_level_dependent_constants(                        &
+                                     self%file_identifier,                     &
+                                     self%level_dependent_constants,           &
+                                     STATUS%message)
+  IF (STATUS%icode /= shumlib_success) RETURN
 END IF
 
 ! Read in the optional headers we care about (for variable resolution)
@@ -285,6 +311,9 @@ IF (STATUS%icode > shumlib_success) THEN
   RETURN
 ELSE IF (STATUS%icode == shumlib_success) THEN
   is_variable_resolution = .TRUE.
+ELSE
+  ! No constants found, therefore not variable resolution
+  is_variable_resolution = .FALSE.
 END IF
 
 STATUS%icode = f_shum_read_column_dependent_constants(                         &
@@ -354,6 +383,7 @@ IF (STATUS%icode > shumlib_success) THEN
 END IF
 
 ! Allocate space for both temporary lookups and final fields
+IF ( ALLOCATED(self%fields) ) DEALLOCATE(self%fields)
 ALLOCATE(self%fields(self%fixed_length_header(lookup_dim2)))
 
 ! Read the lookup
@@ -479,7 +509,7 @@ IF (field_number < 0_int64 .OR. field_number > self%num_fields) THEN
   RETURN
 END IF
 
-IF (self%fixed_length_header(1) == um_imdi) THEN
+IF (.NOT.self%fixed_length_header_read) then
   ! Header has not been loaded, so automatically load it
   STATUS = self%read_header()
   IF (STATUS%icode /= shumlib_success) THEN
@@ -1837,6 +1867,17 @@ TYPE(shum_ff_status_type) :: STATUS    ! Return status object
 
 STATUS%icode = f_shum_close_file(self%file_identifier, STATUS%message)
 
+! reset the shum_file_type fields with save attribute to initial values
+self%fixed_length_header_read=.FALSE.
+self%file_identifier = um_imdi
+self%fixed_length_header = um_imdi
+self%field_number_land_sea_mask = -99
+self%num_fields = 0
+
+! deallocate to reset the filename. the status of other allocatable members
+! is checked during file open so they do not need to be reset here.
+IF (ALLOCATED(self%filename)) DEALLOCATE(self%filename)
+
 END FUNCTION close_file
 
 !-------------------------------------------------------------------------------
@@ -2713,6 +2754,157 @@ END FUNCTION get_field
 
 !-------------------------------------------------------------------------------
 
+FUNCTION find_field_indices_in_file(self, found_field_indices,              &
+                                    max_returned_fields, stashcode, lbproc, &
+                                    fctime, level_code) RESULT(STATUS)
+
+  ! This function takes in a number of optional arguments containing the
+  ! criteria to match, viz. stashcode, lbproc, fctime and level_code, and
+  ! returns an array of all matching indices that could be used to index a
+  ! field via the file handle. For example:
+  ! STATUS = um_file%read_field(found_field_indices(1_int64))
+  ! STATUS = um_file%get_field(found_field_indices(1_int64), local_field)
+  !  where found_field_indices is a list on indices matching the criteria and 
+  !  local_field is a field of type shum_field_type. In this case the field
+  ! corresponding to the first index of found_field_indices is retrieved. 
+  ! An optional argument "max_returned_fields" can be set to limit the number of
+  ! indices returned by this function.
+  ! Note that FCTIME is a REAL argument which is calculated manually, and
+  ! doesn't equate to the LBFC header item; this allows sub-hourly forecast
+  ! times to be matched.
+IMPLICIT NONE
+
+! Arguments
+CLASS(shum_file_type), INTENT(IN OUT)     :: self
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: stashcode
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: lbproc
+REAL(KIND=REAL64), OPTIONAL, INTENT(IN)   :: fctime   ! In hours
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: level_code
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: max_returned_fields
+
+! Returned list
+INTEGER(KIND=INT64), ALLOCATABLE :: found_field_indices(:)
+
+! Internal variables
+TYPE(shum_field_type) :: current_field
+
+! Tolerance for real comparisons
+REAL(KIND=REAL64), PARAMETER :: tolerance = 1.0e-6
+
+! Local message string
+CHARACTER(LEN=256) :: cmessage
+
+! Loop counters
+INTEGER(KIND=INT64) :: i_field
+
+! Matching variables
+INTEGER(KIND=INT64) :: num_matching ! Number of matching fields
+
+! List of matching fields by index in file
+INTEGER(KIND=INT64) :: matching_fields(self%num_fields)
+
+INTEGER(KIND=INT64)       :: stash, proc, level
+REAL(KIND=REAL64)         :: rfctime
+TYPE(shum_ff_status_type) :: STATUS    ! Return status object
+
+num_matching = 0
+matching_fields = um_imdi
+
+! Loop over fields to find potential matches 
+DO i_field = 1, self%num_fields
+  STATUS = self%get_field(i_field, current_field)
+  IF (STATUS%icode /= shumlib_success) THEN
+    WRITE(STATUS%message, '(A,I0)') 'Failed to retrieve field at index = ', i_field
+    RETURN
+  END IF
+
+  IF (PRESENT(stashcode)) THEN
+    IF (stashcode/=um_imdi) THEN
+      STATUS = current_field%get_stashcode(stash)
+      IF (STATUS%icode /= shumlib_success) THEN
+        WRITE(STATUS%message, '(A,I0)') 'Failed to get STASH code for field ',   &
+                                       i_field
+        RETURN
+      END IF
+      IF (stash /= stashcode) CYCLE
+    END IF
+  END IF
+
+  IF (PRESENT(lbproc)) THEN
+    IF (lbproc/=um_imdi) THEN
+      STATUS = current_field%get_lbproc(proc)
+      IF (STATUS%icode /= shumlib_success) THEN
+        WRITE(STATUS%message, '(A,I0)') 'Failed to get LBPROC for  field ',      &
+                                       i_field
+        RETURN
+      END IF
+      ! change to:
+      IF (proc /= lbproc) CYCLE
+    END IF
+  END IF
+
+  IF (PRESENT(fctime)) THEN
+    IF (fctime/=um_rmdi) THEN
+      STATUS = current_field%get_real_fctime(rfctime)
+      IF (STATUS%icode /= shumlib_success) THEN
+        WRITE(STATUS%message, '(A,I0)') 'Failed to get forecast time code for'   &
+                              //' field ', i_field
+        RETURN
+      END IF
+      IF (ABS(rfctime - fctime) > tolerance) CYCLE
+    END IF
+  END IF
+
+  IF (PRESENT(level_code)) THEN
+    IF (level_code/=um_imdi) THEN
+      STATUS = current_field%get_level_number(level)
+      IF (STATUS%icode /= shumlib_success) THEN
+        WRITE(STATUS%message, '(A,I0)') 'Failed to get level number for '        &
+                              //' field ', i_field
+        RETURN
+      END IF
+      IF (level /= level_code) CYCLE
+    END IF
+  END IF
+
+  ! All criteria match - add field index to the list 
+  num_matching = num_matching + 1
+  matching_fields(num_matching) = i_field
+END DO
+
+WRITE(cmessage, '(A,I0,A)') 'Found ', num_matching,                 &
+                            ' matching fields'
+
+! Check whether there's a maximum permitted number of fields to return
+IF (PRESENT(max_returned_fields)) THEN
+  IF (max_returned_fields > 0 .AND. max_returned_fields /= um_imdi) THEN
+    IF (num_matching > max_returned_fields) THEN
+      WRITE(cmessage, '(A,I0,A,I0,A,I0,A)') 'Found ', num_matching,            &
+       ' matching fields; this exceeds the maximum permitted number of '//     &
+       'fields (',max_returned_fields,') so only the first ',                  &
+      max_returned_fields,' are being loaded and returned'
+      num_matching = max_returned_fields
+    END IF
+  END IF
+END IF
+
+IF (num_matching == 0) THEN
+  ! No fields found
+  STATUS%icode = -1_int64
+  STATUS%message = 'No matching fields found'
+  RETURN
+ELSE
+  ALLOCATE(found_field_indices(num_matching))
+  ! copy indices
+  found_field_indices = matching_fields(1:num_matching)
+  STATUS%icode = shumlib_success
+END IF
+
+STATUS%message = cmessage
+END FUNCTION find_field_indices_in_file
+
+!-------------------------------------------------------------------------------
+
 FUNCTION find_fields_in_file(self, found_fields, max_returned_fields,          &
                              stashcode, lbproc,                                &
                              fctime, level_code) RESULT(STATUS)
@@ -2732,161 +2924,151 @@ FUNCTION find_fields_in_file(self, found_fields, max_returned_fields,          &
 IMPLICIT NONE
 
 ! Arguments
-CLASS(shum_file_type), INTENT(IN OUT) :: self
-INTEGER(KIND=INT64), OPTIONAL :: stashcode
-INTEGER(KIND=INT64), OPTIONAL :: lbproc
-REAL(KIND=REAL64), OPTIONAL :: fctime   ! In hours
-INTEGER(KIND=INT64), OPTIONAL :: level_code
-INTEGER(KIND=INT64), OPTIONAL :: max_returned_fields
+CLASS(shum_file_type), INTENT(IN OUT)     :: self
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: stashcode
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: lbproc
+REAL(KIND=REAL64), OPTIONAL, INTENT(IN)   :: fctime   ! In hours
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: level_code
+INTEGER(KIND=INT64), OPTIONAL, INTENT(IN) :: max_returned_fields
 
 ! Returned list
 TYPE(shum_field_type), ALLOCATABLE :: found_fields(:)
-
-! Internal variables
-TYPE(shum_field_type) :: current_field
-
-! Tolerance for real comparisons
-REAL(KIND=REAL64), PARAMETER :: tolerance = 1.0e-6
 
 ! Local message string
 CHARACTER(LEN=256) :: cmessage
 
 ! Loop counters
-INTEGER(KIND=INT64)      :: i_field, j_matching_field
+INTEGER(KIND=INT64) :: j_matching_field
 
 ! Matching variables
-INTEGER(KIND=INT64)      :: num_matching ! Number of matching fields
-LOGICAL :: matches
+INTEGER(KIND=INT64) :: num_matching ! Number of matching fields
 
-! List of matching fields by index in file
-INTEGER(KIND=INT64) :: matching_fields(self%num_fields)
-
-INTEGER(KIND=INT64) :: stash, proc, level
-REAL(KIND=REAL64)   :: rfctime
+! List of matching field indices in file
+INTEGER(KIND=INT64), ALLOCATABLE :: found_field_indices(:)
 TYPE(shum_ff_status_type) :: STATUS    ! Return status object
 
-num_matching = 0
-matching_fields = um_imdi
+! Local optionals
+INTEGER(KIND=INT64) :: stashcode_local
+INTEGER(KIND=INT64) :: lbproc_local
+REAL(KIND=REAL64)   :: fctime_local
+INTEGER(KIND=INT64) :: level_code_local
+INTEGER(KIND=INT64) :: max_returned_fields_local
 
-! Loop over fields to find potential matches
-DO i_field = 1, self%num_fields
-  matches = .TRUE.
-  STATUS = self%get_field(i_field, current_field)
+! Set the local versions of the optional inputs for use in
+! a call to find_field_indices_in_file
+
+IF (PRESENT(stashcode)) THEN
+  stashcode_local = stashcode
+ELSE
+  stashcode_local = um_imdi
+ENDIF
+
+IF (PRESENT(max_returned_fields)) THEN
+  max_returned_fields_local = max_returned_fields
+ELSE
+  max_returned_fields_local = um_imdi
+ENDIF
+
+IF (PRESENT(lbproc)) THEN
+  lbproc_local = lbproc
+ELSE
+  lbproc_local = um_imdi
+ENDIF
+
+IF (PRESENT(fctime)) THEN
+  fctime_local = fctime
+ELSE
+  fctime_local = um_rmdi
+ENDIF
+
+IF (PRESENT(level_code)) THEN
+  level_code_local = level_code
+ELSE
+  level_code_local = um_imdi
+ENDIF
+
+! Get the indices of the fields defined by the supplied input criteria
+! mdi is used if the optional argument is missing
+STATUS = self%find_field_indices_in_file(found_field_indices,            &
+                                         max_returned_fields_local,      &
+                                         stashcode_local, lbproc_local,  &
+                                         fctime_local, level_code_local)
+IF (STATUS%icode /= shumlib_success) THEN
+  RETURN
+END IF
+num_matching = size(found_field_indices)
+
+ALLOCATE(found_fields(num_matching))
+DO j_matching_field = 1, num_matching
+  ! Load the field data
+  STATUS = self%read_field(found_field_indices(j_matching_field))
   IF (STATUS%icode /= shumlib_success) THEN
-    WRITE(STATUS%message, '(A,I0)') 'Failed to analyse field ', i_field
+    WRITE(STATUS%message, '(A,I0)') 'Failed to read field ',                 &
+                                    found_field_indices(j_matching_field)
     RETURN
   END IF
 
-  IF (PRESENT(stashcode)) THEN
-    STATUS = current_field%get_stashcode(stash)
-    IF (STATUS%icode /= shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to get STASH code for field ',   &
-                                     i_field
-      RETURN
-    END IF
-    IF (stash /= stashcode) THEN
-      matches = .FALSE.
-    END IF
+  ! Copy the field, including data
+  STATUS = self%get_field(found_field_indices(j_matching_field) ,                &
+                          found_fields(j_matching_field))
+  IF (STATUS%icode /= shumlib_success) THEN
+    WRITE(STATUS%message, '(A,I0)') 'Failed to copy field ',                 &
+                                    found_field_indices(j_matching_field)
+    RETURN
   END IF
 
-  IF (PRESENT(lbproc)) THEN
-    STATUS = current_field%get_lbproc(proc)
-    IF (STATUS%icode /= shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to get LBPROC for  field ',      &
-                                     i_field
-      RETURN
-    END IF
-    IF (proc /= lbproc) THEN
-      matches = .FALSE.
-    END IF
-  END IF
-
-  IF (PRESENT(fctime)) THEN
-    STATUS = current_field%get_real_fctime(rfctime)
-    IF (STATUS%icode /= shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to get forecast time code for'   &
-                            //' field ', i_field
-      RETURN
-    END IF
-    IF (rfctime > fctime*(1+tolerance) .OR.                                    &
-        rfctime < fctime*(1-tolerance)) THEN
-      matches = .FALSE.
-    END IF
-  END IF
-
-  IF (PRESENT(level_code)) THEN
-    STATUS = current_field%get_level_number(level)
-    IF (STATUS%icode /= shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to get level number for '        &
-                            //' field ', i_field
-      RETURN
-    END IF
-    IF (level /= level_code) THEN
-      matches = .FALSE.
-    END IF
-  END IF
-
-  IF (matches) THEN
-    num_matching = num_matching + 1
-    matching_fields(num_matching) = i_field
+  ! Unload the field data from the file object's version of the field
+  STATUS = self%unload_field(found_field_indices(j_matching_field))
+  IF (STATUS%icode > shumlib_success) THEN
+    WRITE(STATUS%message, '(A,I0)') 'Failed to unload field ',               &
+                                    found_field_indices(j_matching_field)
+    RETURN
   END IF
 END DO
-
-WRITE(cmessage, '(A,I0,A)') 'Found and loaded ', num_matching,                 &
-                            ' matching fields'
-
-! Check whether there's a maximum permitted number of fields to return
-IF (PRESENT(max_returned_fields)) THEN
-  IF (max_returned_fields > 0) THEN
-    IF (num_matching > max_returned_fields) THEN
-      WRITE(cmessage, '(A,I0,A,I0,A,I0,A)') 'Found ', num_matching,            &
-       ' matching fields; this exceeds the maximum permitted number of '//     &
-       'fields (',max_returned_fields,') so only the first ',                  &
-      max_returned_fields,' are being loaded and returned'
-      num_matching = max_returned_fields
-    END IF
-  END IF
-END IF
-
-IF (num_matching == 0) THEN
-  ! No fields found
-  ALLOCATE(found_fields(1))
-  STATUS%icode = -1_int64
-  STATUS%message = 'No matching fields found'
-  RETURN
-ELSE
-  ALLOCATE(found_fields(num_matching))
-  DO j_matching_field = 1, num_matching
-    ! Load the field data
-    STATUS = self%read_field(matching_fields(j_matching_field))
-    IF (STATUS%icode /= shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to read field ',                 &
-                                     matching_fields(j_matching_field)
-      RETURN
-    END IF
-
-    ! Copy the field, including data
-    STATUS = self%get_field(matching_fields(j_matching_field) ,                &
-                           found_fields(j_matching_field))
-    IF (STATUS%icode /= shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to copy field ',                 &
-                                     matching_fields(j_matching_field)
-      RETURN
-    END IF
-
-    ! Unload the field data from the file object's version of the field
-    STATUS = self%unload_field(matching_fields(j_matching_field))
-    IF (STATUS%icode > shumlib_success) THEN
-      WRITE(STATUS%message, '(A,I0)') 'Failed to unload field ',               &
-                                     matching_fields(j_matching_field)
-      RETURN
-    END IF
-  END DO
-  STATUS%icode = shumlib_success
-END IF
-
+STATUS%icode = shumlib_success
 STATUS%message = cmessage
+
 END FUNCTION find_fields_in_file
+
+!-------------------------------------------------------------------------------
+
+FUNCTION find_forecast_time(self, found_fctime, stashcode) RESULT(STATUS)
+
+  ! This function takes a stashcode as input and returns a list of all the times 
+  ! associated with that stashcode.   
+
+IMPLICIT NONE
+
+! Arguments
+CLASS(shum_file_type), INTENT(IN OUT) :: self
+INTEGER(KIND=INT64), INTENT(IN)       :: stashcode
+
+! Returned list
+REAL(KIND=REAL64), ALLOCATABLE        :: found_fctime(:)
+
+TYPE(shum_ff_status_type) :: STATUS    ! Return status object
+
+INTEGER :: i_field, num_matching
+REAL(REAL64) :: rfctime
+INTEGER(KIND=INT64), ALLOCATABLE :: found_field_indices(:)
+
+! Get the indices of the fields defined by the supplied input criteria
+! mdi is used if the optional argument is missing
+STATUS = self%find_field_indices_in_file(found_field_indices,  &
+                                         stashcode=stashcode)
+IF (STATUS%icode /= shumlib_success) THEN
+  RETURN
+END IF
+num_matching = size(found_field_indices)
+
+ALLOCATE(found_fctime(num_matching))
+! get and copy times
+DO i_field=1,num_matching
+  STATUS = self%fields(found_field_indices(i_field))%get_real_fctime(rfctime)
+  found_fctime(i_field) = rfctime
+END DO
+
+END FUNCTION find_forecast_time
 
 !-------------------------------------------------------------------------------
 ! File manipulation
@@ -2913,7 +3095,13 @@ CLASS(shum_file_type), INTENT(IN) :: self
 CHARACTER(LEN=*) :: fname
 TYPE(shum_ff_status_type) :: STATUS    ! Return status object
 
-fname = self%filename
+! return empty string if filename is not allocated
+IF (ALLOCATED(self%filename)) THEN
+  fname = self%filename
+ELSE
+  fname = ''
+ENDIF
+
 STATUS%icode = shumlib_success
 END FUNCTION get_filename
 

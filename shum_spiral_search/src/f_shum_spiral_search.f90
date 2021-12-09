@@ -337,7 +337,7 @@ DO k=1, no_point_unres
       ! Want to avoid doing the whole domain as much as possible
       DO j = 1, points_phi
         DO i = 1, points_lambda
-          l = i+(j - 1)*points_lambda
+          l = i+(j - 1_int64)*points_lambda
           ! Check to see if it is a resolved point
           IF (.NOT. unres_mask(l)) THEN
             ! Calculate distance from point
@@ -367,17 +367,17 @@ DO k=1, no_point_unres
 ! Set the unresolved data to something sensible if possible.  Need to keep this
 ! independent due to we dont want it to interact with future searches.
       IF (curr_dist_valid_min <= max_dist) THEN
-        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
       ELSE IF (allsametype .AND. &
                curr_dist_invalid_min /= rMDI .AND. &
                curr_dist_invalid_min > max_dist) THEN
         cmessage = 'There are no resolved points of this type, setting ' &
         // 'to closest resolved point'
         status = -5
-        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
       ELSE IF (curr_dist_invalid_min /= rMDI .AND. &
                curr_dist_invalid_min <= max_dist) THEN
-        indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
+        indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1_int64)*points_lambda
       ELSE IF (curr_dist_invalid_min /= rMDI .AND. &
                curr_dist_invalid_min > max_dist) THEN
         ! Though hit the maximum search distance there has not been a
@@ -387,7 +387,7 @@ DO k=1, no_point_unres
         // 'of any type within the limit, will just use closest resolved ' &
         // 'point of the same type'
         status = -10
-        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
       ELSE
         cmessage = 'A point has been left as still unresolved'
         status = 47
@@ -399,7 +399,7 @@ DO k=1, no_point_unres
       IF (south+north /= 0 .OR. east+west /= 0) THEN
         DO j = unres_j-south, unres_j+north
           DO i = unres_i-west, unres_i+east
-            l = i+(j - 1)*points_lambda
+            l = i+(j - 1_int64)*points_lambda
             ! Check to see if it is a resolved point
             IF (.NOT. unres_mask(l)) THEN
               ! Calculate distance from point
@@ -432,14 +432,14 @@ DO k=1, no_point_unres
   ! Set unresolved data to something sensible if possible.  Need to keep this
   ! independent as we don't want it to interact with future searches.
         IF (curr_dist_valid_min < search_dist) THEN
-          indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+          indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
           found=.TRUE.
         END IF
         IF (allsametype .AND. curr_dist_invalid_min < search_dist) THEN
           cmessage = 'There are no resolved points of this type, setting ' &
           // 'to closest resolved point'
           status = -5
-          indices(k)=curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
+          indices(k)=curr_i_invalid_min+(curr_j_invalid_min - 1_int64)*points_lambda
           found=.TRUE.
         END IF
         IF (.NOT. found) THEN
@@ -743,7 +743,7 @@ DO k=1, no_point_unres
       ! Want to avoid doing the whole domain as much as possible
       DO j = 1, points_phi
         DO i = 1, points_lambda
-          l = i+(j - 1)*points_lambda
+          l = i+(j - 1_int32)*points_lambda
           ! Check to see if it is a resolved point
           IF (.NOT. unres_mask(l)) THEN
             ! Calculate distance from point
@@ -773,17 +773,17 @@ DO k=1, no_point_unres
 ! Set the unresolved data to something sensible if possible.  Need to keep this
 ! independent due to we dont want it to interact with future searches.
       IF (curr_dist_valid_min <= max_dist) THEN
-        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
       ELSE IF (allsametype .AND. &
                curr_dist_invalid_min /= rMDI_32b .AND. &
                curr_dist_invalid_min > max_dist) THEN
         cmessage = 'There are no resolved points of this type, setting ' &
         // 'to closest resolved point'
         status = -5
-        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
       ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND. &
                curr_dist_invalid_min <= max_dist) THEN
-        indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
+        indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1_int32)*points_lambda
       ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND. &
                curr_dist_invalid_min > max_dist) THEN
         ! Though hit the maximum search distance there has not been a
@@ -793,7 +793,7 @@ DO k=1, no_point_unres
         // 'of any type within the limit, will just use closest resolved ' &
         // 'point of the same type'
         status = -10
-        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+        indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
       ELSE
         cmessage = 'A point has been left as still unresolved'
         status = 47
@@ -805,7 +805,7 @@ DO k=1, no_point_unres
       IF (south+north /= 0 .OR. east+west /= 0) THEN
         DO j = unres_j-south, unres_j+north
           DO i = unres_i-west, unres_i+east
-            l = i+(j - 1)*points_lambda
+            l = i+(j - 1_int32)*points_lambda
             ! Check to see if it is a resolved point
             IF (.NOT. unres_mask(l)) THEN
               ! Calculate distance from point
@@ -838,14 +838,14 @@ DO k=1, no_point_unres
   ! Set unresolved data to something sensible if possible.  Need to keep this
   ! independent as we don't want it to interact with future searches.
         IF (curr_dist_valid_min < search_dist) THEN
-          indices(k) = curr_i_valid_min+(curr_j_valid_min - 1)*points_lambda
+          indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
           found=.TRUE.
         END IF
         IF (allsametype .AND. curr_dist_invalid_min < search_dist) THEN
           cmessage = 'There are no resolved points of this type, setting ' &
           // 'to closest resolved point'
           status = -5
-          indices(k)=curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
+          indices(k)=curr_i_invalid_min+(curr_j_invalid_min - 1_int32)*points_lambda
           found=.TRUE.
         END IF
         IF (.NOT. found) THEN
@@ -894,7 +894,7 @@ DO k=1, no_point_unres
   END DO ! while
   IF (.NOT. found) THEN
     IF (curr_dist_invalid_min /= rMDI_32b) THEN
-      indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
+      indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1_int32)*points_lambda
     ELSE
       cmessage = 'A point has been left as still unresolved'
       status = 47

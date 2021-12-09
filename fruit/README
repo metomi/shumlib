@@ -5,7 +5,7 @@
 This directory consists of the following files:
 
  * Makefile:
-     The makefile used to build a library from the source f90 files that 
+     The makefile used to build a library from the source f90 files that
      the shumlib FRUIT test executables link against.
 
  * Makefile-driver:
@@ -17,7 +17,7 @@ This directory consists of the following files:
      generated via the Ruby script in this directory.
 
  * fruit_mpi.f90:
-     The extensions for running FRUIT in an environment with MPI; not 
+     The extensions for running FRUIT in an environment with MPI; not
      currently used by shumlib.
 
  * fruit_f90_generator.rb (and 3.4.1 version):
@@ -36,4 +36,7 @@ This directory consists of the following files:
 
 Ordinarily the fruit.f90 file should not need to be regenerated unless a fairly
 serious re-working of shumlib is underway; the files are merely provided here
-to aid in tracing how the original source was modified.
+to aid in tracing how the original source was modified.  If you have need to
+regenerate the fruit.f90 file the syntax is:
+
+     ./fruit_f90_generator.rb fruit_f90_source.txt

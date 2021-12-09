@@ -818,7 +818,7 @@ FUNCTION generate_fixed_grid(self) RESULT(status)
   ! Temporary positional counters
   REAL(KIND=real64) :: longitude, latitude
 
-
+  if (ALLOCATED(self%longitudes)) DEALLOCATE(self%longitudes)
   ALLOCATE(self%longitudes(self%lookup_int(lbnpt)))
   longitude = self%lookup_real(bzx - len_integer_lookup)
   DO k_coord = 1, self%lookup_int(lbnpt)
@@ -826,6 +826,7 @@ FUNCTION generate_fixed_grid(self) RESULT(status)
     self%longitudes(k_coord) = longitude
   END DO
 
+  if (ALLOCATED(self%latitudes)) DEALLOCATE(self%latitudes)
   ALLOCATE(self%latitudes(self%lookup_int(lbrow)))
   latitude = self%lookup_real(bzy - len_integer_lookup)
   DO k_coord = 1, self%lookup_int(lbrow)

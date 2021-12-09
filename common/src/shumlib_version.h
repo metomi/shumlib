@@ -41,7 +41,7 @@
  * where "X" is the release number in month "MM" of year "YYYY"
  */
 #if !defined(SHUMLIB_VERSION)
-#define SHUMLIB_VERSION 2021071
+#define SHUMLIB_VERSION 2021101
 #endif
 
 /* 2-stage expansion which will replace in the including code:

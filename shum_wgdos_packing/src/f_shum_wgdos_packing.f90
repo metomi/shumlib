@@ -1254,7 +1254,7 @@ DO j=1,rows
 
   mant = IAND(ibase(j),mask_mant_ibm)
   iexp = ISHFT(IAND(ibase(j),mask_expt_ibm),-24)-64-6
-  base(j) = (16.0**INT(iexp,KIND=int32))*INT(mant,KIND=int32)
+  base(j) = (16.0_real64**INT(iexp,KIND=int32))*INT(mant,KIND=int32)
   IF (IAND(ibase(j),mask_sign_ibm) /= 0) base(j) = -base(j)
   ! Check if bitmaps are used
 

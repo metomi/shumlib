@@ -820,7 +820,7 @@ call methods on a field object without detaching it from the file by calling
             The number of the field in the file which to retrieve.
 
     **Input & Output**
-        ``field (``shum_field_type`` object)``
+        ``field (shum_field_type object)``
             The field object whose position in file corresponds to the
             ``field_number``.
 
@@ -831,6 +831,62 @@ call methods on a field object without detaching it from the file by calling
             will contain information about the problem.
 
 
+``find_field_indices_in_file``
+''''''''''''''''''''''''''''''
+
+This method searches the fields in a file given a set of criteria, and returns
+an array of indices defining the locations of the fields matching the specified
+criteria. The returned list could be used to index the fields within the file,
+for example:
+
+  ``icode = um_file%read_field(found_field_indices(1_int64))``
+
+  ``icode = um_file%get_field(found_field_indices(1_int64), local_field)``
+
+where ``found_field_indices`` is a list of indices matching the criteria and 
+``local_field`` is a field of type ``shum_field_type``. In this case the field
+corresponding to the first index of ``found_field_indices`` is retrieved.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%find_field_indices_in_file(found_field_indices, max_returned_fields, stashcode, lbproc, fctime, level_code)``
+
+    **Input & Output**
+        ``found_field_indices (one dimensional 64-bit ALLOCATABLE INTEGER array)``
+            A list of fields in the file that matches the specified criteria.
+
+    **Inputs**
+        ``max_returned_fields (optional 64-bit INTEGER)``
+            This limits the number of fields returned by the method. Setting
+            this to ``N`` returns only the first ``N`` matching fields.
+
+
+        ``stashcode (optional 64-bit INTEGER)``
+            If present, the found fields must match this STASH code. This
+            corresponds to the LBUSER(4) value in the lookup.
+
+        ``lbproc (optional 64-bit INTEGER)``
+            If present, the found fields must match this LBPROC value. This
+            corresponds to the LBPROC value in the lookup.
+
+        ``fctime (optional 64-bit REAL)``
+            If present, the found fields must match this forecast time within a
+            certain tolerance. This is the timespan in hours between the data
+            and validity time. It is **NOT** the LBFT value, which is an
+            integer.
+
+        ``level_code (optional 64-bit INTEGER)``
+            If present, the found fields must match this level code. This
+            corresponds to the LBLEV value in the lookup.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything above ``0`` means an
+            error has occurred, and a value of ``-1`` means no matching fields
+            were present in the file. In all cases the ``message`` variable in
+            the object will contain further information.
 
 ``find_fields_in_file``
 '''''''''''''''''''''''
@@ -846,7 +902,7 @@ have their data loaded, so they are henceforth independent of the UM file class.
         ``icode = um_file%find_fields_in_file(found_fields, max_returned_fields, stashcode, lbproc, fctime, level_code)``
 
     **Input & Output**
-        ``found_fields (``shum_field_type`` object ``ALLOCATABLE`` array)``
+        ``found_fields (shum_field_type object ALLOCATABLE array)``
             A list of fields in the file which matches the specified criteria.
 
     **Inputs**
@@ -881,6 +937,33 @@ have their data loaded, so they are henceforth independent of the UM file class.
             were present in the file. In all cases the ``message`` variable in
             the object will contain further information.
 
+``find_forecast_time``
+'''''''''''''''''''''''
+
+This method searches the fields in a file for a given stashcode, and returns
+an array of forecast times associated with that stashcode.
+
+    **Available via class**
+        ``shum_file_type``
+
+    **Syntax**
+        ``icode = um_file%find_forecast_time(found_fctime, stashcode)``
+
+    **Input & Output**
+        ``found_fctime (one dimensional 64-bit ALLOCATABLE REAL array)``
+            A list of forecast times for the given stashcode.
+
+    **Inputs**
+        ``stashcode (64-bit INTEGER)``
+            If present, the found fields must match this STASH code. This
+            corresponds to the LBUSER(4) value in the lookup.
+
+    **Return Value**
+        ``status (shum_ff_status_type)``
+            Exit status; ``0`` means success, anything above ``0`` means an
+            error has occurred, and a value of ``-1`` means no matching fields
+            were present in the file. In all cases the ``message`` variable in
+            the object will contain further information.
 
 ``set_filename``
 ''''''''''''''''
@@ -947,7 +1030,7 @@ input file object into the current file object. Thus a file can be used as a
         ``icode = um_file%copy_headers_from_file_object(template_file_object)``
 
     **Inputs**
-        ``template_file_object (``shum_file_type`` object)``
+        ``template_file_object (shum_file_type object)``
             This contains the object to copy the headers from.
 
     **Return Value**
@@ -971,7 +1054,7 @@ the file object will contain the position in the file it was added in.
         ``icode = um_file%add_field(new_field)``
 
     **Inputs**
-        ``new_field (``shum_field_type`` object)``
+        ``new_field (shum_field_type object)``
             The new field to add to the file.
 
     **Return Value**

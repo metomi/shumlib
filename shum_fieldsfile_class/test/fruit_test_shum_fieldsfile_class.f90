@@ -221,6 +221,7 @@ DO i = 1, f_shum_fixed_length_header_len
 END DO
 
 ! Set Endgame grid
+fixed_length_header(5) = 1
 fixed_length_header(9) = 6
 
 status = testfile%set_fixed_length_header(fixed_length_header)
