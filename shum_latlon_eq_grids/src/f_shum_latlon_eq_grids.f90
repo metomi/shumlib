@@ -811,6 +811,7 @@ ELSE
 END IF
 
 status = 0_int64
+message = ''
 
 END FUNCTION f_shum_w_eqtoll_arg64
 
@@ -925,6 +926,7 @@ ELSE
 END IF
 
 status = 0_int64
+message = ''
 
 END FUNCTION f_shum_w_lltoeq_arg64
 

@@ -27,8 +27,8 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86]
 #
-# This script was used to install shumlib version 2018.10.1
-# and is based on the families etc. from the UM at UM 11.2
+# This script was used to install shumlib version 2019.10.1
+# and was intended for use with the UM at UM 11.5
 #
 #PBS -q shared
 #PBS -S /bin/bash

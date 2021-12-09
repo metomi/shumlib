@@ -978,7 +978,6 @@ CHARACTER(LEN=*),    INTENT(OUT)         :: message
 
 INTEGER(KIND=int64)        :: cols
 INTEGER(KIND=int64)        :: rows
-REAL(KIND=real64), POINTER :: field2d(:, :)
 INTEGER(KIND=int64)        :: len_packed_field
 
 IF (MOD(SIZE(field, KIND=int64), stride) /= 0) THEN
@@ -989,7 +988,6 @@ END IF
 
 cols = stride
 rows = SIZE(field)/cols
-field2d(1:cols, 1:rows) => field(:)
 len_packed_field = SIZE(packed_field, 1, KIND=int64)
 
 status = f_shum_wgdos_unpack_expl_arg64(                                       &
@@ -1015,7 +1013,6 @@ CHARACTER(LEN=*),    INTENT(OUT)         :: message
 
 INTEGER(KIND=int32)        :: cols
 INTEGER(KIND=int32)        :: rows
-REAL(KIND=real64), POINTER :: field2d(:, :)
 INTEGER(KIND=int32)        :: len_packed_field
 
 IF (MOD(SIZE(field, KIND=int32), stride) /= 0) THEN
@@ -1026,7 +1023,6 @@ END IF
 
 cols = stride
 rows = INT(SIZE(field)/cols, KIND=int32)
-field2d(1:cols, 1:rows) => field(:)
 len_packed_field = SIZE(packed_field, 1, KIND=int32)
 
 status = f_shum_wgdos_unpack_expl_arg32(                                       &

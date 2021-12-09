@@ -25,7 +25,7 @@
 
 MODULE f_shum_conversions_mod
 
-USE, INTRINSIC :: ISO_C_BINDING, ONLY:                   &
+USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
   C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE
 
 IMPLICIT NONE
@@ -63,6 +63,10 @@ INTEGER, PARAMETER :: real64 = C_DOUBLE
 INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
+!------------------------------------------------------------------------------!
+! 64 Bit Conversion Paramters                                                  !
+!------------------------------------------------------------------------------!
+
 ! Number of seconds in one day - now rsec_per_day and isec_per_day
 ! which will replace magic number 86400 wherever possible
 REAL(KIND=real64),    PARAMETER :: shum_rsec_per_day_const  = 86400.0_real64
@@ -77,61 +81,83 @@ INTEGER(KIND=int64),  PARAMETER :: shum_isec_per_min_const  = 60_int64
 REAL(KIND=real64),    PARAMETER :: shum_rhour_per_day_const = 24.0_real64
 INTEGER(KIND=int64),  PARAMETER :: shum_ihour_per_day_const = 24_int64
 
-REAL(KIND=real64),    PARAMETER ::                                      &
-           shum_rhour_per_sec_const = 1.0_real64/shum_rsec_per_hour_const
-REAL(KIND=real64),    PARAMETER ::                                      &
-           shum_rday_per_hour_const = 1.0_real64/shum_rhour_per_day_const
+REAL(KIND=real64),    PARAMETER ::                                             &
+  shum_rhour_per_sec_const = 1.0_real64/shum_rsec_per_hour_const,              &
+  shum_rday_per_hour_const = 1.0_real64/shum_rhour_per_day_const
 
 ! Pi
-REAL(KIND=real64), PARAMETER ::                           &
-                        shum_pi_const    = 3.14159265358979323846_real64
-!Conversion factor degrees to radians
-REAL(KIND=real64), PARAMETER ::                           &
-                        shum_pi_over_180_const  = shum_pi_const/180.0_real64
-!Conversion factor radians to degrees
-REAL(KIND=real64), PARAMETER ::                           &
-                        shum_180_over_pi_const  = 180.0_real64/shum_pi_const
+REAL(KIND=real64), PARAMETER ::                                                &
+  shum_pi_const = 3.14159265358979323846_real64
+
+! Conversion factor degrees to radians
+REAL(KIND=real64), PARAMETER ::                                                &
+  shum_pi_over_180_const = shum_pi_const/180.0_real64
+
+! Conversion factor radians to degrees
+REAL(KIND=real64), PARAMETER ::                                                &
+  shum_180_over_pi_const = 180.0_real64/shum_pi_const
 
 ! zerodegc is a conversion between degrees centigrade and kelvin
-REAL(KIND=real64), PARAMETER :: shum_zerodegc_const            = 273.15_real64
+REAL(KIND=real64), PARAMETER :: shum_zerodegc_const = 273.15_real64
 
 ! Knots to m/s conversion
-REAL(KIND=real64), PARAMETER :: shum_kt2ms_const  = 1852.0_real64/3600.0_real64
-! Feet to metres conversion
-REAL(KIND=real64), PARAMETER :: shum_ft2m_const   = 0.3048_real64
+REAL(KIND=real64), PARAMETER :: shum_kt2ms_const = 1852.0_real64/3600.0_real64
 
-! -=# As above, but in 32 Bit #=-
-REAL(KIND=real32),    PARAMETER ::                                            &
-         shum_rsec_per_day_const_32  = REAL(shum_rsec_per_day_const,real32)
-INTEGER(KIND=int32),  PARAMETER ::                                            &
-         shum_isec_per_day_const_32  = REAL(shum_isec_per_day_const,real32)
-REAL(KIND=real32),    PARAMETER ::                                            &
-         shum_rsec_per_hour_const_32 = REAL(shum_rsec_per_hour_const,real32)
-INTEGER(KIND=int32),  PARAMETER ::                                            &
-         shum_isec_per_hour_const_32 = REAL(shum_isec_per_hour_const,real32)
-REAL(KIND=real32),  PARAMETER ::                                              &
-         shum_rsec_per_min_const_32  = REAL(shum_rsec_per_min_const,real32)
-INTEGER(KIND=int32),  PARAMETER ::                                            &
-         shum_isec_per_min_const_32  = REAL(shum_isec_per_min_const,real32)
-REAL(KIND=real32),    PARAMETER ::                                            &
-         shum_rhour_per_day_const_32 = REAL(shum_rhour_per_day_const,real32)
-INTEGER(KIND=int32),  PARAMETER ::                                            &
-         shum_ihour_per_day_const_32 = REAL(shum_ihour_per_day_const,real32)
-REAL(KIND=real32),    PARAMETER ::                                            &
-         shum_rhour_per_sec_const_32 = 1.0_real32/shum_rsec_per_hour_const_32
-REAL(KIND=real32),    PARAMETER ::                                            &
-         shum_rday_per_hour_const_32 = 1.0_real32/shum_rhour_per_day_const_32
-REAL(KIND=real32), PARAMETER ::                                               &
-         shum_pi_const_32            = 3.14159265358979323846_real32
-REAL(KIND=real32), PARAMETER ::                                               &
-         shum_pi_over_180_const_32   = shum_pi_const_32/180.0_real32
-REAL(KIND=real32), PARAMETER ::                                               &
-         shum_180_over_pi_const_32   = 180.0_real32/shum_pi_const_32
-REAL(KIND=real32), PARAMETER ::                                               &
-         shum_zerodegc_const_32      = 273.15_real32
-REAL(KIND=real32), PARAMETER ::                                               &
-         shum_kt2ms_const_32         = 1852.0_real32/3600.0_real32
-REAL(KIND=real32), PARAMETER ::                                               &
-         shum_ft2m_const_32          = 0.3048_real32
+! Feet to metres conversion
+REAL(KIND=real64), PARAMETER :: shum_ft2m_const = 0.3048_real64
+
+!------------------------------------------------------------------------------!
+! 32 Bit Conversion Paramters (as above but in 32-bit types)                   !
+!------------------------------------------------------------------------------!
+
+REAL(KIND=real32),   PARAMETER ::                                              &
+  shum_rsec_per_day_const_32  = REAL(shum_rsec_per_day_const,real32)
+
+INTEGER(KIND=int32), PARAMETER ::                                              &
+  shum_isec_per_day_const_32  = INT(shum_isec_per_day_const,int32)
+
+REAL(KIND=real32),   PARAMETER ::                                              &
+  shum_rsec_per_hour_const_32 = REAL(shum_rsec_per_hour_const,real32)
+
+INTEGER(KIND=int32), PARAMETER ::                                              &
+  shum_isec_per_hour_const_32 = INT(shum_isec_per_hour_const,int32)
+
+REAL(KIND=real32),   PARAMETER ::                                              &
+  shum_rsec_per_min_const_32  = REAL(shum_rsec_per_min_const,real32)
+
+INTEGER(KIND=int32), PARAMETER ::                                              &
+  shum_isec_per_min_const_32  = INT(shum_isec_per_min_const,int32)
+
+REAL(KIND=real32),   PARAMETER ::                                              &
+  shum_rhour_per_day_const_32 = REAL(shum_rhour_per_day_const,real32)
+
+INTEGER(KIND=int32), PARAMETER ::                                              &
+  shum_ihour_per_day_const_32 = INT(shum_ihour_per_day_const,int32)
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_rhour_per_sec_const_32 = 1.0_real32/shum_rsec_per_hour_const_32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_rday_per_hour_const_32 = 1.0_real32/shum_rhour_per_day_const_32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_pi_const_32            = 3.14159265358979323846_real32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_pi_over_180_const_32   = shum_pi_const_32/180.0_real32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_180_over_pi_const_32   = 180.0_real32/shum_pi_const_32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_zerodegc_const_32      = 273.15_real32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_kt2ms_const_32         = 1852.0_real32/3600.0_real32
+
+REAL(KIND=real32),  PARAMETER ::                                               &
+  shum_ft2m_const_32          = 0.3048_real32
+
+!------------------------------------------------------------------------------!
 
 END MODULE f_shum_conversions_mod
