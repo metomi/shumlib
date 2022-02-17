@@ -36,7 +36,7 @@ c_shum_byteswap_PIC.o: c_shum_byteswap.c c_shum_byteswap.h c_shum_byteswap_opt.h
 f_shum_byteswap_PIC.o: f_shum_byteswap.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
-libshum_byteswap.so: c_shum_byteswap_PIC.o f_shum_byteswap_PIC.o ${VERSION_OBJECTS_PIC}
+libshum_byteswap.so: c_shum_byteswap_PIC.o f_shum_byteswap_PIC.o ${LIBDIR_OUT}/lib/libshum_string_conv.so ${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 
 # Cleanup

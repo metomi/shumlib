@@ -56,7 +56,10 @@ f_shum_stashmaster_PIC.o: f_shum_stashmaster.f90
 libshum_fieldsfile.so: \
 	f_shum_fieldsfile_PIC.o f_shum_lookup_indices_PIC.o \
 	f_shum_fixed_length_header_indices_PIC.o \
-	f_shum_stashmaster_PIC.o ${VERSION_OBJECTS_PIC}
+	f_shum_stashmaster_PIC.o \
+	${LIBDIR_OUT}/lib/libshum_byteswap.so \
+	${LIBDIR_OUT}/lib/libshum_string_conv.so \
+	${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 
 # Cleanup

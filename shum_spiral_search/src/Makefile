@@ -42,6 +42,7 @@ c_shum_spiral_search_PIC.o: c_shum_spiral_search.f90 f_shum_spiral_search_PIC.o
 libshum_spiral_search.so: \
 	f_shum_spiral_search_PIC.o \
 	c_shum_spiral_search_PIC.o \
+	${LIBDIR_OUT}/lib/libshum_string_conv.so \
 	${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 
