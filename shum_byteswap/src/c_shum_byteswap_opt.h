@@ -211,7 +211,15 @@
 #endif
 
 #if defined(C_USE_BSWAP_BYTESWAP_H)
+#if defined(__APPLE__)
+// Mac OS X / Darwin features
+#include <libkern/OSByteOrder.h>
+#define bswap_16(x) OSSwapInt16(x)
+#define bswap_32(x) OSSwapInt32(x)
+#define bswap_64(x) OSSwapInt64(x)
+#else
 #include <byteswap.h>
+#endif
 #endif
 
 #if defined(C_USE_BSWAP_64_BITSHIFT)
