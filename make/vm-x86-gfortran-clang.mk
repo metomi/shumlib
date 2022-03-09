@@ -84,7 +84,7 @@ AR=ar -rc
 
 # Set the name of this platform; this will be included as the name of the
 # top-level directory in the build
-PLATFORM=vm-x86-clang-gcc
+PLATFORM=vm-x86-gfortran-clang
 
 # Proceed to include the rest of the common makefile
 include Makefile
