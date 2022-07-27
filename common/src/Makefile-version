@@ -56,7 +56,7 @@ c_${VERSION_LIBNAME}_version_PIC.o: \
         ${COMMON_DIR}/shumlib_version.h \
         ${COMMON_DIR}/precision_bomb.h \
 	c_${VERSION_LIBNAME}_version.h
-	${CC} ${CCFLAGS} -c -D SHUMLIB_LIBNAME=${VERSION_LIBNAME} \
+	${CC} ${CCFLAGS} ${CCFLAGS_PIC} -c -D SHUMLIB_LIBNAME=${VERSION_LIBNAME} \
         -I${COMMON_DIR} $< -o $@
 
 VERSION_OBJECTS=c_${VERSION_LIBNAME}_version.o f_${VERSION_LIBNAME}_version_mod.o

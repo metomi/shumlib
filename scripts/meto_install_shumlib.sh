@@ -27,8 +27,8 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86|ex1a]
 #
-# This script was used to install shumlib version 2021.10.1
-# and was intended for use with the UM at UM 12.1
+# This script was used to install shumlib version 2022.02.1
+# and was intended for use with the UM at UM 12.2
 #
 
 set -eu
@@ -313,6 +313,7 @@ fi
 # GNU generic gfortran/gcc
 THIS="x86_gnu_generic"
 if [[ $PLATFORM == "x86" ]] || [[ $PLATFORM == $THIS ]] ; then
+  if [[ $(gcc -dumpversion) > 8 ]] ; then
     (
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/x86-gfortran-$(gfortran -dumpversion)-gcc-$(gcc -dumpversion)
@@ -322,6 +323,9 @@ if [[ $PLATFORM == "x86" ]] || [[ $PLATFORM == $THIS ]] ; then
         >&2 echo "Error compiling for $THIS"
         exit 1
     fi
+  else
+    >&2 echo "SKIPPING $THIS as GCC version older than 8"
+  fi
 fi
 
 

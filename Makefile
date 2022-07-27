@@ -257,11 +257,19 @@ $(addsuffix _prereq_tests, ${ALL_LIBS}): %:
 
 .PHONY: all_libs all_tests
 
+ROOT_LIBS=${LIBDIR_OUT}/lib/libshum.a ${LIBDIR_OUT}/lib/libshum.so
+
 # 'make all_libs' builds all libraries
-all_libs: ${ALL_LIBS}
+all_libs: ${ROOT_LIBS} ${ALL_LIBS}
 
 # 'make all_tests' builds all tests (but does not run them)
-all_tests: $(addsuffix _tests, ${ALL_LIBS})
+all_tests: ${ROOT_LIBS} $(addsuffix _tests, ${ALL_LIBS})
+
+${LIBDIR_OUT}/lib/libshum.a: ${ALL_LIBS}
+	${AR} $@ $(filter-out %_PIC.o,$(wildcard ${DIR_ROOT}/*/src/*.o))
+
+${LIBDIR_OUT}/lib/libshum.so: ${ALL_LIBS}
+	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} -o $@ $(wildcard ${DIR_ROOT}/*/src/*_PIC.o)
 
 # FRUIT testing control
 #--------------------------------------------------------------------------------
@@ -275,7 +283,7 @@ check:
 	${MAKE} -C ${DIR_ROOT} run_tests
 
 # 'make test' builds the tests for currently build libraries, then runs them
-test: ${FRUIT} $(addsuffix _tests, $(patsubst lib%.so, %, $(notdir $(wildcard ${LIBDIR_OUT}/lib/*.so))))
+test: ${FRUIT} $(addsuffix _tests, $(patsubst lib%.so, %, $(notdir $(wildcard ${LIBDIR_OUT}/lib/libshum_*.so))))
 	${MAKE} -C ${DIR_ROOT} run_tests
 
 # 'make run_tests' runs the currently built tests
@@ -283,9 +291,15 @@ run_tests: ${SHUM_TMPDIR}
 	${MAKE} -C ${DIR_ROOT}/${FRUIT} -f Makefile-driver
 ifeq (${SHUM_BUILD_STATIC}, true)
 	${LIBDIR_OUT}/tests/fruit_tests_static.exe
+ifneq ("$(wildcard ${LIBDIR_OUT}/tests/fruit_tests_static_one.exe)", "")
+	${LIBDIR_OUT}/tests/fruit_tests_static_one.exe
+endif
 endif
 ifeq (${SHUM_BUILD_DYNAMIC}, true)
 	${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe
+ifneq ("$(wildcard ${LIBDIR_OUT}/tests/fruit_tests_dynamic_one.exe)", "")
+	${LIBDIR_OUT}/tests/fruit_tests_dynamic_one.exe
+endif
 endif
 
 # dummy target for fruit

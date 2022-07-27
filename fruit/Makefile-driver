@@ -9,10 +9,20 @@ STATIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_static.exe
 else
 STATIC_EXEC=
 endif
+ifneq ("$(wildcard ${LIBDIR_OUT}/lib/libshum.a)", "")
+STATIC_EXEC_ONE=${LIBDIR_OUT}/tests/fruit_tests_static_one.exe
+else
+STATIC_EXEC_ONE=
+endif
 ifeq (${SHUM_BUILD_DYNAMIC}, true)
 DYNAMIC_EXEC=${LIBDIR_OUT}/tests/fruit_tests_dynamic.exe
 else
 DYNAMIC_EXEC=
+endif
+ifneq ("$(wildcard ${LIBDIR_OUT}/lib/libshum.so)", "")
+DYNAMIC_EXEC_ONE=${LIBDIR_OUT}/tests/fruit_tests_dynamic_one.exe
+else
+DYNAMIC_EXEC_ONE=
 endif
 
 # All of the the built FRUIT tests objects
@@ -21,11 +31,11 @@ FRUIT_BUILT_TESTS=$(wildcard                                                   \
                       $(addsuffix /test/fruit_test_*.o, ${ALL_LIBS})))
 
 # Currently built libraries
-FRUIT_CURRENT_LIBS_FILES_DYN=$(wildcard ${LIBDIR_OUT}/lib/*.so)
+FRUIT_CURRENT_LIBS_FILES_DYN=$(wildcard ${LIBDIR_OUT}/lib/libshum_*.so)
 FRUIT_CURRENT_LIBS_DYN=$(patsubst lib%.so, %,                                  \
                          $(notdir $(FRUIT_CURRENT_LIBS_FILES_DYN)))
 
-FRUIT_CURRENT_LIBS_FILES_STA=$(wildcard ${LIBDIR_OUT}/lib/*.a)
+FRUIT_CURRENT_LIBS_FILES_STA=$(wildcard ${LIBDIR_OUT}/lib/libshum_*.a)
 FRUIT_CURRENT_LIBS_STA=$(patsubst lib%.a, %,                                   \
                          $(notdir $(FRUIT_CURRENT_LIBS_FILES_STA)))
 
@@ -36,7 +46,7 @@ FRUIT_AVAILABLE_TESTS=$(strip                                                  \
                                          ${FRUIT_BUILT_TESTS}),${libfile},)))
 
 .PHONY: test
-test: $(STATIC_EXEC) $(DYNAMIC_EXEC)
+test: $(STATIC_EXEC) $(STATIC_EXEC_ONE) $(DYNAMIC_EXEC) $(DYNAMIC_EXEC_ONE)
 
 # Construct the paths to the test directories from the names
 TEST_DIR=$(patsubst %, $(DIR_ROOT)/%/test/, $(FRUIT_AVAILABLE_TESTS))
@@ -110,8 +120,15 @@ fruit_driver_PIC.o: fruit_driver.f90
 $(STATIC_EXEC): fruit_driver.o ${TEST_STATIC} ${FRUIT_CURRENT_LIBS_FILES_STA}
 	${FC} ${FCFLAGS} ${FCFLAGS_STATIC} \
 	$< $(TEST_STATIC) ${TEST_FLAGS_INCL} \
-	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib \
+	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib -lfruit \
 	${TEST_FLAGS_LINK_STA} ${TEST_FLAGS_LINK_STA} \
+	-o $@ ${FCFLAGS_STATIC_TRAIL}
+
+$(STATIC_EXEC_ONE): fruit_driver.o ${TEST_STATIC} ${LIBDIR_OUT}/lib/libshum.a
+	${FC} ${FCFLAGS} ${FCFLAGS_STATIC} \
+	$< $(TEST_STATIC) ${TEST_FLAGS_INCL} \
+	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib -lfruit \
+	${LIBDIR_OUT}/lib/libshum.a \
 	-o $@ ${FCFLAGS_STATIC_TRAIL}
 
 # Dynamic executable
@@ -119,8 +136,15 @@ $(STATIC_EXEC): fruit_driver.o ${TEST_STATIC} ${FRUIT_CURRENT_LIBS_FILES_STA}
 $(DYNAMIC_EXEC): fruit_driver_PIC.o ${TEST_DYNAMIC} ${FRUIT_CURRENT_LIBS_FILES_DYN}
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} ${FCFLAGS_DYNAMIC} \
 	$< $(TEST_DYNAMIC) ${TEST_FLAGS_INCL} \
-	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib \
+	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib -lfruit \
 	${TEST_FLAGS_LINK_DYN} ${TEST_FLAGS_LINK_DYN} \
+	-o $@ ${FCFLAGS_DYNAMIC_TRAIL}
+
+$(DYNAMIC_EXEC_ONE): fruit_driver_PIC.o ${TEST_DYNAMIC} ${LIBDIR_OUT}/lib/libshum.so
+	${FC} ${FCFLAGS} ${FCFLAGS_PIC} ${FCFLAGS_DYNAMIC} \
+	$< $(TEST_DYNAMIC) ${TEST_FLAGS_INCL} \
+	-I${LIBDIR_OUT}/include -L${LIBDIR_OUT}/lib -lfruit \
+	-lshum \
 	-o $@ ${FCFLAGS_DYNAMIC_TRAIL}
 
 # Cleanup
