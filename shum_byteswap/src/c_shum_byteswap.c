@@ -31,6 +31,7 @@
 #include <inttypes.h>
 #include "c_shum_byteswap.h"
 #include "c_shum_byteswap_opt.h"
+#include "c_shum_compile_diag_suspend.h"
 
 #if defined(_OPENMP) && defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
 #include "c_shum_thread_utils.h"
@@ -51,6 +52,21 @@
 #define INLINEQUAL
 #else
 #define INLINEQUAL static inline
+#endif
+
+/* We need to suspend compiler diagnostics for the expansion of byteswap macros
+ * on some systems, as they bring in reserved identifiers from system headers.
+ */
+#if defined(__clang__)
+#if __clang_major__ >= 13
+#define SUSPEND_RES_IDNET SHUM_COMPILE_DIAG_SUSPEND(-Wreserved-identifier)
+#define RESUME_RES_IDENT SHUM_COMPILE_DIAG_RESUME
+#endif
+#endif
+
+#if !defined(SUSPEND_RES_IDNET)
+#define SUSPEND_RES_IDNET
+#define RESUME_RES_IDENT
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -169,7 +185,9 @@ INLINEQUAL void c_shum_byteswap_par_swap64(void **const array,
 #endif
     for (i=0; i<=span; i=i+1)
     {
+      SUSPEND_RES_IDNET
       ptr_64[min+i*cincr] = (uint64_t)bswap_64(ptr_64[min+i*cincr]);
+      RESUME_RES_IDENT
     }
   }
 }
@@ -193,7 +211,9 @@ INLINEQUAL void c_shum_byteswap_par_swap32(void **const array,
 #endif
     for (i=0; i<=span; i=i+1)
     {
+      SUSPEND_RES_IDNET
       ptr_32[min+i*cincr] = (uint32_t)bswap_32(ptr_32[min+i*cincr]);
+      RESUME_RES_IDENT
     }
   }
 }
@@ -217,7 +237,9 @@ INLINEQUAL void c_shum_byteswap_par_swap16(void **const array,
 #endif
     for (i=0; i<=span; i=i+1)
     {
+      SUSPEND_RES_IDNET
       ptr_16[min+i*cincr] = (uint16_t)bswap_16(ptr_16[min+i*cincr]);
+      RESUME_RES_IDENT
     }
   }
 }

@@ -197,7 +197,6 @@ END IF
 
 ! Loop over every unresolved point.
 DO k=1, no_point_unres
-  distance(:,:)=rMDI
   ! Find i/j index for point.
   unres_j  = (index_unres(k)-1_int64)/points_lambda + 1_int64
   unres_i  = index_unres(k)-(unres_j-1_int64)*points_lambda
@@ -239,8 +238,6 @@ DO k=1, no_point_unres
   curr_dist_valid_min = (planet_radius*shum_pi_const)+1.0_real64
 ! We want nearest one so we dont want to limit search to max_dist.
   curr_dist_invalid_min = rMDI
-! Give some initial rMDI values in case they are never set
-  distance(:,:)=rMDI
 
   found=.FALSE.
 
@@ -260,58 +257,42 @@ DO k=1, no_point_unres
     east=-1_int64
 
     ! Find how many points can go south and be inside search_dist
-    DO j = 1, points_phi
-      IF (unres_j-j > 0) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j-j),lons(unres_i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          south=j-1_int64
-          EXIT
-        END IF
-      ELSE
+    DO j = 1, unres_j-1
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j-j),lons(unres_i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        south=j-1_int64
         EXIT
       END IF
     END DO
     ! Find how many points can go north and be inside search_dist
-    DO j = 1, points_phi
-      IF (unres_j+j <= points_phi) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j+j),lons(unres_i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          north=j-1_int64
-          EXIT
-        END IF
-      ELSE
+    DO j = 1, points_phi-unres_j
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j+j),lons(unres_i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        north=j-1_int64
         EXIT
       END IF
     END DO
     ! Find how many points can go west and be inside search_dist
-    DO i = 1, points_lambda
-      IF (unres_i-i > 0) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j),lons(unres_i-i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          west=i-1_int64
-          EXIT
-        END IF
-      ELSE
+    DO i = 1, unres_i-1
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j),lons(unres_i-i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        west=i-1_int64
         EXIT
       END IF
     END DO
     ! Find how many points can go east and be inside search_dist
-    DO i = 1, points_lambda
-      IF (unres_i+i <= points_lambda) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j),lons(unres_i+i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          east=i-1_int64
-          EXIT
-        END IF
-      ELSE
+    DO i = 1, points_lambda-unres_i
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j),lons(unres_i+i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        east=i-1_int64
         EXIT
       END IF
     END DO
@@ -343,6 +324,13 @@ DO k=1, no_point_unres
             ! Calculate distance from point
             distance(i,j) = calc_distance(lats(unres_j), lons(unres_i), &
                                           lats(j), lons(i), planet_radius)
+          END IF
+        END DO
+
+        DO i = 1, points_lambda
+          l = i+(j - 1_int64)*points_lambda
+          ! Check to see if it is a resolved point
+          IF (.NOT. unres_mask(l)) THEN
             ! Same type of point.
             IF (lsm(l) .EQV. is_land_field) THEN
               ! If current distance is less than any previous min store it.
@@ -405,6 +393,13 @@ DO k=1, no_point_unres
               ! Calculate distance from point
               distance(i,j) = calc_distance(lats(unres_j),lons(unres_i), &
                                             lats(j),lons(i), planet_radius)
+            END IF
+          END DO
+
+          DO i = unres_i-west, unres_i+east
+            l = i+(j - 1_int64)*points_lambda
+            ! Check to see if it is a resolved point
+            IF (.NOT. unres_mask(l)) THEN
               ! Same type of point and distance less than maximum distance.
               IF ((lsm(l) .EQV. is_land_field) .AND. &
                        (distance(i,j) < search_dist)) THEN
@@ -603,7 +598,6 @@ END IF
 
 ! Loop over every unresolved point.
 DO k=1, no_point_unres
-  distance(:,:)=rMDI_32b
   ! Find i/j index for point.
   unres_j  = (index_unres(k)-1_int32)/points_lambda + 1_int32
   unres_i  = index_unres(k)-(unres_j-1_int32)*points_lambda
@@ -645,8 +639,6 @@ DO k=1, no_point_unres
   curr_dist_valid_min = (planet_radius*shum_pi_const_32)+1.0_real32
 ! We want nearest one so we dont want to limit search to max_dist.
   curr_dist_invalid_min = rMDI_32b
-! Give some initial rMDI values in case they are never set
-  distance(:,:)=rMDI_32b
 
   found=.FALSE.
 
@@ -666,58 +658,42 @@ DO k=1, no_point_unres
     east=-1_int32
 
     ! Find how many points can go south and be inside search_dist
-    DO j = 1, points_phi
-      IF (unres_j-j > 0) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j-j),lons(unres_i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          south=j-1_int32
-          EXIT
-        END IF
-      ELSE
+    DO j = 1, unres_j-1_int32
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j-j),lons(unres_i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        south=j-1_int32
         EXIT
       END IF
     END DO
     ! Find how many points can go north and be inside search_dist
-    DO j = 1, points_phi
-      IF (unres_j+j <= points_phi) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j+j),lons(unres_i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          north=j-1_int32
-          EXIT
-        END IF
-      ELSE
+    DO j = 1, points_phi-unres_j
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j+j),lons(unres_i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        north=j-1_int32
         EXIT
       END IF
     END DO
     ! Find how many points can go west and be inside search_dist
-    DO i = 1, points_lambda
-      IF (unres_i-i > 0) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j),lons(unres_i-i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          west=i-1_int32
-          EXIT
-        END IF
-      ELSE
+    DO i = 1, unres_i-1_int32
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j),lons(unres_i-i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        west=i-1_int32
         EXIT
       END IF
     END DO
     ! Find how many points can go east and be inside search_dist
-    DO i = 1, points_lambda
-      IF (unres_i+i <= points_lambda) THEN
-        tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                               lats(unres_j),lons(unres_i+i), &
-                               planet_radius)
-        IF (tempdist > search_dist) THEN
-          east=i-1_int32
-          EXIT
-        END IF
-      ELSE
+    DO i = 1, points_lambda-unres_i
+      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
+                             lats(unres_j),lons(unres_i+i), &
+                             planet_radius)
+      IF (tempdist > search_dist) THEN
+        east=i-1_int32
         EXIT
       END IF
     END DO
@@ -749,6 +725,13 @@ DO k=1, no_point_unres
             ! Calculate distance from point
             distance(i,j) = calc_distance(lats(unres_j), lons(unres_i), &
                                  lats(j), lons(i), planet_radius)
+          END IF
+        END DO
+
+        DO i = 1, points_lambda
+          l = i+(j - 1_int32)*points_lambda
+          ! Check to see if it is a resolved point
+          IF (.NOT. unres_mask(l)) THEN
             ! Same type of point.
             IF (lsm(l) .EQV. is_land_field) THEN
               ! If current distance is less than any previous min store it.
@@ -811,6 +794,13 @@ DO k=1, no_point_unres
               ! Calculate distance from point
               distance(i,j) = calc_distance(lats(unres_j),lons(unres_i), &
                                     lats(j),lons(i), planet_radius)
+            END IF
+          END DO
+
+          DO i = unres_i-west, unres_i+east
+            l = i+(j - 1_int32)*points_lambda
+            ! Check to see if it is a resolved point
+            IF (.NOT. unres_mask(l)) THEN
               ! Same type of point and distance less than maximum distance.
               IF ((lsm(l) .EQV. is_land_field) .AND. &
                        (distance(i,j) < search_dist)) THEN

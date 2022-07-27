@@ -156,7 +156,7 @@ PACK_PREREQ=STR_CONV CONSTS
 # Horizontal Interpolation
 #--------------
 HORIZ_INTERP=shum_horizontal_field_interp
-HORIZ_INTERP_PREREQ=
+HORIZ_INTERP_PREREQ=NUMTOOLS
 
 # Thread Utils
 #--------------

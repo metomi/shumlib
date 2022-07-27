@@ -64,16 +64,23 @@
  *    standard C99, so will always work.
  *
  * vi) If the user defines one of the macros C_USE_BSWAP_BITSHIFT,
- *     C_USE_BSWAP_BUILTINS, or C_USE_BSWAP_BYTESWAP_H, override the above
- *     cases and use the direct bit-shift based macros, the __builtin_bswap*()
- *     non-standard intrinsic functions, or the <byteswap.h> headers
- *     repectively, as per that choice.
+ *     C_USE_BSWAP_BUILTINS, C_USE_BSWAP_BYTESWAP_H, or
+ *     C_USE_BSWAP_OSBYTEORDER_H override the above cases and use the direct
+ *     bit-shift based macros, the __builtin_bswap*() non-standard intrinsic
+ *     functions, the <byteswap.h> headers, or the <libkern/osbyteorder.h>
+ *     headers repectively, as per that choice.
+ *
+ * Note: the following cases were added to support more systems at a later date
+ *       and so are out of sequence. A user choice (case vi) will still override
+ *       these defaults
  *
  * vii) If we are usining a version of the Cray compiler (defines _CRAYC) with
  *      GNU extensions enabled (-hgnu) and has __GNUC__ greater than version
  *      6.1, fall-back to the non-standard intrinsic __builtin_bswap*()
  *      functions for all data sizes.
  *
+ * viii) If we are on a Mac OS X / Darwin system (defines __APPLE__) instead
+ *       use the non-standard <libkern/osbyteorder.h> header
  */
 
 /*----------------*/
@@ -87,21 +94,21 @@
 #define C_SHUM_BSWAP_HASGNU 0
 #endif
 
-#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                    \
+#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                 \
                           (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
 #define C_SHUM_BSWAP_HASGNU4_3 1
 #else
 #define C_SHUM_BSWAP_HASGNU4_3 0
 #endif
 
-#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                    \
+#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                 \
                           (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)))
 #define C_SHUM_BSWAP_HASGNU4_8 1
 #else
 #define C_SHUM_BSWAP_HASGNU4_8 0
 #endif
 
-#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 6) ||                                    \
+#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 6) ||                                 \
                           (__GNUC__ == 6 && __GNUC_MINOR__ >= 1)))
 #define C_SHUM_BSWAP_HASGNU6_1 1
 #else
@@ -123,27 +130,51 @@
 
 /* test for user choice */
 
-#if defined C_USE_BSWAP_BYTESWAP_H
+#if defined(C_USE_BSWAP_BYTESWAP_H)
 
 /* user choice is <byteswap.h> */
 #define C_USE_BSWAP_USERCHOICE
+#undef C_USE_BSWAP_OSBYTEORDER_H
+#undef C_USE_BSWAP_BITSHIFT
+#undef C_USE_BSWAP_BUILTINS
 
-#elif defined C_USE_BSWAP_BUILTINS
+#elif defined(C_USE_BSWAP_OSBYTEORDER_H)
+
+/* user choice is <libkern/OSByteOrder.h> */
+#define C_USE_BSWAP_USERCHOICE
+#undef C_USE_BSWAP_BYTESWAP_H
+#undef C_USE_BSWAP_BITSHIFT
+#undef C_USE_BSWAP_BUILTINS
+
+#elif defined(C_USE_BSWAP_BUILTINS)
 
 /* user choice is __builtin_bswap*() */
 #define C_USE_BSWAP_USERCHOICE
 #define C_USE_BSWAP_BUILTINS_64
 #define C_USE_BSWAP_BUILTINS_32
 #define C_USE_BSWAP_BUILTINS_16
+#undef C_USE_BSWAP_OSBYTEORDER_H
+#undef C_USE_BSWAP_BYTESWAP_H
+#undef C_USE_BSWAP_BITSHIFT
 
-#elif defined C_USE_BSWAP_BITSHIFT
+#elif defined(C_USE_BSWAP_BITSHIFT)
 
 /* user choice is bit-shift macros */
 #define C_USE_BSWAP_USERCHOICE
 #define C_USE_BSWAP_64_BITSHIFT
 #define C_USE_BSWAP_32_BITSHIFT
 #define C_USE_BSWAP_16_BITSHIFT
+#undef C_USE_BSWAP_OSBYTEORDER_H
+#undef C_USE_BSWAP_BYTESWAP_H
+#undef C_USE_BSWAP_BUILTINS
 
+#endif
+
+#if !defined(C_USE_BSWAP_USERCHOICE)
+#undef C_USE_BSWAP_OSBYTEORDER_H
+#undef C_USE_BSWAP_BYTESWAP_H
+#undef C_USE_BSWAP_BITSHIFT
+#undef C_USE_BSWAP_BUILTINS
 #endif
 
 /* test for used case */
@@ -151,6 +182,11 @@
 #if defined(C_USE_BSWAP_USERCHOICE)
 
 /* case vi) */
+
+#elif defined(__APPLE__)
+
+/* case viii) */
+#define C_USE_BSWAP_OSBYTEORDER_H
 
 #elif C_SHUM_BSWAP_HASGNU && !C_SHUM_BSWAP_HASGNU4_3
 
@@ -213,6 +249,14 @@
 #if defined(C_USE_BSWAP_BYTESWAP_H)
 #include <byteswap.h>
 #endif
+
+#if defined(C_USE_BSWAP_OSBYTEORDER_H)
+#include <libkern/OSByteOrder.h>
+#define bswap_16(x) OSSwapInt16(x)
+#define bswap_32(x) OSSwapInt32(x)
+#define bswap_64(x) OSSwapInt64(x)
+#endif
+
 
 #if defined(C_USE_BSWAP_64_BITSHIFT)
 
