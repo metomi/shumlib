@@ -160,7 +160,7 @@ REAL(KIND=real64) :: step ! step size to loop over
 REAL(KIND=real64) :: tempdist ! temporary distance
 REAL(KIND=real64) :: min_loc_spc ! minimum of the local spacings
 REAL(KIND=real64) :: max_dist ! maximum distance to search
-REAL(KIND=real64) :: distance(points_lambda, points_phi) ! Array of calculation.
+REAL(KIND=real64) :: distance(points_lambda) ! Vector of calculation.
 REAL(KIND=real64) :: curr_dist_valid_min   ! Current distance to valid point
 REAL(KIND=real64) :: curr_dist_invalid_min ! Current distance to invalid point
 LOGICAL(KIND=bool) :: is_the_same(SIZE(tmp_lsm,1))
@@ -322,31 +322,23 @@ DO k=1, no_point_unres
           ! Check to see if it is a resolved point
           IF (.NOT. unres_mask(l)) THEN
             ! Calculate distance from point
-            distance(i,j) = calc_distance(lats(unres_j), lons(unres_i), &
+            distance(i) = calc_distance(lats(unres_j), lons(unres_i), &
                                           lats(j), lons(i), planet_radius)
-          END IF
-        END DO
-
-        DO i = 1, points_lambda
-          l = i+(j - 1_int64)*points_lambda
-          ! Check to see if it is a resolved point
-          IF (.NOT. unres_mask(l)) THEN
             ! Same type of point.
             IF (lsm(l) .EQV. is_land_field) THEN
               ! If current distance is less than any previous min store it.
-              IF (distance(i,j) < curr_dist_valid_min) THEN
-                curr_dist_valid_min = distance(i,j)
+              IF (distance(i) < curr_dist_valid_min) THEN
+                curr_dist_valid_min = distance(i)
                 curr_i_valid_min    = i
                 curr_j_valid_min    = j
               END IF
             ELSE IF (constrained .OR. allsametype) THEN
-              IF (distance(i,j) < curr_dist_invalid_min .OR. &
+              IF (distance(i) < curr_dist_invalid_min .OR. &
                 curr_dist_invalid_min == rMDI) THEN
-                curr_dist_invalid_min = distance(i,j)
+                curr_dist_invalid_min = distance(i)
                 curr_i_invalid_min=i
                 curr_j_invalid_min=j
               END IF
-              distance(i,j) = rMDI
             END IF
           END IF
         END DO
@@ -391,34 +383,26 @@ DO k=1, no_point_unres
             ! Check to see if it is a resolved point
             IF (.NOT. unres_mask(l)) THEN
               ! Calculate distance from point
-              distance(i,j) = calc_distance(lats(unres_j),lons(unres_i), &
+              distance(i) = calc_distance(lats(unres_j),lons(unres_i), &
                                             lats(j),lons(i), planet_radius)
-            END IF
-          END DO
-
-          DO i = unres_i-west, unres_i+east
-            l = i+(j - 1_int64)*points_lambda
-            ! Check to see if it is a resolved point
-            IF (.NOT. unres_mask(l)) THEN
               ! Same type of point and distance less than maximum distance.
               IF ((lsm(l) .EQV. is_land_field) .AND. &
-                       (distance(i,j) < search_dist)) THEN
+                       (distance(i) < search_dist)) THEN
                 ! If current distance is less than any previous min store it.
-                IF (distance(i,j) < curr_dist_valid_min) THEN
-                  curr_dist_valid_min = distance(i,j)
+                IF (distance(i) < curr_dist_valid_min) THEN
+                  curr_dist_valid_min = distance(i)
                   curr_i_valid_min    = i
                   curr_j_valid_min    = j
                 END IF
               ELSE IF (constrained .OR. allsametype) THEN
               ! have to add this in as if it isn't constrained don't want it
               ! storing an invalid value
-                IF (distance(i,j) < curr_dist_invalid_min .OR. &
+                IF (distance(i) < curr_dist_invalid_min .OR. &
                   curr_dist_invalid_min == rMDI) THEN
-                  curr_dist_invalid_min = distance(i,j)
+                  curr_dist_invalid_min = distance(i)
                   curr_i_invalid_min=i
                   curr_j_invalid_min=j
                 END IF
-                distance(i,j) = rMDI
               END IF
             END IF
           END DO
@@ -561,7 +545,7 @@ REAL(KIND=real32) :: step ! step size to loop over
 REAL(KIND=real32) :: tempdist ! temporary distance
 REAL(KIND=real32) :: min_loc_spc ! minimum of the local spacings
 REAL(KIND=real32) :: max_dist ! maximum distance to search
-REAL(KIND=real32) :: distance(points_lambda, points_phi) ! Array of calculation.
+REAL(KIND=real32) :: distance(points_lambda) ! Vector of calculation.
 REAL(KIND=real32) :: curr_dist_valid_min   ! Current distance to valid point
 REAL(KIND=real32) :: curr_dist_invalid_min ! Current distance to invalid point
 LOGICAL(KIND=bool) :: is_the_same(SIZE(tmp_lsm,1))
@@ -723,31 +707,23 @@ DO k=1, no_point_unres
           ! Check to see if it is a resolved point
           IF (.NOT. unres_mask(l)) THEN
             ! Calculate distance from point
-            distance(i,j) = calc_distance(lats(unres_j), lons(unres_i), &
+            distance(i) = calc_distance(lats(unres_j), lons(unres_i), &
                                  lats(j), lons(i), planet_radius)
-          END IF
-        END DO
-
-        DO i = 1, points_lambda
-          l = i+(j - 1_int32)*points_lambda
-          ! Check to see if it is a resolved point
-          IF (.NOT. unres_mask(l)) THEN
             ! Same type of point.
             IF (lsm(l) .EQV. is_land_field) THEN
               ! If current distance is less than any previous min store it.
-              IF (distance(i,j) < curr_dist_valid_min) THEN
-                curr_dist_valid_min = distance(i,j)
+              IF (distance(i) < curr_dist_valid_min) THEN
+                curr_dist_valid_min = distance(i)
                 curr_i_valid_min    = i
                 curr_j_valid_min    = j
               END IF
             ELSE IF (constrained .OR. allsametype) THEN
-              IF (distance(i,j) < curr_dist_invalid_min .OR. &
+              IF (distance(i) < curr_dist_invalid_min .OR. &
                 curr_dist_invalid_min == rMDI_32b) THEN
-                curr_dist_invalid_min = distance(i,j)
+                curr_dist_invalid_min = distance(i)
                 curr_i_invalid_min=i
                 curr_j_invalid_min=j
               END IF
-              distance(i,j) = rMDI_32b
             END IF
           END IF
         END DO
@@ -792,34 +768,26 @@ DO k=1, no_point_unres
             ! Check to see if it is a resolved point
             IF (.NOT. unres_mask(l)) THEN
               ! Calculate distance from point
-              distance(i,j) = calc_distance(lats(unres_j),lons(unres_i), &
+              distance(i) = calc_distance(lats(unres_j),lons(unres_i), &
                                     lats(j),lons(i), planet_radius)
-            END IF
-          END DO
-
-          DO i = unres_i-west, unres_i+east
-            l = i+(j - 1_int32)*points_lambda
-            ! Check to see if it is a resolved point
-            IF (.NOT. unres_mask(l)) THEN
               ! Same type of point and distance less than maximum distance.
               IF ((lsm(l) .EQV. is_land_field) .AND. &
-                       (distance(i,j) < search_dist)) THEN
+                       (distance(i) < search_dist)) THEN
                 ! If current distance is less than any previous min store it.
-                IF (distance(i,j) < curr_dist_valid_min) THEN
-                  curr_dist_valid_min = distance(i,j)
+                IF (distance(i) < curr_dist_valid_min) THEN
+                  curr_dist_valid_min = distance(i)
                   curr_i_valid_min    = i
                   curr_j_valid_min    = j
                 END IF
               ELSE IF (constrained .OR. allsametype) THEN
               ! have to add this in as if it isn't constrained don't want it
               ! storing an invalid value
-                IF (distance(i,j) < curr_dist_invalid_min .OR. &
+                IF (distance(i) < curr_dist_invalid_min .OR. &
                   curr_dist_invalid_min == rMDI_32b) THEN
-                  curr_dist_invalid_min = distance(i,j)
+                  curr_dist_invalid_min = distance(i)
                   curr_i_invalid_min=i
                   curr_j_invalid_min=j
                 END IF
-                distance(i,j) = rMDI_32b
               END IF
             END IF
           END DO

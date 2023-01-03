@@ -12,7 +12,7 @@ fruit_test_shum_number_tools.o: fruit_test_shum_number_tools.f90 ${LIBDIR_OUT}/l
 	${FC} -c ${FCFLAGS_STATIC} ${FCFLAGS} $< \
 	-I${LIBDIR_OUT}/include -o $@ ${FCFLAGS_STATIC_TRAIL}
 
-c_fruit_test_shum_shum_number_tools.o: c_fruit_test_shum_shum_number_tools.c ${LIBDIR_OUT}/lib/libshum_shum_number_tools.a
+c_fruit_test_shum_number_tools.o: c_fruit_test_shum_number_tools.c ${LIBDIR_OUT}/lib/libshum_number_tools.a
 	${CC} -c ${CCFLAGS_STATIC} ${CCFLAGS} $< \
 	-I${LIBDIR_OUT}/include -o $@ ${CCFLAGS_STATIC_TRAIL}
 

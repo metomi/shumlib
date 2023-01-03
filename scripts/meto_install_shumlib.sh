@@ -27,14 +27,14 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86|ex1a]
 #
-# This script was used to install shumlib version 2022.07.1
-# and was intended for use with the UM at UM 13.0
+# This script was used to install shumlib version 2022.11.1
+# and was intended for use with the UM at UM 13.1
 #
 
 set -eu
 
 # set up no IEEE list
-NO_IEEE_LIST=${NO_IEEE_LIST:-"xc40_haswell_gnu_4.9.1 xc40_ivybridge_gnu_4.9.1 ex1a_gnu_10.3.0"}
+NO_IEEE_LIST=${NO_IEEE_LIST:-"xc40_haswell_gnu_4.9.1 xc40_ivybridge_gnu_4.9.1 ex1a_gnu_12.1.0"}
 
 # Ensure directory is correct
 cd $(readlink -f $(dirname $0)/..)
@@ -108,9 +108,12 @@ function build_openmp_onoff {
     local dir=$2
     shift 2
     # Copy source to temporary build directory and switch there
-    TEMP_BUILD_DIR=$(mktemp -d)
+    TEMP_BUILD_DIR=${SHUM_TMPDIR:-$(mktemp -d)}
+    mkdir -p $TEMP_BUILD_DIR
     cp -r * $TEMP_BUILD_DIR
     cd $TEMP_BUILD_DIR
+
+    echo "Build Dir is: $TEMP_BUILD_DIR"
 
     # OpenMP
     unset LIBDIR_OUT
@@ -159,8 +162,13 @@ function build_openmp_onoff {
     unset SHUM_USE_C_OPENMP_VIA_THREAD_UTILS
     build_test_clean $config $*
 
-    # Tidy up the temporary directory
-    rm -rf $TEMP_BUILD_DIR
+    # Test if $SHUM_TMPDIR is unset. If it is not set, we are using the mktmp
+    # directory, which must be cleaned up again.
+    if [ -z ${SHUM_TMPDIR+x} ]; then
+      # Tidy up the temporary directory
+      rm -rf $TEMP_BUILD_DIR
+    fi
+
 }
 
 # Intel/GCC (ifort 16)
@@ -170,6 +178,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
     module load ifort/16.0_64  # From METO_LINUX family in rose-stem
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-ifort15+-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-16.0.1-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -191,7 +200,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     module unload libraries/gcc
     module load gcc/8.1.0
     module load llvm/12.0.0
-
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-ifort15+-clang
     LIBDIR=$BUILD_DESTINATION/meto-x86-ifort-16.0.1-clang-12.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -209,6 +218,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
     module load nagfor/6.2.0_64
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-nagfor-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-6.2.0-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -227,6 +237,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
     module load pgfortran/16.10_64
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-portland-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-pgfortran-16.10.0-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR $(sed "s/\bshum_fieldsfile_class\b//g" \
@@ -246,6 +257,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     module use /data/users/lfric/modules/modulefiles.rhel7
     module purge
     module load environment/lfric/gnu/6.1.0
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-6.1.0-gcc-6.1.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -264,6 +276,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     module use /home/h03/jopa/modulefiles
     module purge
     module load jedi/gcc/9.2.0
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-9.2.0-gcc-9.2.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -282,6 +295,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     module use /home/h03/jopa/modulefiles
     module purge
     module load gnu-toolchain/gcc/9.3.0
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-9.3.0-gcc-9.3.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -300,6 +314,7 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     module use /data/users/lfric/modules/modulefiles.rhel7
     module purge
     module load environment/lfric/gnu/10.2.0
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-10.2.0-gcc-10.2.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -315,6 +330,7 @@ THIS="x86_gnu_generic"
 if [[ $PLATFORM == "x86" ]] || [[ $PLATFORM == $THIS ]] ; then
   if [[ $(gcc -dumpversion) > 8 ]] ; then
     (
+    unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/x86-gfortran-$(gfortran -dumpversion)-gcc-$(gcc -dumpversion)
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -345,6 +361,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-crayftn8.3.4+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-crayftn-8.3.4-craycc-8.3.4
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
@@ -372,6 +389,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-crayftn8.3.4+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-crayftn-8.3.4-craycc-8.3.4
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
@@ -398,6 +416,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-crayftn8.4.0+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-crayftn-8.4.3-craycc-8.4.3
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
@@ -423,6 +442,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-crayftn8.4.0+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-crayftn-8.5.8-craycc-8.5.8
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
@@ -448,6 +468,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-crayftn8.4.0+-craycc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-crayftn-8.5.8-craycc-8.5.8
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
@@ -473,6 +494,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-ifort-15.0.0-icc-15.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -496,6 +518,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-ifort-15.0.0-icc-15.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -519,6 +542,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-ifort-17.0.0-icc-17.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -542,6 +566,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-ifort-icc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-ifort-17.0.0-icc-17.0.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -565,6 +590,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-gfortran-4.9.1-gcc-4.9.1
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -588,6 +614,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-gfortran-4.9.1-gcc-4.9.1
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -611,6 +638,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-haswell-gfortran-6.3.0-gcc-6.3.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -634,6 +662,7 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     module load metoffice/tempdir
     module load metoffice/userenv
     module load craype-network-aries
+    unset SHUM_TMPDIR
     CONFIG=meto-xc40-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-xc40-ivybridge-gfortran-6.3.0-gcc-6.3.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
@@ -644,15 +673,21 @@ if [ $PLATFORM == "xc40" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-# Crayftn/CrayCC 14.0.0
-THIS="ex1a_cray_14.0.0"
+# Crayftn/CrayCC 15.0.0
+THIS="ex1a_cray_15.0.0"
 if [ $PLATFORM == "ex1a" ] || [ $PLATFORM == $THIS ] ; then
 
     (
-    module switch PrgEnv-cray PrgEnv-cray/8.3.3                                                                                                                                                   
-    module load cpe/22.05 
+    module switch PrgEnv-cray PrgEnv-cray/8.3.3
+    module load cpe/22.11
+    unset SHUM_TMPDIR
     CONFIG=meto-ex1a-crayftn12.0.1+-craycc
-    LIBDIR=$BUILD_DESTINATION/meto-ex1a-crayftn-14.0.0-craycc-14.0.0
+    LIBDIR=$BUILD_DESTINATION/meto-ex1a-crayftn-15.0.0-craycc-15.0.0
+    # If it is not the case that $CYLC_TASK_WORK_PATH is unset, use it to
+    # define $SHUM_TMPDIR
+    if [ ! -z ${CYLC_TASK_WORK_PATH+x} ]; then
+      export SHUM_TMPDIR=$CYLC_TASK_WORK_PATH/meto-ex1a-crayftn-15.0.0-craycc-15.0.0
+    fi
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
                                              -e "s/\bshum_fieldsfile\b//g" \
                                              <<< $LIB_DIRS)
@@ -663,16 +698,16 @@ if [ $PLATFORM == "ex1a" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-# Gfortran 10.3.0
-THIS="ex1a_gnu_10.3.0"
+# Gfortran 12.1.0
+THIS="ex1a_gnu_12.1.0"
 if [ $PLATFORM == "ex1a" ] || [ $PLATFORM == $THIS ] ; then
 
     (
     module switch PrgEnv-cray PrgEnv-gnu/8.3.3
-    module load cpe/22.05
-    module switch gcc gcc/10.3.0 
+    module load cpe/22.11
+    unset SHUM_TMPDIR
     CONFIG=meto-ex1a-gfortran-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-ex1a-gfortran-10.3.0-gcc-10.3.0
+    LIBDIR=$BUILD_DESTINATION/meto-ex1a-gfortran-12.1.0-gcc-12.1.0
     build_openmp_onoff $CONFIG $LIBDIR all_libs
     )
     if [ $? -ne 0 ] ; then

@@ -23,6 +23,12 @@
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <float.h>
+#if defined(SHUM_X86_INTRINSIC)
+#include <stdbool.h>
+#include <xmmintrin.h>
+#include <xmmintrin.h>
+#endif
 #include "c_fruit_test_shum_number_tools.h"
 
 /******************************************************************************/
@@ -33,28 +39,28 @@
 /* tests                                                                      */
 /******************************************************************************/
 
-float c_test_generate_finf()
+float c_test_generate_finf(void)
 {
   return strtof("INF", NULL);
 }
 
 /******************************************************************************/
 
-double c_test_generate_dinf()
+double c_test_generate_dinf(void)
 {
   return strtod("INF", NULL);
 }
 
 /******************************************************************************/
 
-float c_test_generate_fnan()
+float c_test_generate_fnan(void)
 {
   return nanf("");
 }
 
 /******************************************************************************/
 
-double c_test_generate_dnan()
+double c_test_generate_dnan(void)
 {
   return nan("");
 }
@@ -63,40 +69,138 @@ double c_test_generate_dnan()
 
 void c_test_generate_fdenormal(float *denormal_float)
 {
+#if !defined(__GNUC__) || defined(__clang__)
+#if defined(__STDC_IEC_559__)
+/* tell the compiler we will modify the floating point environment */
+#pragma STDC FENV_ACCESS ON
+#endif
+#endif
+
+#if defined(SHUM_X86_INTRINSIC)
+/* save the current MXCSR state of the FZ and DAZ bits */
+bool hwftz = _MM_GET_FLUSH_ZERO_MODE();
+bool hwdaz = _MM_GET_DENORMALS_ZERO_MODE();
+
+if (hwftz)
+{
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
+}
+
+if (hwdaz)
+{
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
+}
+#endif
+
   union fdenorm_t {
       int32_t bits;
       float denormal;
   } fdenorm;
 
+  /* Attempt to genertate a denormal number */
+
   fdenorm.bits = UINT32_C(0x1);
 
+#if defined(FLT_TRUE_MIN)
   if (fpclassify(fdenorm.denormal)!=FP_SUBNORMAL)
   {
-    *denormal_float=0.0;
-    return;
+    fdenorm.denormal=FLT_TRUE_MIN;
+#endif
+    if (fpclassify(fdenorm.denormal)!=FP_SUBNORMAL)
+    {
+      fdenorm.denormal=FLT_MIN*0.1F;
+      if (fpclassify(fdenorm.denormal)!=FP_SUBNORMAL)
+      {
+        fdenorm.bits = 0;
+      }
+    }
+#if defined(FLT_TRUE_MIN)
   }
+#endif
 
   *denormal_float=fdenorm.denormal;
+
+#if defined(SHUM_X86_INTRINSIC)
+if (hwftz)
+{
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+}
+
+if (hwdaz)
+{
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+}
+#endif
 }
 
 /******************************************************************************/
 
 void c_test_generate_ddenormal(double *denomal_double)
 {
+#if !defined(__GNUC__) || defined(__clang__)
+#if defined(__STDC_IEC_559__)
+/* tell the compiler we will modify the floating point environment */
+#pragma STDC FENV_ACCESS ON
+#endif
+#endif
+
+#if defined(SHUM_X86_INTRINSIC)
+/* save the current MXCSR state of the FZ and DAZ bits */
+bool hwftz =_MM_GET_FLUSH_ZERO_MODE();
+bool hwdaz =_MM_GET_DENORMALS_ZERO_MODE();
+
+if (hwftz)
+{
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
+}
+
+if (hwdaz)
+{
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
+}
+#endif
+
   union ddenorm_t {
       int64_t bits;
       double denormal;
   } ddenorm;
 
+  /* Attempt to genertate a denormal number */
+
   ddenorm.bits = UINT64_C(0x1);
 
+#if defined(DBL_TRUE_MIN)
   if (fpclassify(ddenorm.denormal)!=FP_SUBNORMAL)
   {
-    *denomal_double=0.0;
-    return;
+    ddenorm.denormal=DBL_TRUE_MIN;
+#endif
+    if (fpclassify(ddenorm.denormal)!=FP_SUBNORMAL)
+    {
+      ddenorm.denormal=DBL_MIN*0.1;
+      if (fpclassify(ddenorm.denormal)!=FP_SUBNORMAL)
+      {
+        ddenorm.bits = 0;
+      }
+    }
+#if defined(DBL_TRUE_MIN)
   }
+#endif
 
   *denomal_double=ddenorm.denormal;
+
+#if defined(SHUM_X86_INTRINSIC)
+/* restore the MXCSR state of the FZ and DAZ bits (if required) */
+
+if (hwftz)
+{
+  _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+}
+
+if (hwdaz)
+{
+  _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+}
+#endif
 }
 
 /******************************************************************************/
