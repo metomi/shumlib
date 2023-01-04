@@ -42,6 +42,7 @@ c_shum_wgdos_packing_PIC.o: c_shum_wgdos_packing.f90 f_shum_wgdos_packing_PIC.o
 libshum_wgdos_packing.so: \
 	f_shum_wgdos_packing_PIC.o \
 	c_shum_wgdos_packing_PIC.o \
+	${LIBDIR_OUT}/lib/libshum_string_conv.so \
 	${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 

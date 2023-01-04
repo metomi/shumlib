@@ -36,7 +36,7 @@ c_shum_data_conv_PIC.o: c_shum_data_conv.c c_shum_data_conv.h ${COMMON_DIR}/c_sh
 f_shum_data_conv_PIC.o: f_shum_data_conv.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
-libshum_data_conv.so: c_shum_data_conv_PIC.o f_shum_data_conv_PIC.o ${VERSION_OBJECTS_PIC}
+libshum_data_conv.so: c_shum_data_conv_PIC.o f_shum_data_conv_PIC.o ${LIBDIR_OUT}/lib/libshum_string_conv.so ${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 
 # Cleanup

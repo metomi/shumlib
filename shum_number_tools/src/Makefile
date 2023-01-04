@@ -17,13 +17,13 @@ include ${COMMON_DIR}/Makefile-version
 
 # Static library - uses archiver to create library
 #-------------------------------------------------------------------------------
-f_shum_is_inf.o: f_shum_is_inf.f90
+f_shum_is_inf.o: f_shum_is_inf.F90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
 
-f_shum_is_nan.o: f_shum_is_nan.f90
+f_shum_is_nan.o: f_shum_is_nan.F90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
 
-f_shum_is_denormal.o: f_shum_is_denormal.f90
+f_shum_is_denormal.o: f_shum_is_denormal.F90
 	${FC} ${FCFLAGS} -c -I${LIBDIR_OUT}/include $<
 
 libshum_number_tools.a: f_shum_is_inf.o f_shum_is_nan.o f_shum_is_denormal.o \
@@ -34,13 +34,13 @@ libshum_number_tools.a: f_shum_is_inf.o f_shum_is_nan.o f_shum_is_denormal.o \
 # are suffixed to keep them separate to the above (since the dynamic library
 # required position-independent-code flags whilst the static version does not)
 #-------------------------------------------------------------------------------
-f_shum_is_inf_PIC.o: f_shum_is_inf.f90
+f_shum_is_inf_PIC.o: f_shum_is_inf.F90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
-f_shum_is_nan_PIC.o: f_shum_is_nan.f90
+f_shum_is_nan_PIC.o: f_shum_is_nan.F90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
-f_shum_is_denormal_PIC.o: f_shum_is_denormal.f90
+f_shum_is_denormal_PIC.o: f_shum_is_denormal.F90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
 libshum_number_tools.so: f_shum_is_inf_PIC.o f_shum_is_nan_PIC.o f_shum_is_denormal_PIC.o \
@@ -51,9 +51,4 @@ libshum_number_tools.so: f_shum_is_inf_PIC.o f_shum_is_nan_PIC.o f_shum_is_denor
 #-------------------------------------------------------------------------------
 .PHONY: clean
 clean:
-	rm -f *.o *.mod *.so *.a *.f90 ${VERSION_CLEAN}
-
-# Preprocess targets
-#--------------------------------------------------------------------------------
-%.f90: %.F90
-	${FPP} ${FPPFLAGS} $< -o $@
+	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}

@@ -44,7 +44,10 @@ f_shum_ff_status_PIC.o: f_shum_ff_status.f90
 	${FC} ${FCFLAGS} ${FCFLAGS_PIC} -c -I${LIBDIR_OUT}/include $< -o $@
 
 libshum_fieldsfile_class.so: \
-	f_shum_file_PIC.o f_shum_field_PIC.o f_shum_ff_status_PIC.o ${VERSION_OBJECTS_PIC}
+	f_shum_file_PIC.o f_shum_field_PIC.o f_shum_ff_status_PIC.o \
+	${LIBDIR_OUT}/lib/libshum_fieldsfile.so \
+	${LIBDIR_OUT}/lib/libshum_wgdos_packing.so \
+	${VERSION_OBJECTS_PIC}
 	${FC} ${FCFLAGS_SHARED} ${FCFLAGS} ${FCFLAGS_PIC} $^ -o $@
 
 # Cleanup
