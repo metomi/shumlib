@@ -48,15 +48,15 @@ PUBLIC :: f_shum_spiral_search_algorithm
 ! Additional protection for the case that FLOAT/DOUBLE do not conform to the   !
 ! sizes we expect is provided via the "precision_bomb" macro-file              !
 !------------------------------------------------------------------------------!
-  INTEGER, PARAMETER :: int64  = C_INT64_T
-  INTEGER, PARAMETER :: int32  = C_INT32_T
-  INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT
-  INTEGER, PARAMETER :: bool   = C_BOOL
+INTEGER, PARAMETER :: INT64  = C_INT64_T
+INTEGER, PARAMETER :: INT32  = C_INT32_T
+INTEGER, PARAMETER :: REAL64 = C_DOUBLE
+INTEGER, PARAMETER :: REAL32 = C_FLOAT
+INTEGER, PARAMETER :: bool   = C_BOOL
 !------------------------------------------------------------------------------!
 
-REAL(KIND=real64), PARAMETER :: rMDI      = -32768.0_real64*32768.0_real64
-REAL(KIND=real32), PARAMETER :: rMDI_32b  = -32768.0_real32*32768.0_real32
+REAL(KIND=REAL64), PARAMETER :: rMDI      = -32768.0_real64*32768.0_real64
+REAL(KIND=REAL32), PARAMETER :: rMDI_32b  = -32768.0_real32*32768.0_real32
 
 INTERFACE f_shum_spiral_search_algorithm
   MODULE PROCEDURE                                                             &
@@ -99,76 +99,76 @@ FUNCTION f_shum_spiral_arg64                                                   &
             is_land_field, constrained, constrained_max_dist,                  &
             dist_step, cyclic_domain, unres_mask,                              &
             indices, planet_radius,                                            &
-            cmessage) RESULT(status)
+            cmessage) RESULT(istat)
 
 IMPLICIT NONE
 
                                           ! Number of rows in grid
-INTEGER(KIND=int64), INTENT(IN)    :: points_phi
+INTEGER(KIND=INT64), INTENT(IN)    :: points_phi
                                           ! Number of columns in grid
-INTEGER(KIND=int64), INTENT(IN)    :: points_lambda
+INTEGER(KIND=INT64), INTENT(IN)    :: points_lambda
                                           ! Land sea mask
 LOGICAL(KIND=bool),  INTENT(IN)    :: lsm(points_lambda*points_phi)
                                           ! Number of unresolved points
-INTEGER(KIND=int64), INTENT(IN)    :: no_point_unres
+INTEGER(KIND=INT64), INTENT(IN)    :: no_point_unres
                                           ! Index to unresolved pts
-INTEGER(KIND=int64), INTENT(IN)    :: index_unres(no_point_unres)
+INTEGER(KIND=INT64), INTENT(IN)    :: index_unres(no_point_unres)
                                           ! Latitudes
-REAL(KIND=real64),   INTENT(IN)    :: lats(points_phi)
+REAL(KIND=REAL64),   INTENT(IN)    :: lats(points_phi)
                                           ! Longitudes
-REAL(KIND=real64),   INTENT(IN)    :: lons(points_lambda)
+REAL(KIND=REAL64),   INTENT(IN)    :: lons(points_lambda)
                                           ! False for sea, True for land field
 LOGICAL(KIND=bool),  INTENT(IN)    :: is_land_field
                                           ! True to apply constraint distance
 LOGICAL(KIND=bool),  INTENT(IN)    :: constrained
                                           ! Contraint distance (m)
-REAL(KIND=real64),   INTENT(IN)    :: constrained_max_dist
+REAL(KIND=REAL64),   INTENT(IN)    :: constrained_max_dist
                                           ! Step size modifier for search
-REAL(KIND=real64),   INTENT(IN)    :: dist_step
+REAL(KIND=REAL64),   INTENT(IN)    :: dist_step
                                           ! True if covering complete lat circle
 LOGICAL(KIND=bool),  INTENT(IN)    :: cyclic_domain
                                           ! False for a point that is resolved,
                                           ! True for an unresolved point
 LOGICAL(KIND=bool),  INTENT(IN)    :: unres_mask(points_lambda*points_phi)
                                           ! Indices to resolved pts
-INTEGER(KIND=int64), INTENT(OUT)   :: indices(no_point_unres)
+INTEGER(KIND=INT64), INTENT(OUT)   :: indices(no_point_unres)
                                           ! Radius of planet (in m)
-REAL(KIND=real64),   INTENT(IN)    :: planet_radius
+REAL(KIND=REAL64),   INTENT(IN)    :: planet_radius
                                           ! Error message
-CHARACTER(LEN=*),    INTENT(INOUT) :: cmessage
+CHARACTER(LEN=*),    INTENT(IN OUT) :: cmessage
                                           ! Return status
-INTEGER(KIND=int64)                :: status
+INTEGER(KIND=INT64)                :: istat
 
 ! LOCAL VARIABLES
 
-INTEGER(KIND=int64) :: i,j,k,l ! Loop counters
-INTEGER(KIND=int64) :: north ! Number of points to search north
-INTEGER(KIND=int64) :: south ! Number of points to search south
-INTEGER(KIND=int64) :: east  ! Number of points to search east
-INTEGER(KIND=int64) :: west  ! Number of points to search west
-INTEGER(KIND=int64) :: unres_i ! Index for i for unres
-INTEGER(KIND=int64) :: unres_j ! Index for j for unres
-INTEGER(KIND=int64) :: curr_i_valid_min ! Posn of valid min distance in E-W dir
-INTEGER(KIND=int64) :: curr_j_valid_min ! Posn of valid min distance in S-N dir
-INTEGER(KIND=int64) :: curr_i_invalid_min ! Posn of invalid min dist in E-W dir
-INTEGER(KIND=int64) :: curr_j_invalid_min ! Posn of invalid min dist in S-N dir
+INTEGER(KIND=INT64) :: i,j,k,l ! Loop counters
+INTEGER(KIND=INT64) :: north ! Number of points to search north
+INTEGER(KIND=INT64) :: south ! Number of points to search south
+INTEGER(KIND=INT64) :: east  ! Number of points to search east
+INTEGER(KIND=INT64) :: west  ! Number of points to search west
+INTEGER(KIND=INT64) :: unres_i ! Index for i for unres
+INTEGER(KIND=INT64) :: unres_j ! Index for j for unres
+INTEGER(KIND=INT64) :: curr_i_valid_min ! Posn of valid min distance in E-W dir
+INTEGER(KIND=INT64) :: curr_j_valid_min ! Posn of valid min distance in S-N dir
+INTEGER(KIND=INT64) :: curr_i_invalid_min ! Posn of invalid min dist in E-W dir
+INTEGER(KIND=INT64) :: curr_j_invalid_min ! Posn of invalid min dist in S-N dir
 LOGICAL :: found ! resolved point fitting critirea has been found
 LOGICAL :: allsametype ! no resolved points of same type in lsm
 LOGICAL(KIND=bool) :: tmp_lsm(points_lambda*points_phi) ! temp land sea mask
-REAL(KIND=real64) :: search_dist ! distance to search
-REAL(KIND=real64) :: step ! step size to loop over
-REAL(KIND=real64) :: tempdist ! temporary distance
-REAL(KIND=real64) :: min_loc_spc ! minimum of the local spacings
-REAL(KIND=real64) :: max_dist ! maximum distance to search
-REAL(KIND=real64) :: distance(points_lambda) ! Vector of calculation.
-REAL(KIND=real64) :: curr_dist_valid_min   ! Current distance to valid point
-REAL(KIND=real64) :: curr_dist_invalid_min ! Current distance to invalid point
+REAL(KIND=REAL64) :: search_dist ! distance to search
+REAL(KIND=REAL64) :: step ! step size to loop over
+REAL(KIND=REAL64) :: tempdist ! temporary distance
+REAL(KIND=REAL64) :: min_loc_spc ! minimum of the local spacings
+REAL(KIND=REAL64) :: max_dist ! maximum distance to search
+REAL(KIND=REAL64) :: distance(points_lambda) ! Vector of calculation.
+REAL(KIND=REAL64) :: curr_dist_valid_min   ! Current distance to valid point
+REAL(KIND=REAL64) :: curr_dist_invalid_min ! Current distance to invalid point
 LOGICAL(KIND=bool) :: is_the_same(SIZE(tmp_lsm,1))
 
 ! End of header
 
 ! Initialise
-status = 0
+istat = 0
 indices(:) = -1
 cmessage = ' '
 IF (constrained) THEN
@@ -182,10 +182,10 @@ END IF
 ! Test to see if all resolved points are of the opposite type
 tmp_lsm=lsm
 
-tmp_lsm(index_unres(1:no_point_unres))=.NOT. is_land_field
+tmp_lsm(index_unres(1:no_point_unres))= .NOT. is_land_field
 WHERE (tmp_lsm .EQV. is_land_field)
   is_the_same = .TRUE.
-ELSEWHERE
+ELSE WHERE
   is_the_same = .FALSE.
 END WHERE
 
@@ -206,23 +206,23 @@ DO k=1, no_point_unres
   min_loc_spc=99999999_int64
 
   IF (unres_j > 1) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j-1_int64), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j-1_int64),       &
                     lons(unres_i), planet_radius))
   END IF
   IF (unres_j < points_phi) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j+1_int64), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j+1_int64),       &
                     lons(unres_i), planet_radius))
   END IF
   IF (unres_i > 1) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j),               &
                     lons(unres_i-1_int64), planet_radius))
   END IF
   IF (unres_i < points_lambda) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j),               &
                     lons(unres_i+1_int64), planet_radius))
   END IF
 
@@ -234,9 +234,9 @@ DO k=1, no_point_unres
     search_dist = max_dist
   END IF
 
-! Assume if we don't find a valid min the value is at planet_radius*pi+1.
+  ! Assume if we don't find a valid min the value is at planet_radius*pi+1.
   curr_dist_valid_min = (planet_radius*shum_pi_const)+1.0_real64
-! We want nearest one so we dont want to limit search to max_dist.
+  ! We want nearest one so we dont want to limit search to max_dist.
   curr_dist_invalid_min = rMDI
 
   found=.FALSE.
@@ -258,8 +258,8 @@ DO k=1, no_point_unres
 
     ! Find how many points can go south and be inside search_dist
     DO j = 1, unres_j-1
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j-j),lons(unres_i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j-j),lons(unres_i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         south=j-1_int64
@@ -268,8 +268,8 @@ DO k=1, no_point_unres
     END DO
     ! Find how many points can go north and be inside search_dist
     DO j = 1, points_phi-unres_j
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j+j),lons(unres_i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j+j),lons(unres_i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         north=j-1_int64
@@ -278,8 +278,8 @@ DO k=1, no_point_unres
     END DO
     ! Find how many points can go west and be inside search_dist
     DO i = 1, unres_i-1
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j),lons(unres_i-i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j),lons(unres_i-i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         west=i-1_int64
@@ -288,8 +288,8 @@ DO k=1, no_point_unres
     END DO
     ! Find how many points can go east and be inside search_dist
     DO i = 1, points_lambda-unres_i
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j),lons(unres_i+i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j),lons(unres_i+i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         east=i-1_int64
@@ -312,7 +312,7 @@ DO k=1, no_point_unres
       END IF
     END IF
 
-    IF (south == -1_int64 .OR. north == -1_int64 .OR.   &
+    IF (south == -1_int64 .OR. north == -1_int64 .OR.                          &
          west == -1_int64 .OR.  east == -1_int64) THEN
       ! have hit an edge of a cyclic domain so will have to do the whole domain
       ! Want to avoid doing the whole domain as much as possible
@@ -322,8 +322,15 @@ DO k=1, no_point_unres
           ! Check to see if it is a resolved point
           IF (.NOT. unres_mask(l)) THEN
             ! Calculate distance from point
-            distance(i) = calc_distance(lats(unres_j), lons(unres_i), &
+            distance(i) = calc_distance(lats(unres_j), lons(unres_i),          &
                                           lats(j), lons(i), planet_radius)
+          END IF
+        END DO
+
+        DO i = 1, points_lambda
+          l = i+(j - 1_int64)*points_lambda
+          ! Check to see if it is a resolved point
+          IF (.NOT. unres_mask(l)) THEN
             ! Same type of point.
             IF (lsm(l) .EQV. is_land_field) THEN
               ! If current distance is less than any previous min store it.
@@ -333,7 +340,7 @@ DO k=1, no_point_unres
                 curr_j_valid_min    = j
               END IF
             ELSE IF (constrained .OR. allsametype) THEN
-              IF (distance(i) < curr_dist_invalid_min .OR. &
+              IF (distance(i) < curr_dist_invalid_min .OR.                     &
                 curr_dist_invalid_min == rMDI) THEN
                 curr_dist_invalid_min = distance(i)
                 curr_i_invalid_min=i
@@ -344,33 +351,33 @@ DO k=1, no_point_unres
         END DO
       END DO
 
-! Set the unresolved data to something sensible if possible.  Need to keep this
-! independent due to we dont want it to interact with future searches.
+      ! Set the unresolved data to something sensible if possible.  Need to keep this
+      ! independent due to we dont want it to interact with future searches.
       IF (curr_dist_valid_min <= max_dist) THEN
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
-      ELSE IF (allsametype .AND. &
-               curr_dist_invalid_min /= rMDI .AND. &
+      ELSE IF (allsametype .AND.                                               &
+               curr_dist_invalid_min /= rMDI .AND.                             &
                curr_dist_invalid_min > max_dist) THEN
-        cmessage = 'There are no resolved points of this type, setting ' &
+        cmessage = 'There are no resolved points of this type, setting '       &
         // 'to closest resolved point'
-        status = -5
+        istat = -5
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= rMDI .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI .AND.                             &
                curr_dist_invalid_min <= max_dist) THEN
         indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1_int64)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= rMDI .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI .AND.                             &
                curr_dist_invalid_min > max_dist) THEN
         ! Though hit the maximum search distance there has not been a
         ! resolved point of either type found, therefore use the closest
         ! resolved point of the same type which will be greater than max_dist
-        cmessage = 'Despite being constrained there were no resolved points ' &
-        // 'of any type within the limit, will just use closest resolved ' &
+        cmessage = 'Despite being constrained there were no resolved points '  &
+        // 'of any type within the limit, will just use closest resolved '     &
         // 'point of the same type'
-        status = -10
+        istat = -10
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
       ELSE
         cmessage = 'A point has been left as still unresolved'
-        status = 47
+        istat = 47
       END IF
       found=.TRUE.
 
@@ -383,10 +390,17 @@ DO k=1, no_point_unres
             ! Check to see if it is a resolved point
             IF (.NOT. unres_mask(l)) THEN
               ! Calculate distance from point
-              distance(i) = calc_distance(lats(unres_j),lons(unres_i), &
+              distance(i) = calc_distance(lats(unres_j),lons(unres_i),         &
                                             lats(j),lons(i), planet_radius)
+            END IF
+          END DO
+
+          DO i = unres_i-west, unres_i+east
+            l = i+(j - 1_int64)*points_lambda
+            ! Check to see if it is a resolved point
+            IF (.NOT. unres_mask(l)) THEN
               ! Same type of point and distance less than maximum distance.
-              IF ((lsm(l) .EQV. is_land_field) .AND. &
+              IF ((lsm(l) .EQV. is_land_field) .AND.                           &
                        (distance(i) < search_dist)) THEN
                 ! If current distance is less than any previous min store it.
                 IF (distance(i) < curr_dist_valid_min) THEN
@@ -395,9 +409,9 @@ DO k=1, no_point_unres
                   curr_j_valid_min    = j
                 END IF
               ELSE IF (constrained .OR. allsametype) THEN
-              ! have to add this in as if it isn't constrained don't want it
-              ! storing an invalid value
-                IF (distance(i) < curr_dist_invalid_min .OR. &
+                ! have to add this in as if it isn't constrained don't want it
+                ! storing an invalid value
+                IF (distance(i) < curr_dist_invalid_min .OR.                   &
                   curr_dist_invalid_min == rMDI) THEN
                   curr_dist_invalid_min = distance(i)
                   curr_i_invalid_min=i
@@ -408,16 +422,16 @@ DO k=1, no_point_unres
           END DO
         END DO
 
-  ! Set unresolved data to something sensible if possible.  Need to keep this
-  ! independent as we don't want it to interact with future searches.
+        ! Set unresolved data to something sensible if possible.  Need to keep this
+        ! independent as we don't want it to interact with future searches.
         IF (curr_dist_valid_min < search_dist) THEN
           indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int64)*points_lambda
           found=.TRUE.
         END IF
         IF (allsametype .AND. curr_dist_invalid_min < search_dist) THEN
-          cmessage = 'There are no resolved points of this type, setting ' &
+          cmessage = 'There are no resolved points of this type, setting '     &
           // 'to closest resolved point'
-          status = -5
+          istat = -5
           indices(k)=curr_i_invalid_min+(curr_j_invalid_min - 1_int64)*points_lambda
           found=.TRUE.
         END IF
@@ -426,15 +440,15 @@ DO k=1, no_point_unres
             search_dist=search_dist+step
           ELSE IF (search_dist < max_dist) THEN
             search_dist=max_dist
-          ELSE IF (constrained .AND. &
+          ELSE IF (constrained .AND.                                           &
                    curr_dist_invalid_min == rMDI) THEN
             ! Though hit the maximum search distance there has not been a
             ! resolved point of either type found, therefore increase
             ! max_dist by step
-            cmessage = 'Despite being constrained there were no resolved ' &
-            // 'points of any type within the limit, will just use closest ' &
+            cmessage = 'Despite being constrained there were no resolved '     &
+            // 'points of any type within the limit, will just use closest '   &
             // 'resolved point of the same type'
-            status = -20
+            istat = -20
             max_dist=planet_radius*shum_pi_const
             curr_dist_valid_min=max_dist
             search_dist=search_dist+step
@@ -447,15 +461,15 @@ DO k=1, no_point_unres
           search_dist=search_dist+step
         ELSE IF (search_dist < max_dist) THEN
           search_dist=max_dist
-        ELSE IF (constrained .AND. &
+        ELSE IF (constrained .AND.                                             &
                  curr_dist_invalid_min == rMDI) THEN
           ! Though hit the maximum search distance there has not been a
           ! resolved point of either type found, therefore increase
           ! max_dist by step
-          cmessage = 'Despite being constrained there were no resolved ' &
-          // 'points of any type within the limit, will just use closest ' &
+          cmessage = 'Despite being constrained there were no resolved '       &
+          // 'points of any type within the limit, will just use closest '     &
           // 'resolved point of the same type'
-          status = -30
+          istat = -30
           max_dist=planet_radius*shum_pi_const
           curr_dist_valid_min=max_dist
           search_dist=search_dist+step
@@ -470,7 +484,7 @@ DO k=1, no_point_unres
       indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1)*points_lambda
     ELSE
       cmessage = 'A point has been left as still unresolved'
-      status = 47
+      istat = 47
     END IF
   END IF
 END DO
@@ -484,76 +498,76 @@ FUNCTION f_shum_spiral_arg32                                                   &
             is_land_field, constrained, constrained_max_dist,                  &
             dist_step, cyclic_domain, unres_mask,                              &
             indices, planet_radius,                                            &
-            cmessage) RESULT(status)
+            cmessage) RESULT(istat)
 
 IMPLICIT NONE
 
                                           ! Number of rows in grid
-INTEGER(KIND=int32), INTENT(IN)    :: points_phi
+INTEGER(KIND=INT32), INTENT(IN)    :: points_phi
                                           ! Number of columns in grid
-INTEGER(KIND=int32), INTENT(IN)    :: points_lambda
+INTEGER(KIND=INT32), INTENT(IN)    :: points_lambda
                                           ! Land sea mask
 LOGICAL(KIND=bool),  INTENT(IN)    :: lsm(points_lambda*points_phi)
                                           ! Number of unresolved points
-INTEGER(KIND=int32), INTENT(IN)    :: no_point_unres
+INTEGER(KIND=INT32), INTENT(IN)    :: no_point_unres
                                           ! Index to unresolved pts
-INTEGER(KIND=int32), INTENT(IN)    :: index_unres(no_point_unres)
+INTEGER(KIND=INT32), INTENT(IN)    :: index_unres(no_point_unres)
                                           ! Latitudes
-REAL(KIND=real32),   INTENT(IN)    :: lats(points_phi)
+REAL(KIND=REAL32),   INTENT(IN)    :: lats(points_phi)
                                           ! Longitudes
-REAL(KIND=real32),   INTENT(IN)    :: lons(points_lambda)
+REAL(KIND=REAL32),   INTENT(IN)    :: lons(points_lambda)
                                           ! False for sea, True for land field
 LOGICAL(KIND=bool),  INTENT(IN)    :: is_land_field
                                           ! True to apply constraint distance
 LOGICAL(KIND=bool),  INTENT(IN)    :: constrained
                                           ! Contraint distance (m)
-REAL(KIND=real32),   INTENT(IN)    :: constrained_max_dist
+REAL(KIND=REAL32),   INTENT(IN)    :: constrained_max_dist
                                           ! Step size modifier for search
-REAL(KIND=real32),   INTENT(IN)    :: dist_step
+REAL(KIND=REAL32),   INTENT(IN)    :: dist_step
                                           ! True if covering complete lat circle
 LOGICAL(KIND=bool),  INTENT(IN)    :: cyclic_domain
                                           ! False for a point that is resolved,
                                           ! True for an unresolved point
 LOGICAL(KIND=bool),  INTENT(IN)    :: unres_mask(points_lambda*points_phi)
                                           ! Index to resolved pts
-INTEGER(KIND=int32), INTENT(OUT)   :: indices(no_point_unres)
+INTEGER(KIND=INT32), INTENT(OUT)   :: indices(no_point_unres)
                                           ! Radius of planet
-REAL(KIND=real32),   INTENT(IN)    :: planet_radius
+REAL(KIND=REAL32),   INTENT(IN)    :: planet_radius
                                           ! Error message
-CHARACTER(LEN=*),    INTENT(INOUT) :: cmessage
+CHARACTER(LEN=*),    INTENT(IN OUT) :: cmessage
                                           ! Return status
-INTEGER(KIND=int32)                :: status
+INTEGER(KIND=INT32)                :: istat
 
 ! LOCAL VARIABLES
 
-INTEGER(KIND=int32) :: i,j,k,l ! Loop counters
-INTEGER(KIND=int32) :: north ! Number of points to search north
-INTEGER(KIND=int32) :: south ! Number of points to search south
-INTEGER(KIND=int32) :: east  ! Number of points to search east
-INTEGER(KIND=int32) :: west  ! Number of points to search west
-INTEGER(KIND=int32) :: unres_i ! Index for i for unres
-INTEGER(KIND=int32) :: unres_j ! Index for j for unres
-INTEGER(KIND=int32) :: curr_i_valid_min ! Posn of valid min distance in E-W dir
-INTEGER(KIND=int32) :: curr_j_valid_min ! Posn of valid min distance in S-N dir
-INTEGER(KIND=int32) :: curr_i_invalid_min ! Posn of invalid min dist in E-W dir
-INTEGER(KIND=int32) :: curr_j_invalid_min ! Posn of invalid min dist in S-N dir
+INTEGER(KIND=INT32) :: i,j,k,l ! Loop counters
+INTEGER(KIND=INT32) :: north ! Number of points to search north
+INTEGER(KIND=INT32) :: south ! Number of points to search south
+INTEGER(KIND=INT32) :: east  ! Number of points to search east
+INTEGER(KIND=INT32) :: west  ! Number of points to search west
+INTEGER(KIND=INT32) :: unres_i ! Index for i for unres
+INTEGER(KIND=INT32) :: unres_j ! Index for j for unres
+INTEGER(KIND=INT32) :: curr_i_valid_min ! Posn of valid min distance in E-W dir
+INTEGER(KIND=INT32) :: curr_j_valid_min ! Posn of valid min distance in S-N dir
+INTEGER(KIND=INT32) :: curr_i_invalid_min ! Posn of invalid min dist in E-W dir
+INTEGER(KIND=INT32) :: curr_j_invalid_min ! Posn of invalid min dist in S-N dir
 LOGICAL :: found ! resolved point fitting critirea has been found
 LOGICAL :: allsametype ! no resolved points of same type in lsm
 LOGICAL(KIND=bool) :: tmp_lsm(points_lambda*points_phi) ! temp land sea mask
-REAL(KIND=real32) :: search_dist ! distance to search
-REAL(KIND=real32) :: step ! step size to loop over
-REAL(KIND=real32) :: tempdist ! temporary distance
-REAL(KIND=real32) :: min_loc_spc ! minimum of the local spacings
-REAL(KIND=real32) :: max_dist ! maximum distance to search
-REAL(KIND=real32) :: distance(points_lambda) ! Vector of calculation.
-REAL(KIND=real32) :: curr_dist_valid_min   ! Current distance to valid point
-REAL(KIND=real32) :: curr_dist_invalid_min ! Current distance to invalid point
+REAL(KIND=REAL32) :: search_dist ! distance to search
+REAL(KIND=REAL32) :: step ! step size to loop over
+REAL(KIND=REAL32) :: tempdist ! temporary distance
+REAL(KIND=REAL32) :: min_loc_spc ! minimum of the local spacings
+REAL(KIND=REAL32) :: max_dist ! maximum distance to search
+REAL(KIND=REAL32) :: distance(points_lambda) ! Vector of calculation.
+REAL(KIND=REAL32) :: curr_dist_valid_min   ! Current distance to valid point
+REAL(KIND=REAL32) :: curr_dist_invalid_min ! Current distance to invalid point
 LOGICAL(KIND=bool) :: is_the_same(SIZE(tmp_lsm,1))
 
 ! End of header
 
 ! Initialise
-status = 0
+istat = 0
 indices(:) = -1
 cmessage = ' '
 IF (constrained) THEN
@@ -567,10 +581,10 @@ END IF
 ! Test to see if all resolved points are of the opposite type
 tmp_lsm=lsm
 
-tmp_lsm(index_unres)=.NOT. is_land_field
+tmp_lsm(index_unres)= .NOT. is_land_field
 WHERE (tmp_lsm .EQV. is_land_field)
   is_the_same = .TRUE.
-ELSEWHERE
+ELSE WHERE
   is_the_same = .FALSE.
 END WHERE
 
@@ -591,23 +605,23 @@ DO k=1, no_point_unres
   min_loc_spc=99999999.0_real32
 
   IF (unres_j > 1) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j-1_int32), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j-1_int32),       &
                     lons(unres_i), planet_radius))
   END IF
   IF (unres_j < points_phi) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j+1_int32), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j+1_int32),       &
                     lons(unres_i), planet_radius))
   END IF
   IF (unres_i > 1) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j),               &
                     lons(unres_i-1_int32), planet_radius))
   END IF
   IF (unres_i < points_lambda) THEN
-    min_loc_spc=MIN(min_loc_spc,&
-      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j), &
+    min_loc_spc=MIN(min_loc_spc,                                               &
+      calc_distance(lats(unres_j), lons(unres_i), lats(unres_j),               &
                     lons(unres_i+1_int32), planet_radius))
   END IF
 
@@ -619,9 +633,9 @@ DO k=1, no_point_unres
     search_dist = max_dist
   END IF
 
-! Assume if we don't find a valid min the value is at planet_radius*pi+1.
+  ! Assume if we don't find a valid min the value is at planet_radius*pi+1.
   curr_dist_valid_min = (planet_radius*shum_pi_const_32)+1.0_real32
-! We want nearest one so we dont want to limit search to max_dist.
+  ! We want nearest one so we dont want to limit search to max_dist.
   curr_dist_invalid_min = rMDI_32b
 
   found=.FALSE.
@@ -643,8 +657,8 @@ DO k=1, no_point_unres
 
     ! Find how many points can go south and be inside search_dist
     DO j = 1, unres_j-1_int32
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j-j),lons(unres_i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j-j),lons(unres_i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         south=j-1_int32
@@ -653,8 +667,8 @@ DO k=1, no_point_unres
     END DO
     ! Find how many points can go north and be inside search_dist
     DO j = 1, points_phi-unres_j
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j+j),lons(unres_i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j+j),lons(unres_i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         north=j-1_int32
@@ -663,8 +677,8 @@ DO k=1, no_point_unres
     END DO
     ! Find how many points can go west and be inside search_dist
     DO i = 1, unres_i-1_int32
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j),lons(unres_i-i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j),lons(unres_i-i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         west=i-1_int32
@@ -673,8 +687,8 @@ DO k=1, no_point_unres
     END DO
     ! Find how many points can go east and be inside search_dist
     DO i = 1, points_lambda-unres_i
-      tempdist=calc_distance(lats(unres_j),lons(unres_i), &
-                             lats(unres_j),lons(unres_i+i), &
+      tempdist=calc_distance(lats(unres_j),lons(unres_i),                      &
+                             lats(unres_j),lons(unres_i+i),                    &
                              planet_radius)
       IF (tempdist > search_dist) THEN
         east=i-1_int32
@@ -697,7 +711,7 @@ DO k=1, no_point_unres
       END IF
     END IF
 
-    IF (south == -1_int32 .OR. north == -1_int32 .OR.   &
+    IF (south == -1_int32 .OR. north == -1_int32 .OR.                          &
          west == -1_int32 .OR. east  == -1_int32) THEN
       ! have hit an edge of a cyclic domain so will have to do the whole domain
       ! Want to avoid doing the whole domain as much as possible
@@ -707,8 +721,15 @@ DO k=1, no_point_unres
           ! Check to see if it is a resolved point
           IF (.NOT. unres_mask(l)) THEN
             ! Calculate distance from point
-            distance(i) = calc_distance(lats(unres_j), lons(unres_i), &
+            distance(i) = calc_distance(lats(unres_j), lons(unres_i),          &
                                  lats(j), lons(i), planet_radius)
+          END IF
+        END DO
+
+        DO i = 1, points_lambda
+          l = i+(j - 1_int32)*points_lambda
+          ! Check to see if it is a resolved point
+          IF (.NOT. unres_mask(l)) THEN
             ! Same type of point.
             IF (lsm(l) .EQV. is_land_field) THEN
               ! If current distance is less than any previous min store it.
@@ -718,7 +739,7 @@ DO k=1, no_point_unres
                 curr_j_valid_min    = j
               END IF
             ELSE IF (constrained .OR. allsametype) THEN
-              IF (distance(i) < curr_dist_invalid_min .OR. &
+              IF (distance(i) < curr_dist_invalid_min .OR.                     &
                 curr_dist_invalid_min == rMDI_32b) THEN
                 curr_dist_invalid_min = distance(i)
                 curr_i_invalid_min=i
@@ -729,33 +750,33 @@ DO k=1, no_point_unres
         END DO
       END DO
 
-! Set the unresolved data to something sensible if possible.  Need to keep this
-! independent due to we dont want it to interact with future searches.
+      ! Set the unresolved data to something sensible if possible.  Need to keep this
+      ! independent due to we dont want it to interact with future searches.
       IF (curr_dist_valid_min <= max_dist) THEN
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
-      ELSE IF (allsametype .AND. &
-               curr_dist_invalid_min /= rMDI_32b .AND. &
+      ELSE IF (allsametype .AND.                                               &
+               curr_dist_invalid_min /= rMDI_32b .AND.                         &
                curr_dist_invalid_min > max_dist) THEN
-        cmessage = 'There are no resolved points of this type, setting ' &
+        cmessage = 'There are no resolved points of this type, setting '       &
         // 'to closest resolved point'
-        status = -5
+        istat = -5
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND.                         &
                curr_dist_invalid_min <= max_dist) THEN
         indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1_int32)*points_lambda
-      ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND. &
+      ELSE IF (curr_dist_invalid_min /= rMDI_32b .AND.                         &
                curr_dist_invalid_min > max_dist) THEN
         ! Though hit the maximum search distance there has not been a
         ! resolved point of either type found, therefore use the closest
         ! resolved point of the same type which will be greater than max_dist
-        cmessage = 'Despite being constrained there were no resolved points ' &
-        // 'of any type within the limit, will just use closest resolved ' &
+        cmessage = 'Despite being constrained there were no resolved points '  &
+        // 'of any type within the limit, will just use closest resolved '     &
         // 'point of the same type'
-        status = -10
+        istat = -10
         indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
       ELSE
         cmessage = 'A point has been left as still unresolved'
-        status = 47
+        istat = 47
       END IF
       found=.TRUE.
 
@@ -768,10 +789,17 @@ DO k=1, no_point_unres
             ! Check to see if it is a resolved point
             IF (.NOT. unres_mask(l)) THEN
               ! Calculate distance from point
-              distance(i) = calc_distance(lats(unres_j),lons(unres_i), &
+              distance(i) = calc_distance(lats(unres_j),lons(unres_i),         &
                                     lats(j),lons(i), planet_radius)
+            END IF
+          END DO
+
+          DO i = unres_i-west, unres_i+east
+            l = i+(j - 1_int32)*points_lambda
+            ! Check to see if it is a resolved point
+            IF (.NOT. unres_mask(l)) THEN
               ! Same type of point and distance less than maximum distance.
-              IF ((lsm(l) .EQV. is_land_field) .AND. &
+              IF ((lsm(l) .EQV. is_land_field) .AND.                           &
                        (distance(i) < search_dist)) THEN
                 ! If current distance is less than any previous min store it.
                 IF (distance(i) < curr_dist_valid_min) THEN
@@ -780,9 +808,9 @@ DO k=1, no_point_unres
                   curr_j_valid_min    = j
                 END IF
               ELSE IF (constrained .OR. allsametype) THEN
-              ! have to add this in as if it isn't constrained don't want it
-              ! storing an invalid value
-                IF (distance(i) < curr_dist_invalid_min .OR. &
+                ! have to add this in as if it isn't constrained don't want it
+                ! storing an invalid value
+                IF (distance(i) < curr_dist_invalid_min .OR.                   &
                   curr_dist_invalid_min == rMDI_32b) THEN
                   curr_dist_invalid_min = distance(i)
                   curr_i_invalid_min=i
@@ -793,16 +821,16 @@ DO k=1, no_point_unres
           END DO
         END DO
 
-  ! Set unresolved data to something sensible if possible.  Need to keep this
-  ! independent as we don't want it to interact with future searches.
+        ! Set unresolved data to something sensible if possible.  Need to keep this
+        ! independent as we don't want it to interact with future searches.
         IF (curr_dist_valid_min < search_dist) THEN
           indices(k) = curr_i_valid_min+(curr_j_valid_min - 1_int32)*points_lambda
           found=.TRUE.
         END IF
         IF (allsametype .AND. curr_dist_invalid_min < search_dist) THEN
-          cmessage = 'There are no resolved points of this type, setting ' &
+          cmessage = 'There are no resolved points of this type, setting '     &
           // 'to closest resolved point'
-          status = -5
+          istat = -5
           indices(k)=curr_i_invalid_min+(curr_j_invalid_min - 1_int32)*points_lambda
           found=.TRUE.
         END IF
@@ -811,15 +839,15 @@ DO k=1, no_point_unres
             search_dist=search_dist+step
           ELSE IF (search_dist < max_dist) THEN
             search_dist=max_dist
-          ELSE IF (constrained .AND. &
+          ELSE IF (constrained .AND.                                           &
                    curr_dist_invalid_min == rMDI_32b) THEN
             ! Though hit the maximum search distance there has not been a
             ! resolved point of either type found, therefore increase
             ! max_dist by step
-            cmessage = 'Despite being constrained there were no resolved ' &
-            // 'points of any type within the limit, will just use closest ' &
+            cmessage = 'Despite being constrained there were no resolved '     &
+            // 'points of any type within the limit, will just use closest '   &
             // 'resolved point of the same type'
-            status = -20
+            istat = -20
             max_dist=planet_radius*shum_pi_const_32
             curr_dist_valid_min=max_dist
             search_dist=search_dist+step
@@ -832,15 +860,15 @@ DO k=1, no_point_unres
           search_dist=search_dist+step
         ELSE IF (search_dist < max_dist) THEN
           search_dist=max_dist
-        ELSE IF (constrained .AND. &
+        ELSE IF (constrained .AND.                                             &
                  curr_dist_invalid_min == rMDI_32b) THEN
           ! Though hit the maximum search distance there has not been a
           ! resolved point of either type found, therefore increase
           ! max_dist by step
-          cmessage = 'Despite being constrained there were no resolved ' &
-          // 'points of any type within the limit, will just use closest ' &
+          cmessage = 'Despite being constrained there were no resolved '       &
+          // 'points of any type within the limit, will just use closest '     &
           // 'resolved point of the same type'
-          status = -30
+          istat = -30
           max_dist=planet_radius*shum_pi_const_32
           curr_dist_valid_min=max_dist
           search_dist=search_dist+step
@@ -855,7 +883,7 @@ DO k=1, no_point_unres
       indices(k) = curr_i_invalid_min+(curr_j_invalid_min - 1_int32)*points_lambda
     ELSE
       cmessage = 'A point has been left as still unresolved'
-      status = 47
+      istat = 47
     END IF
   END IF
 END DO
@@ -867,13 +895,13 @@ FUNCTION calc_distance_arg64(lat0, lon0, lat1, lon1, planet_radius)
 
 IMPLICIT NONE
 
-REAL(KIND=real64) :: calc_distance_arg64
-REAL(KIND=real64), INTENT(IN) :: lat0, lon0, lat1, lon1, planet_radius
+REAL(KIND=REAL64) :: calc_distance_arg64
+REAL(KIND=REAL64), INTENT(IN) :: lat0, lon0, lat1, lon1, planet_radius
 
-REAL(KIND=real64) :: dlat_rad
-REAL(KIND=real64) :: dlon_rad
-REAL(KIND=real64) :: lat0_rad
-REAL(KIND=real64) :: lat1_rad
+REAL(KIND=REAL64) :: dlat_rad
+REAL(KIND=REAL64) :: dlon_rad
+REAL(KIND=REAL64) :: lat0_rad
+REAL(KIND=REAL64) :: lat1_rad
 
 lat0_rad = lat0*shum_pi_over_180_const
 lat1_rad = lat1*shum_pi_over_180_const
@@ -881,8 +909,8 @@ dlat_rad = lat1_rad - lat0_rad
 dlon_rad = (lon1-lon0)*shum_pi_over_180_const
 
 ! Use the Haversine formula.
-calc_distance_arg64 = 2.0_real64*planet_radius*                      &
-              ASIN(SQRT(SIN(0.5_real64*dlat_rad)**2_int64 +      &
+calc_distance_arg64 = 2.0_real64*planet_radius*                                &
+              ASIN(SQRT(SIN(0.5_real64*dlat_rad)**2_int64 +                    &
               COS(lat0_rad)*COS(lat1_rad)*SIN(0.5_real64*dlon_rad)**2_int64))
 
 END FUNCTION calc_distance_arg64
@@ -891,13 +919,13 @@ FUNCTION calc_distance_arg32(lat0, lon0, lat1, lon1, planet_radius)
 
 IMPLICIT NONE
 
-REAL(KIND=real32) :: calc_distance_arg32
-REAL(KIND=real32), INTENT(IN) :: lat0, lon0, lat1, lon1, planet_radius
+REAL(KIND=REAL32) :: calc_distance_arg32
+REAL(KIND=REAL32), INTENT(IN) :: lat0, lon0, lat1, lon1, planet_radius
 
-REAL(KIND=real32) :: dlat_rad
-REAL(KIND=real32) :: dlon_rad
-REAL(KIND=real32) :: lat0_rad
-REAL(KIND=real32) :: lat1_rad
+REAL(KIND=REAL32) :: dlat_rad
+REAL(KIND=REAL32) :: dlon_rad
+REAL(KIND=REAL32) :: lat0_rad
+REAL(KIND=REAL32) :: lat1_rad
 
 lat0_rad = lat0*shum_pi_over_180_const_32
 lat1_rad = lat1*shum_pi_over_180_const_32
@@ -905,8 +933,8 @@ dlat_rad = lat1_rad - lat0_rad
 dlon_rad = (lon1-lon0)*shum_pi_over_180_const_32
 
 ! Use the Haversine formula.
-calc_distance_arg32 = 2.0_real32*planet_radius*                      &
-              ASIN(SQRT(SIN(0.5_real32*dlat_rad)**2_int32 +      &
+calc_distance_arg32 = 2.0_real32*planet_radius*                                &
+              ASIN(SQRT(SIN(0.5_real32*dlat_rad)**2_int32 +                    &
               COS(lat0_rad)*COS(lat1_rad)*SIN(0.5_real32*dlon_rad)**2_int32))
 
 END FUNCTION calc_distance_arg32

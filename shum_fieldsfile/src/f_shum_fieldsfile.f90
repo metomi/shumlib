@@ -606,11 +606,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(integer_constants) .AND. (SIZE(integer_constants) /= DIM)) THEN
-  DEALLOCATE(integer_constants, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed integer_constants"
-    RETURN
+IF (ALLOCATED(integer_constants)) THEN
+  IF (SIZE(integer_constants) /= DIM) THEN
+    DEALLOCATE(integer_constants, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed integer_constants"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(integer_constants)) THEN
@@ -679,11 +681,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(real_constants) .AND. (SIZE(real_constants) /= DIM)) THEN
-  DEALLOCATE(real_constants, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed real_constants"
-    RETURN
+IF (ALLOCATED(real_constants)) THEN
+  IF (SIZE(real_constants) /= DIM) THEN
+    DEALLOCATE(real_constants, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed real_constants"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(real_constants)) THEN
@@ -755,13 +759,14 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(level_dependent_constants)                                       &
-    .AND. (SIZE(level_dependent_constants, 1) /= dim1)                         &
-    .AND. (SIZE(level_dependent_constants, 2) /= dim2)) THEN
-  DEALLOCATE(level_dependent_constants, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed level_dependent_constants"
-    RETURN
+IF (ALLOCATED(level_dependent_constants)) THEN
+  IF ((SIZE(level_dependent_constants, 1) /= dim1)                         &
+      .AND. (SIZE(level_dependent_constants, 2) /= dim2)) THEN
+    DEALLOCATE(level_dependent_constants, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed level_dependent_constants"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(level_dependent_constants)) THEN
@@ -836,13 +841,14 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(row_dependent_constants)                                         &
-    .AND. (SIZE(row_dependent_constants, 1) /= dim1)                           &
-    .AND. (SIZE(row_dependent_constants, 2) /= dim2)) THEN
-  DEALLOCATE(row_dependent_constants, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed row_dependent_constants"
-    RETURN
+IF (ALLOCATED(row_dependent_constants)) THEN
+  IF ((SIZE(row_dependent_constants, 1) /= dim1)                           &
+      .AND. (SIZE(row_dependent_constants, 2) /= dim2)) THEN
+    DEALLOCATE(row_dependent_constants, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed row_dependent_constants"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(row_dependent_constants)) THEN
@@ -916,13 +922,14 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(column_dependent_constants)                                      &
-    .AND. (SIZE(column_dependent_constants, 1) /= dim1)                        &
-    .AND. (SIZE(column_dependent_constants, 2) /= dim2)) THEN
-  DEALLOCATE(column_dependent_constants, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed column_dependent_constants"
-    RETURN
+IF (ALLOCATED(column_dependent_constants)) THEN
+  IF ((SIZE(column_dependent_constants, 1) /= dim1)                        &
+      .AND. (SIZE(column_dependent_constants, 2) /= dim2)) THEN
+    DEALLOCATE(column_dependent_constants, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed column_dependent_constants"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(column_dependent_constants)) THEN
@@ -997,13 +1004,14 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(additional_parameters)                                           &
-    .AND. (SIZE(additional_parameters, 1) /= dim1)                             &
-    .AND. (SIZE(additional_parameters, 2) /= dim2)) THEN
-  DEALLOCATE(additional_parameters, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed additional_parameters"
-    RETURN
+IF (ALLOCATED(additional_parameters)) THEN
+  IF ((SIZE(additional_parameters, 1) /= dim1)                             &
+      .AND. (SIZE(additional_parameters, 2) /= dim2)) THEN
+    DEALLOCATE(additional_parameters, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed additional_parameters"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(additional_parameters)) THEN
@@ -1075,11 +1083,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(extra_constants) .AND. (SIZE(extra_constants) /= DIM)) THEN
-  DEALLOCATE(extra_constants, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed extra_constants"
-    RETURN
+IF (ALLOCATED(extra_constants)) THEN
+  IF (SIZE(extra_constants) /= DIM) THEN
+    DEALLOCATE(extra_constants, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed extra_constants"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(extra_constants)) THEN
@@ -1148,11 +1158,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(temp_histfile) .AND. (SIZE(temp_histfile) /= DIM)) THEN
-  DEALLOCATE(temp_histfile, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed temp_histfile"
-    RETURN
+IF (ALLOCATED(temp_histfile) ) THEN
+  IF (SIZE(temp_histfile) /= DIM) THEN
+    DEALLOCATE(temp_histfile, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed temp_histfile"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(temp_histfile)) THEN
@@ -1236,11 +1248,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(compressed_index) .AND. (SIZE(compressed_index) /= DIM)) THEN
-  DEALLOCATE(compressed_index, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed compressed_index"
-    RETURN
+IF (ALLOCATED(compressed_index)) THEN
+  IF (SIZE(compressed_index) /= DIM) THEN
+    DEALLOCATE(compressed_index, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed compressed_index"
+      RETURN
+    END IF
   END IF
 END IF
 IF (.NOT. ALLOCATED(compressed_index)) THEN
@@ -1312,13 +1326,14 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(lookup)                                                          &
-    .AND. (SIZE(lookup, 1) /= dim1)                                            &
-    .AND. (SIZE(lookup, 2) /= dim2)) THEN
-  DEALLOCATE(lookup, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed lookup array"
-    RETURN
+IF (ALLOCATED(lookup)) THEN
+  IF ((SIZE(lookup, 1) /= dim1)                                            &
+      .AND. (SIZE(lookup, 2) /= dim2)) THEN
+    DEALLOCATE(lookup, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed lookup array"
+      RETURN
+    END IF
   END IF
 END IF
 
@@ -1519,11 +1534,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(field_data) .AND. SIZE(field_data) /= len_data) THEN
-  DEALLOCATE(field_data, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed field_data array"
-    RETURN
+IF (ALLOCATED(field_data)) THEN
+  IF (SIZE(field_data) /= len_data) THEN
+    DEALLOCATE(field_data, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed field_data array"
+      RETURN
+    END IF
   END IF
 END IF
 
@@ -1638,11 +1655,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(field_data) .AND. SIZE(field_data) /= len_data) THEN
-  DEALLOCATE(field_data, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed field_data array"
-    RETURN
+IF (ALLOCATED(field_data)) THEN
+  IF (SIZE(field_data) /= len_data) THEN
+    DEALLOCATE(field_data, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed field_data array"
+      RETURN
+    END IF
   END IF
 END IF
 
@@ -1760,11 +1779,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(field_data) .AND. SIZE(field_data) /= len_data) THEN
-  DEALLOCATE(field_data, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed field_data array"
-    RETURN
+IF (ALLOCATED(field_data)) THEN
+  IF (SIZE(field_data) /= len_data) THEN
+    DEALLOCATE(field_data, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed field_data array"
+      RETURN
+    END IF
   END IF
 END IF
 
@@ -1889,11 +1910,13 @@ END IF
 
 ! If the output array is already allocated it must be deallocated first,
 ! unless it happens to be exactly the right size already
-IF (ALLOCATED(field_data) .AND. SIZE(field_data) /= len_data) THEN
-  DEALLOCATE(field_data, STAT=STATUS)
-  IF (STATUS /= 0) THEN
-    message = "Unable to de-allocate passed field_data array"
-    RETURN
+IF (ALLOCATED(field_data)) THEN
+  IF (SIZE(field_data) /= len_data) THEN
+    DEALLOCATE(field_data, STAT=STATUS)
+    IF (STATUS /= 0) THEN
+      message = "Unable to de-allocate passed field_data array"
+      RETURN
+    END IF
   END IF
 END IF
 

@@ -2565,8 +2565,6 @@ TYPE(shum_ff_status_type) :: STATUS    ! Return status object
 
 INTEGER(KIND=int64) :: s_thf
 
-s_thf = SIZE(temp_histfile)
-
 IF (ALLOCATED(self%temp_histfile)) THEN
   s_thf = SIZE(self%temp_histfile)
 
