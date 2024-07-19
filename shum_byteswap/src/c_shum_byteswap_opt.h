@@ -50,9 +50,10 @@
  *      version 4.8 or later, we can use the the non-standard intrinsic
  *      __builtin_bswap*() functions for all sizes of bswap.
  *
- * iv) If we are using the Cray compiler (defines _CRAYC) with GNU extensions
- *     enabled (-hgnu): we can use GCC extensions, but not inline assembly.
- *     Therefore, for __GNUC__ support greater than version 4.3 but less than
+ * iv) If we are using the Cray compiler (defines SHUM_IS_CRAY_COMPILER) with
+ *     GNU extensions enabled (defines SHUM_HAS_GNU_EXTENSIONS): we can use GCC
+ *     extensions, but not inline assembly. Therefore, for
+ *     SHUM_HAS_GNU_EXTENSIONS support greater than version 4.3 but less than
  *     6.1, fall-back to the non-standard intrinsic __builtin_bswap*()
  *     functions, except for __builtin_bswap16, which isn't implemented, and
  *     so therefore use a directly implemented macro for bswap_16. (Note, some
@@ -74,45 +75,43 @@
  *       and so are out of sequence. A user choice (case vi) will still override
  *       these defaults
  *
- * vii) If we are usining a version of the Cray compiler (defines _CRAYC) with
- *      GNU extensions enabled (-hgnu) and has __GNUC__ greater than version
- *      6.1, fall-back to the non-standard intrinsic __builtin_bswap*()
- *      functions for all data sizes.
+ * vii) If we are usining a version of the Cray compiler (defines
+ *      SHUM_IS_CRAY_COMPILER) with GNU extensions enabled (defines
+ *      SHUM_HAS_GNU_EXTENSIONS) with a version greater than 6.1, fall-back to
+ *      the non-standard intrinsic __builtin_bswap*() functions for all data
+ *      sizes.
  *
  * viii) If we are on a Mac OS X / Darwin system (defines __APPLE__) instead
  *       use the non-standard <libkern/osbyteorder.h> header
  */
+
+#include "c_shum_compiler_select.h"
 
 /*----------------*/
 /* Control macros */
 /*----------------*/
 
 /* Feature test macros */
-#if (defined(__GNUC__) && __GNUC__ >= 2)
-#define C_SHUM_BSWAP_HASGNU 1
-#else
-#define C_SHUM_BSWAP_HASGNU 0
-#endif
+#if defined(SHUM_HAS_GNU_EXTENSIONS)
 
-#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                 \
-                          (__GNUC__ == 4 && __GNUC_MINOR__ >= 3)))
-#define C_SHUM_BSWAP_HASGNU4_3 1
-#else
-#define C_SHUM_BSWAP_HASGNU4_3 0
-#endif
+#define C_SHUM_BSWAP_HASGNU6_1 (SHUM_HAS_GNU_EXTENSIONS >= 60100)
 
-#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 4) ||                                 \
-                          (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)))
-#define C_SHUM_BSWAP_HASGNU4_8 1
-#else
-#define C_SHUM_BSWAP_HASGNU4_8 0
-#endif
+#define C_SHUM_BSWAP_HASGNU4_8 ((SHUM_HAS_GNU_EXTENSIONS >= 40800)             \
+                               && (SHUM_HAS_GNU_EXTENSIONS < 60100))
 
-#if (C_SHUM_BSWAP_HASGNU && ((__GNUC__ > 6) ||                                 \
-                          (__GNUC__ == 6 && __GNUC_MINOR__ >= 1)))
-#define C_SHUM_BSWAP_HASGNU6_1 1
+#define C_SHUM_BSWAP_HASGNU4_3 ((SHUM_HAS_GNU_EXTENSIONS >= 40300)             \
+                               && (SHUM_HAS_GNU_EXTENSIONS < 40800))
+
+#define C_SHUM_BSWAP_HASGNU2_0 ((SHUM_HAS_GNU_EXTENSIONS >= 20000)             \
+                               && (SHUM_HAS_GNU_EXTENSIONS < 40300))
+
 #else
+
 #define C_SHUM_BSWAP_HASGNU6_1 0
+#define C_SHUM_BSWAP_HASGNU4_8 0
+#define C_SHUM_BSWAP_HASGNU4_3 0
+#define C_SHUM_BSWAP_HASGNU2_0 0
+
 #endif
 
 /* ensure test macros are unset */
@@ -188,19 +187,19 @@
 /* case viii) */
 #define C_USE_BSWAP_OSBYTEORDER_H
 
-#elif C_SHUM_BSWAP_HASGNU && !C_SHUM_BSWAP_HASGNU4_3
+#elif C_SHUM_BSWAP_HASGNU2_0
 
 /* case i) */
 #define C_USE_BSWAP_BYTESWAP_H
 
-#elif C_SHUM_BSWAP_HASGNU6_1 && defined(_CRAYC)
+#elif C_SHUM_BSWAP_HASGNU6_1 && defined(SHUM_IS_CRAY_COMPILER)
 
 /* case vii) */
 #define C_USE_BSWAP_BUILTINS_64
 #define C_USE_BSWAP_BUILTINS_32
 #define C_USE_BSWAP_BUILTINS_16
 
-#elif C_SHUM_BSWAP_HASGNU4_3 && defined(_CRAYC)
+#elif C_SHUM_BSWAP_HASGNU4_3 && defined(SHUM_IS_CRAY_COMPILER)
 
 /* case iv) */
 #define C_USE_BSWAP_BUILTINS_64

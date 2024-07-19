@@ -478,6 +478,20 @@ INTERFACE
 
 !-------------!
 
+  SUBROUTINE c_test_barrier(test_ret,shared1) &
+             BIND(c, name="c_test_barrier")
+
+    IMPORT :: C_BOOL, C_INT64_T
+
+    IMPLICIT NONE
+
+    LOGICAL(KIND=C_BOOL), INTENT(OUT) :: test_ret
+    INTEGER(KIND=C_INT64_T), INTENT(INOUT) :: shared1(3)
+
+  END SUBROUTINE c_test_barrier
+
+!-------------!
+
 END INTERFACE
 
 !------------------------------------------------------------------------------!
@@ -549,6 +563,7 @@ CALL run_test_case(test_startOMPparallelfor, "test_startOMPparallelfor")
 ! OpenMP functions
 
 CALL run_test_case(test_flush, "test_flush")
+CALL run_test_case(test_barrier, "test_barrier")
 
 END SUBROUTINE fruit_test_shum_thread_utils
 
@@ -1061,6 +1076,42 @@ CALL c_test_threadflush(test_ret,shared1)
 CALL assert_true(test_ret, "Dummy flush test fails!")
 
 END SUBROUTINE test_flush
+
+!------------------------------------------------------------------------------!
+
+SUBROUTINE test_barrier
+
+IMPLICIT NONE
+
+! This test has been explicitly designed to work with three threads.
+! Modifying this number without adjusting the test will cause errors.
+INTEGER, PARAMETER :: max_threads = 3
+
+LOGICAL(KIND=C_BOOL) :: test_ret, test_ret_arr(max_threads)
+INTEGER(KIND=C_INT64_T) :: shared1(max_threads), tid
+
+CALL set_case_name("test_threadbarrier")
+
+shared1 = 0
+test_ret = .FALSE.
+test_ret_arr = .FALSE.
+tid = 1
+
+!$ CALL omp_set_num_threads(max_threads)
+!$OMP PARALLEL DEFAULT(NONE) SHARED(shared1,test_ret_arr)                      &
+!$OMP PRIVATE(tid)
+
+!$ tid = omp_get_thread_num() + 1
+CALL c_test_barrier(test_ret_arr(tid),shared1)
+
+!$OMP END PARALLEL
+
+test_ret = test_ret_arr(1)
+!$ test_ret = ALL(test_ret_arr)
+
+CALL assert_true(test_ret, "Barrier test fails!")
+
+END SUBROUTINE test_barrier
 
 !------------------------------------------------------------------------------!
 

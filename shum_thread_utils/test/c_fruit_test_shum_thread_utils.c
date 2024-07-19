@@ -20,6 +20,10 @@
 /* If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 */
 /******************************************************************************/
 
+#if !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -27,6 +31,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 #include "c_shum_thread_utils.h"
 #include "c_fruit_test_shum_thread_utils.h"
 
@@ -1065,6 +1070,60 @@ void c_test_threadflush(bool *test_ret, volatile int64_t *shared1)
   /* this is a dummy test for now */
 
   *test_ret = (*shared1==0);
+}
+
+/******************************************************************************/
+
+void c_test_barrier(bool *test_ret, int64_t *shared1)
+{
+  int64_t tid = f_shum_threadID();
+
+  struct timespec sleep_one = { 1, 0 };
+
+  const int64_t inpar = f_shum_inPar();
+
+  *test_ret = (inpar==f_shum_barrier());
+
+  if (tid==0)
+  {
+    shared1[0] = 1;
+  }
+  else
+  {
+    while (nanosleep(&sleep_one, NULL))
+    {
+      /* repeat until we sleep uninterupted */
+    }
+  }
+
+  *test_ret &= (inpar==f_shum_barrier());
+
+  *test_ret &= (shared1[0] + shared1[1] + shared1[2] == 1);
+
+  *test_ret &= (inpar==f_shum_barrier());
+
+  shared1[tid] = 2;
+
+  if (tid!=0)
+  {
+    while (nanosleep(&sleep_one, NULL))
+    {
+      /* repeat until we sleep uninterupted */
+    }
+  }
+
+  if (tid==2)
+  {
+    while (nanosleep(&sleep_one, NULL))
+    {
+      /* repeat until we sleep uninterupted */
+    }
+  }
+
+  *test_ret &= (inpar==f_shum_barrier());
+
+  *test_ret &= (shared1[0] + shared1[1] + shared1[2] == 2*f_shum_numThreads());
+
 }
 
 /******************************************************************************/

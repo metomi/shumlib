@@ -30,6 +30,7 @@
 #include <xmmintrin.h>
 #endif
 #include "c_fruit_test_shum_number_tools.h"
+#include "c_shum_compiler_select.h"
 
 /******************************************************************************/
 /* prototypes                                                                 */
@@ -69,7 +70,7 @@ double c_test_generate_dnan(void)
 
 void c_test_generate_fdenormal(float *denormal_float)
 {
-#if !defined(__GNUC__) || defined(__clang__)
+#if !defined(SHUM_IS_GNU_COMPILER)
 #if defined(__STDC_IEC_559__)
 /* tell the compiler we will modify the floating point environment */
 #pragma STDC FENV_ACCESS ON
@@ -137,7 +138,7 @@ if (hwdaz)
 
 void c_test_generate_ddenormal(double *denomal_double)
 {
-#if !defined(__GNUC__) || defined(__clang__)
+#if !defined(SHUM_IS_GNU_COMPILER)
 #if defined(__STDC_IEC_559__)
 /* tell the compiler we will modify the floating point environment */
 #pragma STDC FENV_ACCESS ON

@@ -64,22 +64,22 @@ INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
 !------------------------------------------------------------------------------!
-! 64 Bit Conversion Paramters                                                  !
+! Primary Conversion Parameters                                                !
 !------------------------------------------------------------------------------!
 
 ! Number of seconds in one day - now rsec_per_day and isec_per_day
 ! which will replace magic number 86400 wherever possible
 REAL(KIND=real64),    PARAMETER :: shum_rsec_per_day_const  = 86400.0_real64
-INTEGER(KIND=int64),  PARAMETER :: shum_isec_per_day_const  = 86400_int64
+INTEGER(KIND=int32),  PARAMETER :: shum_isec_per_day_const_32  = 86400_int32
 
 REAL(KIND=real64),    PARAMETER :: shum_rsec_per_hour_const = 3600.0_real64
-INTEGER(KIND=int64),  PARAMETER :: shum_isec_per_hour_const = 3600_int64
+INTEGER(KIND=int32),  PARAMETER :: shum_isec_per_hour_const_32 = 3600_int32
 
 REAL(KIND=real64),    PARAMETER :: shum_rsec_per_min_const  = 60.0_real64
-INTEGER(KIND=int64),  PARAMETER :: shum_isec_per_min_const  = 60_int64
+INTEGER(KIND=int32),  PARAMETER :: shum_isec_per_min_const_32  = 60_int32
 
 REAL(KIND=real64),    PARAMETER :: shum_rhour_per_day_const = 24.0_real64
-INTEGER(KIND=int64),  PARAMETER :: shum_ihour_per_day_const = 24_int64
+INTEGER(KIND=int32),  PARAMETER :: shum_ihour_per_day_const_32 = 24_int32
 
 REAL(KIND=real64),    PARAMETER ::                                             &
   shum_rhour_per_sec_const = 1.0_real64/shum_rsec_per_hour_const,              &
@@ -107,32 +107,32 @@ REAL(KIND=real64), PARAMETER :: shum_kt2ms_const = 1852.0_real64/3600.0_real64
 REAL(KIND=real64), PARAMETER :: shum_ft2m_const = 0.3048_real64
 
 !------------------------------------------------------------------------------!
-! 32 Bit Conversion Paramters (as above but in 32-bit types)                   !
+! Secondary Conversion Parameters (as above but in opposite precision)         !
 !------------------------------------------------------------------------------!
 
 REAL(KIND=real32),   PARAMETER ::                                              &
   shum_rsec_per_day_const_32  = REAL(shum_rsec_per_day_const,real32)
 
-INTEGER(KIND=int32), PARAMETER ::                                              &
-  shum_isec_per_day_const_32  = INT(shum_isec_per_day_const,int32)
+INTEGER(KIND=int64), PARAMETER ::                                              &
+  shum_isec_per_day_const  = INT(shum_isec_per_day_const_32,int64)
 
 REAL(KIND=real32),   PARAMETER ::                                              &
   shum_rsec_per_hour_const_32 = REAL(shum_rsec_per_hour_const,real32)
 
-INTEGER(KIND=int32), PARAMETER ::                                              &
-  shum_isec_per_hour_const_32 = INT(shum_isec_per_hour_const,int32)
+INTEGER(KIND=int64), PARAMETER ::                                              &
+  shum_isec_per_hour_const = INT(shum_isec_per_hour_const_32,int64)
 
 REAL(KIND=real32),   PARAMETER ::                                              &
   shum_rsec_per_min_const_32  = REAL(shum_rsec_per_min_const,real32)
 
-INTEGER(KIND=int32), PARAMETER ::                                              &
-  shum_isec_per_min_const_32  = INT(shum_isec_per_min_const,int32)
+INTEGER(KIND=int64), PARAMETER ::                                              &
+  shum_isec_per_min_const  = INT(shum_isec_per_min_const_32,int64)
 
 REAL(KIND=real32),   PARAMETER ::                                              &
   shum_rhour_per_day_const_32 = REAL(shum_rhour_per_day_const,real32)
 
-INTEGER(KIND=int32), PARAMETER ::                                              &
-  shum_ihour_per_day_const_32 = INT(shum_ihour_per_day_const,int32)
+INTEGER(KIND=int64), PARAMETER ::                                              &
+  shum_ihour_per_day_const = INT(shum_ihour_per_day_const_32,int64)
 
 REAL(KIND=real32),  PARAMETER ::                                               &
   shum_rhour_per_sec_const_32 = 1.0_real32/shum_rsec_per_hour_const_32

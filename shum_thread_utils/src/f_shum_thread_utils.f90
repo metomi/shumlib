@@ -558,5 +558,22 @@ END SUBROUTINE startOMPparallelfor
 
 !------------------------------------------------------------------------------!
 
-END MODULE f_shum_thread_utils_mod
+! barrier() sets up an OpenMP barrier. Returns 1 if the barrier was used.
 
+FUNCTION barrier()                                                             &
+  BIND(c,NAME="f_shum_barrier")                                                &
+  RESULT(r)
+
+IMPLICIT NONE
+
+INTEGER(KIND=c_int64_t) :: r
+
+r = 0
+!$ r = 1
+!$OMP BARRIER
+
+END FUNCTION barrier
+
+!------------------------------------------------------------------------------!
+
+END MODULE f_shum_thread_utils_mod

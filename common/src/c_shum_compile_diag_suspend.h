@@ -43,16 +43,35 @@
 
 #define SHUM_COMPILE_DIAG_SUSPEND_H
 
+#include "c_shum_compiler_select.h"
+
 #define SHUM_EXEC_PRAGMA(pragma_string) _Pragma(#pragma_string)
 #define SHUM_EXEC_PRAGMA_STRINGIFY(string) #string
 
-/* Deal with GCC */
 
-#if defined(__GNUC__) && !defined(__clang__)
+/* Choose method */
+
+#if defined(SHUM_HAS_GNU_EXTENSIONS)
+#define SHUM_DIAG_USE_GNU_METHOD
+#endif
+
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#define SHUM_DIAG_USE_CLANG_METHOD
+#endif
+
+/* Favour Clang method if both are availible */
+
+#if defined(SHUM_DIAG_USE_GNU_METHOD) && defined(SHUM_DIAG_USE_CLANG_METHOD)
+#undef SHUM_DIAG_USE_GNU_METHOD
+#endif
+
+/* Deal with GCC and derivatives */
+
+#if defined(SHUM_DIAG_USE_GNU_METHOD)
 
 /* we are using GCC */
 
-#if (__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 8))
+#if (SHUM_HAS_GNU_EXTENSIONS < 40800)
 
 /* older versions of GCC (<4.8) cannot suspend checking, so we must turn it off
  * completely. Call SHUM_COMPILE_DIAG_GLOBAL_SUSPEND from the top of the unit,
@@ -79,9 +98,9 @@
 
 #endif
 
-/* Deal with Clang */
+/* Deal with Clang & Clang derivatives */
 
-#if defined(__clang__)
+#if defined(SHUM_DIAG_USE_CLANG_METHOD)
 
 /* we are using Clang - which supports suspending checking */
 

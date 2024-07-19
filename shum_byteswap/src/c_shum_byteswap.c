@@ -32,6 +32,7 @@
 #include "c_shum_byteswap.h"
 #include "c_shum_byteswap_opt.h"
 #include "c_shum_compile_diag_suspend.h"
+#include "c_shum_compiler_select.h"
 
 #if defined(_OPENMP) && defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
 #include "c_shum_thread_utils.h"
@@ -51,14 +52,18 @@
 #if defined(_OPENMP) && defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
 #define INLINEQUAL
 #else
+#if defined(SHUM_IS_GNU_COMPILER)
+#define INLINEQUAL static inline __attribute__((always_inline))
+#else
 #define INLINEQUAL static inline
+#endif
 #endif
 
 /* We need to suspend compiler diagnostics for the expansion of byteswap macros
  * on some systems, as they bring in reserved identifiers from system headers.
  */
-#if defined(__clang__)
-#if __clang_major__ >= 13
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#if SHUM_HAS_CLANG_EXTENSIONS >= 130000
 #define SUSPEND_RES_IDNET SHUM_COMPILE_DIAG_SUSPEND(-Wreserved-identifier)
 #define RESUME_RES_IDENT SHUM_COMPILE_DIAG_RESUME
 #endif
@@ -120,10 +125,12 @@ int64_t c_shum_byteswap(void *array, int64_t len, int64_t word_len,
 #endif
 
 #if defined(_OPENMP) && !defined(SHUM_USE_C_OPENMP_VIA_THREAD_UTILS)
-#if defined(_CRAYC)
+#if defined(SHUM_IS_CRAY_COMPILER)
+#if (SHUM_IS_CRAY_COMPILER < 90200)
   #pragma _CRI inline_always c_shum_byteswap_par_swap64
   #pragma _CRI inline_always c_shum_byteswap_par_swap32
   #pragma _CRI inline_always c_shum_byteswap_par_swap16
+#endif
 #endif
 #endif
 
@@ -168,6 +175,10 @@ int64_t c_shum_byteswap(void *array, int64_t len, int64_t word_len,
 
 /* -------------------------------------------------------------------------- */
 
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#pragma clang attribute push(__attribute__((always_inline)), apply_to = function)
+#endif
+
 INLINEQUAL void c_shum_byteswap_par_swap64(void **const array,
                                            const int64_t * const restrict imin,
                                            const int64_t * const restrict imax,
@@ -192,7 +203,15 @@ INLINEQUAL void c_shum_byteswap_par_swap64(void **const array,
   }
 }
 
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#pragma clang attribute pop
+#endif
+
 /* -------------------------------------------------------------------------- */
+
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#pragma clang attribute push(__attribute__((always_inline)), apply_to = function)
+#endif
 
 INLINEQUAL void c_shum_byteswap_par_swap32(void **const array,
                                            const int64_t *const restrict imin,
@@ -218,7 +237,15 @@ INLINEQUAL void c_shum_byteswap_par_swap32(void **const array,
   }
 }
 
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#pragma clang attribute pop
+#endif
+
 /* -------------------------------------------------------------------------- */
+
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#pragma clang attribute push(__attribute__((always_inline)), apply_to = function)
+#endif
 
 INLINEQUAL void c_shum_byteswap_par_swap16(void **const array,
                                            const int64_t *const restrict imin,
@@ -243,6 +270,10 @@ INLINEQUAL void c_shum_byteswap_par_swap16(void **const array,
     }
   }
 }
+
+#if defined(SHUM_HAS_CLANG_EXTENSIONS)
+#pragma clang attribute pop
+#endif
 
 /* -------------------------------------------------------------------------- */
 

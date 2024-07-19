@@ -109,40 +109,82 @@ IMPLICIT NONE
 
 REAL(KIND=real64), PARAMETER :: r64eps32 = REAL(EPSILON(0.0_real32),KIND=real64)
 LOGICAL(KIND=bool) :: l_is_equal
+INTEGER(kind=int32) :: itemp32(2)
 
 ! Integer Comparisons
 
 CALL assert_equals(INT(shum_isec_per_day_const_32,KIND=int64),                 &
-                   shum_isec_per_day_const, "shum_isec_per_day_const")
+                   shum_isec_per_day_const,                                    &
+                   "shum_isec_per_day_const up-conversion")
 
 CALL assert_equals(INT(shum_isec_per_hour_const_32,KIND=int64),                &
-                   shum_isec_per_hour_const, "shum_isec_per_hour_const")
+                   shum_isec_per_hour_const,                                   &
+                   "shum_isec_per_hour_const up-conversion")
 
 CALL assert_equals(INT(shum_isec_per_min_const_32,KIND=int64),                 &
-                   shum_isec_per_min_const, "shum_isec_per_min_const")
+                   shum_isec_per_min_const,                                    &
+                   "shum_isec_per_min_const up-conversion")
 
 CALL assert_equals(INT(shum_ihour_per_day_const_32,KIND=int64),                &
-                   shum_ihour_per_day_const, "shum_ihour_per_day_const")
+                   shum_ihour_per_day_const,                                   &
+                   "shum_ihour_per_day_const up-conversion")
+
+itemp32(1:2) = TRANSFER(shum_isec_per_day_const,itemp32)
+
+CALL assert_equals(itemp32(1) + itemp32(2),                    &
+                   shum_isec_per_day_const_32,                                 &
+                   "shum_isec_per_day_const down-conversion")
+
+itemp32(1:2) = TRANSFER(shum_isec_per_hour_const,itemp32)
+
+CALL assert_equals(itemp32(1) + itemp32(2),                   &
+                   shum_isec_per_hour_const_32,                                &
+                   "shum_isec_per_hour_const down-conversion")
+
+itemp32(1:2) = TRANSFER(shum_isec_per_min_const,itemp32)
+
+CALL assert_equals(itemp32(1) + itemp32(2),                    &
+                   shum_isec_per_min_const_32,                                 &
+                   "shum_isec_per_min_const down-conversion")
+
+itemp32(1:2) = TRANSFER(shum_ihour_per_day_const,itemp32)
+
+CALL assert_equals(itemp32(1) + itemp32(2),                      &
+                   shum_ihour_per_day_const_32,                                &
+                   "shum_ihour_per_day_const")
 
 ! Exactly representable Real comparisons
 
-CALL assert_equals(REAL(shum_rhour_per_sec_const_32,KIND=real64),              &
-                   shum_rhour_per_sec_const, r64eps32,                         &
-                   "shum_rhour_per_sec_const")
-
-CALL assert_equals(REAL(shum_rsec_per_day_const,KIND=real32),                  &
-                   shum_rsec_per_day_const_32, "shum_rsec_per_day_const_32")
+CALL assert_equals(REAL(shum_rsec_per_day_const_32,KIND=real64),                  &
+                   shum_rsec_per_day_const, "shum_rsec_per_day_const_32 up-conversion")
 
 CALL assert_equals(REAL(shum_rsec_per_hour_const_32,KIND=real64),              &
-                   shum_rsec_per_hour_const, "shum_rsec_per_hour_const")
+                   shum_rsec_per_hour_const, "shum_rsec_per_hour_const up-conversion")
 
 CALL assert_equals(REAL(shum_rhour_per_day_const_32,KIND=real64),              &
-                   shum_rhour_per_day_const, "shum_rhour_per_day_const")
+                   shum_rhour_per_day_const, "shum_rhour_per_day_const up-conversion")
 
 CALL assert_equals(REAL(shum_rsec_per_min_const_32,KIND=real64),               &
-                   shum_rsec_per_min_const, "shum_rhour_per_day_const")
+                   shum_rsec_per_min_const, "shum_rhour_per_day_const up-conversion")
+
+CALL assert_equals(REAL(shum_rsec_per_day_const,KIND=real32),                  &
+                   shum_rsec_per_day_const_32, "shum_rsec_per_day_const_32 down-conversion")
+
+CALL assert_equals(REAL(shum_rsec_per_hour_const,KIND=real32),              &
+                   shum_rsec_per_hour_const_32, "shum_rsec_per_hour_const down-conversion")
+
+CALL assert_equals(REAL(shum_rhour_per_day_const,KIND=real32),              &
+                   shum_rhour_per_day_const_32, "shum_rhour_per_day_const down-conversion")
+
+CALL assert_equals(REAL(shum_rsec_per_min_const,KIND=real32),               &
+                   shum_rsec_per_min_const_32, "shum_rhour_per_day_const down-conversion")
 
 ! Approximate Real comparisons
+
+l_is_equal = equals(REAL(shum_rhour_per_sec_const_32,KIND=real64),              &
+                   shum_rhour_per_sec_const, r64eps32)
+
+CALL assert_true(l_is_equal, "shum_rhour_per_sec_const")
 
 l_is_equal = equals(REAL(shum_pi_const_32,KIND=real64),                        &
                     shum_pi_const, r64eps32)
