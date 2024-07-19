@@ -83,7 +83,7 @@
                                + (__INTEL_COMPILER % 10))
 #endif
 #else
-#define SHUM_IS_INTEL_COMPILER (__INTEL_COMPILER * 10000 
+#define SHUM_IS_INTEL_COMPILER (__INTEL_COMPILER * 10000                       \
                                + __INTEL_COMPILER_UPDATE * 100)
 #endif
 #endif

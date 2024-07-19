@@ -197,11 +197,15 @@ else
 NUMTOOLS_PREREQ=
 endif
 
+# Kinds
+#---------------
+KINDS=shum_kinds
+KINDS_PREREQ=
 
 # All libs vars
 #--------------
 ALL_LIBS_VARS=CONSTS BSWAP STR_CONV DATA_CONV PACK THREAD_UTILS LLEQ \
-	      FFILE HORIZ_INTERP SPIRAL FFCLASS NUMTOOLS
+	      FFILE HORIZ_INTERP SPIRAL FFCLASS NUMTOOLS KINDS
 ALL_LIBS=$(foreach lib,${ALL_LIBS_VARS},${${lib}})
 
 # Forward targets (targets with "VAR" names)

@@ -27,8 +27,8 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86|ex1a]
 #
-# This script was used to install shumlib version 2023.08.1
-# and was intended for use with the UM at UM 13.3.1
+# This script was used to install shumlib version 2023.10.1
+# and was intended for use with the UM at UM 13.4
 #
 
 set -eu
@@ -36,7 +36,7 @@ set -eu
 RUN_SUCCESS=0
 
 # set up no IEEE list
-NO_IEEE_LIST=${NO_IEEE_LIST:-"xc40_haswell_gnu_4.9.1 xc40_ivybridge_gnu_4.9.1 ex1a_gnu_12.1.0"}
+NO_IEEE_LIST=${NO_IEEE_LIST:-"xc40_haswell_gnu_4.9.1 xc40_ivybridge_gnu_4.9.1 x86_gnu_11.2.0"}
 
 # Ensure directory is correct
 CANONICAL_DIR=$(dirname "$0")
@@ -87,7 +87,7 @@ function contains {
 function build_test_clean {
     local config=$1
     shift
-    if [[ " $NO_IEEE_LIST " =~ [:space:]"$THIS"[:space:] ]] ; then
+    if [[ " $NO_IEEE_LIST " =~ [[:space:]]"$THIS"[[:space:]] ]] ; then
       export SHUM_HAS_IEEE_ARITHMETIC="false"
     else
       unset SHUM_HAS_IEEE_ARITHMETIC
@@ -257,34 +257,12 @@ if [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == $THIS ] ; then
     RUN_SUCCESS=1
 fi
 
-# Gfortran/GCC 6.1.0
-# Have to use Lfric module as default Gfortran is too old
-THIS="x86_gnu_6.1.0"
-if [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == $THIS ] ; then
-    (
-    module use /data/users/lfric/modules/modulefiles.rhel7
-    module purge
-    module load environment/lfric/gnu/6.1.0
-    unset SHUM_TMPDIR
-    CONFIG=meto-x86-gfortran-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-6.1.0-gcc-6.1.0
-    build_openmp_onoff $CONFIG "$LIBDIR" all_libs
-    )
-    if [ $? -ne 0 ] ; then
-        >&2 echo "Error compiling for $THIS"
-        exit 1
-    fi
-    RUN_SUCCESS=1
-fi
-
 # Gfortran/GCC 9.2.0
-# Using jopa module
+# Using darth env script
 THIS="x86_gnu_9.2.0"
 if [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == $THIS ] ; then
     (
-    module use /home/h03/jopa/modulefiles
-    module purge
-    module load jedi/gcc/9.2.0
+    source /home/h03/darth/opt/mobb-stack/spice_gnu/mobb-stack-env.sh
     unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
     LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-9.2.0-gcc-9.2.0
@@ -317,17 +295,20 @@ if [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == $THIS ] ; then
     RUN_SUCCESS=1
 fi
 
-# Gfortran/GCC 10.2.0
+# Gfortran/GCC 11.2.0
 # Using LFRic module
-THIS="x86_gnu_10.2.0"
+THIS="x86_gnu_11.2.0"
 if [ "$PLATFORM" == "x86" ] || [ "$PLATFORM" == $THIS ] ; then
     (
-    module use /data/users/lfric/modules/modulefiles.rhel7
     module purge
-    module load environment/lfric/gnu/10.2.0
+    module unuse /data/users/lfric/modules/modulefiles.rhel7
+    module unuse /project/ukmo/rhel7/fortran/opt/gfortran/modulefiles
+    module use /project/extrasoftware/modulefiles.rhel7
+    module use /data/users/lfric/software/modulefiles.rhel7
+    module load gcc/11.2.0
     unset SHUM_TMPDIR
     CONFIG=meto-x86-gfortran-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-10.2.0-gcc-10.2.0
+    LIBDIR=$BUILD_DESTINATION/meto-x86-gfortran-11.2.0-gcc-11.2.0
     build_openmp_onoff $CONFIG "$LIBDIR" all_libs
     )
     if [ $? -ne 0 ] ; then
@@ -743,7 +724,7 @@ if [ "$PLATFORM" == "ex1a" ] || [ "$PLATFORM" == $THIS ] ; then
     # If it is not the case that $CYLC_TASK_WORK_PATH is unset, use it to
     # define $SHUM_TMPDIR
     if [ ! -z "${CYLC_TASK_WORK_PATH+x}" ]; then
-      export SHUM_TMPDIR=$CYLC_TASK_WORK_PATH/meto-ex1a-gfortran-12.1.0-gcc-12.1.0
+      export SHUM_TMPDIR=$CYLC_TASK_WORK_PATH/meto-ex1a-gfortran-12.2.0-gcc-12.2.0
     fi
 
     (
