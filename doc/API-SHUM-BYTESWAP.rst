@@ -1,20 +1,20 @@
 API Reference: shum_byteswap
 ----------------------------
 
-When performing reads from disk there are two different orders in which the 
-individual bytes making up a word/record can be read; these forms are known as 
+When performing reads from disk there are two different orders in which the
+individual bytes making up a word/record can be read; these forms are known as
 "big endian" or "little endian" byte ordering, taken from the "end" of the word
-where the read is started from (and the fact that bytes correspond to larger 
+where the read is started from (and the fact that bytes correspond to larger
 values at one end of the word).
 
 If the machine's default byte ordering is opposite to the one for a given file,
-the data read in (or written) will not convert to the intended values correctly.  
+the data read in (or written) will not convert to the intended values correctly.
 This library allows the ordering of data to be swapped before writing or after
 reading to solve this issue.  The UM uses exclusively big-endian input/output
 files and so often needs to perform swapping when run on little-endian machines.
 
-Note that this library is intended as an *alternative* to any compiler provided 
-non-standard swapping functionality, and as such they should not be used 
+Note that this library is intended as an *alternative* to any compiler provided
+non-standard swapping functionality, and as such they should not be used
 together.
 
 Fortran Functions/Subroutines
@@ -23,7 +23,7 @@ Fortran Functions/Subroutines
 ``get_shum_byteswap_version``
 '''''''''''''''''''''''''''''
 
-All Shumlib libraries expose a module and function named in this format; it 
+All Shumlib libraries expose a module and function named in this format; it
 allows access to the Shumlib version number used when compiling the library.
 
     **Available via module**
@@ -41,7 +41,7 @@ allows access to the Shumlib version number used when compiling the library.
 ``f_shum_byteswap``
 '''''''''''''''''''
 
-This function performs an in-place byteswap on a provided array.  
+This function performs an in-place byteswap on a provided array.
 
     **Available via module**
         ``f_shum_byteswap_mod``
@@ -67,7 +67,7 @@ This function performs an in-place byteswap on a provided array.
     **Return Value**
         ``status (INTEGER)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
     **Notes**
@@ -150,7 +150,7 @@ This function performs an in-place byteswap of an array.
     **Return Value**
         ``(int64_t)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
     **Notes**
@@ -176,6 +176,6 @@ This function should be used to test whether or not a swap is required.
     **Return Value**
         ``endianness (enum)``
             The native endianism of the machine. An enum taking 2 possible
-            values defined in ``c_shum_byteswap.h``; ``bigEndian`` and 
-            ``littleEndian``. 
+            values defined in ``c_shum_byteswap.h``; ``bigEndian`` and
+            ``littleEndian``.
 

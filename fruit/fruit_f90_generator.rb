@@ -4,7 +4,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
   #---- variable type ------
   t_def = {
     "logical" => "logical(kind=bool)",
-    "string"  => "character (len = *)", 
+    "string"  => "character (len = *)",
     "int32"   => "integer(kind=int32)",
     "int64"   => "integer(kind=int64)",
     "real32"  => "real(kind=real32)",
@@ -18,7 +18,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
 
   t_eq = { "logical" => ".eqv.", }
   t_eq.default = "=="
-  
+
   t_ne = { "logical" => ".neqv.", }
   t_ne.default = "/="
 
@@ -60,9 +60,9 @@ def generate_assertation(t, dim, has_range, equals = "1")
     ij     = "(i, j)"
     ij_1st = "(1, 1)"
     nm     = "(n, m)"
-    loop_from = "    do j = 1, m" + "\n" + 
+    loop_from = "    do j = 1, m" + "\n" +
                 "      do i = 1, n"
-    loop_to   = "      enddo" + "\n" + 
+    loop_to   = "      enddo" + "\n" +
                 "    enddo"
     pre_message = "'2d array #{trouble}, ' // "
   elsif dim == "1d64"
@@ -113,7 +113,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
     del_def_line = "#{del_def[t]}, intent (in) :: delta"
     condition = "abs(var1#{ij} - var2#{ij}) > delta"
   end
-  
+
   #----- returns ------
   if (equals)
     interface_eq  = "    module procedure " + name + "\n"
@@ -183,11 +183,11 @@ end
 def many_assert()
   types = %w/ logical string int32 int64 real32 real64 /
   dims = %w/ 0d 1d32 2d32 1d64 2d64 /
-  
+
   interface_eq = ""
   interface_neq = ""
   f90str = ""
-  
+
   [1, nil].each{|if_equals|
     types.each {|t|
       dims.each {|dim|
@@ -197,9 +197,9 @@ def many_assert()
         end
 
         range_loop.each{|has_range|
-          a_interface_eq, a_interface_neq, a_f90str = 
+          a_interface_eq, a_interface_neq, a_f90str =
             generate_assertation(t, dim, has_range, if_equals)
-  
+
           interface_eq  += a_interface_eq
           interface_neq += a_interface_neq
           f90str += a_f90str

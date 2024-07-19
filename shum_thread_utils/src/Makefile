@@ -39,6 +39,6 @@ libshum_thread_utils.so: f_shum_thread_utils_PIC.o ${VERSION_OBJECTS_PIC}
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}
 

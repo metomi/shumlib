@@ -297,8 +297,8 @@ each receive a contiguous sub-range.
             needed within the parallel region.
 
         ``par_ftn_ptr (<par_ftn_ptr_spec>)``
-            A function pointer to the code to execute in the parallel region. 
-            See additional notes below for more details on the 
+            A function pointer to the code to execute in the parallel region.
+            See additional notes below for more details on the
             ``<par_ftn_ptr_spec>`` specification.
 
         ``istart (const int64_t *)``
@@ -324,19 +324,19 @@ each receive a contiguous sub-range.
                     value.
 
                 ``struct_ptr (void **)``
-                    The first argument is ``struct_ptr``, the pointer passed on 
+                    The first argument is ``struct_ptr``, the pointer passed on
                     from the parent (``f_shum_startOMPparallelfor``).
 
                 ``istart (const int64_t *const restrict)``
                     The second argument is a pointer to a value derived from the
-                    ``istart`` value passed to the parent. Rather than directly 
+                    ``istart`` value passed to the parent. Rather than directly
                     pass the value, it is modified such that the iteration
                     range passed to the parent is divided into a different
                     sub-range for each thread.
 
                 ``iend (const int64_t *const restrict)``
                     The third argument is a pointer to a value derived from the
-                    ``iend`` value passed to the parent. Rather than directly 
+                    ``iend`` value passed to the parent. Rather than directly
                     pass the value, it is modified such that the iteration
                     range passed to the parent is divided into a different
                     sub-range for each thread.

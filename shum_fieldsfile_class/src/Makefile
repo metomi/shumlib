@@ -50,6 +50,6 @@ libshum_fieldsfile_class.so: \
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}
 

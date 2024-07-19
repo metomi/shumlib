@@ -7,7 +7,7 @@ Fortran Functions/Subroutines
 ``get_shum_wgdos_packing_version``
 ''''''''''''''''''''''''''''''''''
 
-All Shumlib libraries expose a module and function named in this format; it 
+All Shumlib libraries expose a module and function named in this format; it
 allows access to the Shumlib version number used when compiling the library.
 
     **Available via module**
@@ -38,7 +38,7 @@ sizes to use for allocating the return arrays of the unpacking routine below.
     **Inputs**
         ``packed_field (32-bit INTEGER)``
             The packed field data, a 1D array.
-    
+
     **Outputs**
         ``num_words (INTEGER)``
             Total number of (32-bit) words in packed array.
@@ -56,7 +56,7 @@ sizes to use for allocating the return arrays of the unpacking routine below.
     **Return Value**
         ``status (INTEGER)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
     **Notes**
@@ -83,7 +83,7 @@ value in the process.
         ``field (64-bit REAL)``
             The unpacked field data (which may be either a 1D or 2D array).
         ``stride (INTEGER)``
-            If ``field`` is 1D this must be provided to indicate the stride (or 
+            If ``field`` is 1D this must be provided to indicate the stride (or
             row length) for the packing to use.
         ``accuracy (INTEGER)``
             Packing accuracy (power of 2).
@@ -102,7 +102,7 @@ value in the process.
         ``n_packed_words (INTEGER)``
             This must be provided unless ``packed_field`` is an unallocated
             ``ALLOCATABLE``. It will receive the number of elements of
-            ``packed_field`` containing the packed data (i.e. 
+            ``packed_field`` containing the packed data (i.e.
             ``packed_field(1:n_packed_words)`` which may be less than the full
             extent of the array).
 
@@ -113,7 +113,7 @@ value in the process.
     **Return Value**
         ``status (INTEGER)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
     **Notes**
@@ -144,7 +144,7 @@ any missing points with a given value and returning the unpacked array.
         ``field (64-bit REAL)``
             The unpacked field data (which may be either a 1D or 2D array).
         ``stride (INTEGER)``
-            If ``field`` is 1D this must be provided to indicate the stride (or 
+            If ``field`` is 1D this must be provided to indicate the stride (or
             row length) for the unpacking to use.
 
     **Input & Output**
@@ -154,7 +154,7 @@ any missing points with a given value and returning the unpacked array.
     **Return Value**
         ``status (INTEGER)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
     **Notes**
@@ -214,7 +214,7 @@ sizes to use for allocating the return arrays of the unpacking routine below.
     **Return Value**
         ``(int64_t)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
 
@@ -257,7 +257,7 @@ value in the process.
     **Return Value**
         ``status (int64_t)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 
 
@@ -295,6 +295,6 @@ any missing points with a given value and returning the unpacked array.
     **Return Value**
         ``status (int64_t)``
             Exit status; ``0`` means success, anything else means an error has
-            occurred and in that case the ``message`` argument will contain 
+            occurred and in that case the ``message`` argument will contain
             information about the problem.
 

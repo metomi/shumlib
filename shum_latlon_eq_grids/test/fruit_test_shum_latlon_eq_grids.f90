@@ -1,30 +1,30 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 MODULE fruit_test_shum_latlon_eq_grids_mod
 
 USE fruit
 USE, INTRINSIC :: ISO_C_BINDING, ONLY: C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -41,7 +41,7 @@ PUBLIC :: fruit_test_shum_latlon_eq_grids
   INTEGER, PARAMETER :: int64  = C_INT64_T
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT                                       
+  INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
 ! The number of points in the individual test arrays
@@ -110,12 +110,12 @@ CALL run_test_case(                                                            &
 
 END SUBROUTINE fruit_test_shum_latlon_eq_grids
 
-! Functions used to provide sample arrays of lat/long data - the goal here 
+! Functions used to provide sample arrays of lat/long data - the goal here
 ! isn't for a numerical workout but easy to identify and work with arrays.
 ! The range from -90 to 90 lat and 1 to 360 long is spread across 10 values.
 !------------------------------------------------------------------------------!
 SUBROUTINE sample_starting_data_64(latitude, longitude)
-IMPLICIT NONE 
+IMPLICIT NONE
 REAL(KIND=real64), INTENT(OUT) :: latitude(n)
 REAL(KIND=real64), INTENT(OUT) :: longitude(n)
 
@@ -130,8 +130,8 @@ END SUBROUTINE sample_starting_data_64
 
 !------------------------------------------------------------------------------!
 
-SUBROUTINE sample_starting_data_32(latitude, longitude) 
-IMPLICIT NONE 
+SUBROUTINE sample_starting_data_32(latitude, longitude)
+IMPLICIT NONE
 REAL(KIND=real32), INTENT(OUT) :: latitude(n)
 REAL(KIND=real32), INTENT(OUT) :: longitude(n)
 
@@ -154,7 +154,7 @@ END SUBROUTINE sample_starting_data_32
 
 SUBROUTINE sample_rotated_data_64                                              &
                      (case_index, pole_lat, pole_lon, latitude_eq, longitude_eq)
-IMPLICIT NONE 
+IMPLICIT NONE
 INTEGER(KIND=int64), INTENT(IN ) :: case_index
 REAL(KIND=real64),   INTENT(OUT) :: pole_lat
 REAL(KIND=real64),   INTENT(OUT) :: pole_lon
@@ -229,7 +229,7 @@ SELECT CASE (case_index)
                          12.4979706108037_real64,                              &
                          -1.93508314394315_real64,                             &
                          18.0000000000000_real64  ]
-      
+
     longitude_eq(:) = [ 179.999999146226_real64,                               &
                         169.992216056674_real64,                               &
                         154.328820636016_real64,                               &
@@ -279,7 +279,7 @@ SELECT CASE (case_index)
                         -73.0882699868836_real64,                              &
                         -40.7803149924612_real64,                              &
                         -54.0000000000000_real64  ]
-    
+
     longitude_eq(:) = [  180.000001909096_real64,                              &
                          189.231457280872_real64,                              &
                          238.213796851124_real64,                              &
@@ -326,7 +326,7 @@ END SUBROUTINE sample_rotated_data_64
 
 SUBROUTINE sample_rotated_data_32                                              &
                      (case_index, pole_lat, pole_lon, latitude_eq, longitude_eq)
-IMPLICIT NONE 
+IMPLICIT NONE
 INTEGER(KIND=int32), INTENT(IN ) :: case_index
 REAL(KIND=real32),   INTENT(OUT) :: pole_lat
 REAL(KIND=real32),   INTENT(OUT) :: pole_lon
@@ -360,7 +360,7 @@ END SUBROUTINE sample_rotated_data_32
 
 SUBROUTINE sample_rotated_wind_data_64                                         &
                      (case_index, pole_lat, pole_lon, longitude_eq, u_ll, v_ll)
-IMPLICIT NONE 
+IMPLICIT NONE
 
 INTEGER(KIND=int64), INTENT(IN ) :: case_index
 REAL(KIND=real64),   INTENT(OUT) :: pole_lat
@@ -371,7 +371,7 @@ REAL(KIND=real64),   INTENT(OUT) :: v_ll(n)
 
 REAL(KIND=real64) :: latitude_eq_dummy(n)
 
-! We're sharing data with the test cases from the non-vector rotation tests, 
+! We're sharing data with the test cases from the non-vector rotation tests,
 ! so to avoid duplication retrieve the pole co-ordinates and longitudes
 ! directly from there (the latitudes aren't needed however)
 CALL sample_rotated_data(                                                      &
@@ -436,7 +436,7 @@ SELECT CASE (case_index)
                   3.06913674758749_real64,                                     &
                  30.2050787224513_real64,                                      &
                 136.731456986939_real64  ]
-                
+
     v_ll(:) = [  16.2231918521525_real64,                                      &
                  11.6707878263360_real64,                                      &
                   6.45115237043830_real64,                                     &
@@ -525,7 +525,7 @@ END SUBROUTINE sample_rotated_wind_data_64
 
 SUBROUTINE sample_rotated_wind_data_32                                         &
                      (case_index, pole_lat, pole_lon, longitude_eq, u_ll, v_ll)
-IMPLICIT NONE 
+IMPLICIT NONE
 INTEGER(KIND=int32), INTENT(IN ) :: case_index
 REAL(KIND=real32),   INTENT(OUT) :: pole_lat
 REAL(KIND=real32),   INTENT(OUT) :: pole_lon
@@ -568,8 +568,8 @@ REAL(KIND=real64), INTENT(OUT) :: v_eq(n)
 
 REAL(KIND=real64) :: phi_dummy(n)
 
-! We're sharing data with the test cases from the non-vector rotation tests, 
-! so to avoid duplication retrieve the starting longitudes directly from 
+! We're sharing data with the test cases from the non-vector rotation tests,
+! so to avoid duplication retrieve the starting longitudes directly from
 ! there (the latitudes aren't needed however)
 CALL sample_starting_data(phi_dummy, lambda)
 
@@ -586,7 +586,7 @@ END SUBROUTINE sample_wind_data_64
 !------------------------------------------------------------------------------!
 
 SUBROUTINE sample_wind_data_32(lambda, u_eq, v_eq)
-IMPLICIT NONE 
+IMPLICIT NONE
 REAL(KIND=real32), INTENT(OUT) :: lambda(n)
 REAL(KIND=real32), INTENT(OUT) :: u_eq(n)
 REAL(KIND=real32), INTENT(OUT) :: v_eq(n)
@@ -613,7 +613,7 @@ SUBROUTINE test_ll_to_eq_arg64
 
 USE f_shum_latlon_eq_grids_mod, ONLY: f_shum_latlon_to_eq
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real64) :: longitude(n)
 REAL(KIND=real64) :: latitude(n)
@@ -634,7 +634,7 @@ CHARACTER(LEN=20)            :: case_info
 ! Retrieve the set of lat/lon points to be tested
 CALL sample_starting_data(latitude, longitude)
 
-! The above points will be tested using a variety of target grids, the 
+! The above points will be tested using a variety of target grids, the
 ! pole co-ordinates of these and the expected values after rotation are
 ! returned by a call to "sample_rotated_data" with the case number, i
 DO i = 1,cases
@@ -666,7 +666,7 @@ SUBROUTINE test_ll_to_eq_arg32
 
 USE f_shum_latlon_eq_grids_mod, ONLY: f_shum_latlon_to_eq
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real32) :: longitude(n)
 REAL(KIND=real32) :: latitude(n)
@@ -687,7 +687,7 @@ CHARACTER(LEN=20)            :: case_info
 ! Retrieve the set of lat/lon points to be tested
 CALL sample_starting_data(latitude, longitude)
 
-! The above points will be tested using a variety of target grids, the 
+! The above points will be tested using a variety of target grids, the
 ! pole co-ordinates of these and the expected values after rotation are
 ! returned by a call to "sample_rotated_data" with the case number, i
 DO i = 1,cases
@@ -719,7 +719,7 @@ SUBROUTINE test_eq_to_ll_arg64
 
 USE f_shum_latlon_eq_grids_mod, ONLY: f_shum_eq_to_latlon
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real64) :: phi_pole
 REAL(KIND=real64) :: phi_eq(n)
@@ -741,11 +741,11 @@ CHARACTER(LEN=20)            :: case_info
 CALL sample_starting_data(phi_exp, lambda_exp)
 
 ! Now go through the sample cases un-rotating the data and comparing to the
-! original data above 
+! original data above
 DO i = 1,cases
 
   CALL sample_rotated_data(i, phi_pole, lambda_pole, phi_eq, lambda_eq)
-  
+
   status = f_shum_eq_to_latlon(                                                &
          phi_eq, lambda_eq, latitude, longitude, phi_pole, lambda_pole, message)
 
@@ -769,9 +769,9 @@ END SUBROUTINE test_eq_to_ll_arg64
 
 SUBROUTINE test_eq_to_ll_arg32
 
-USE f_shum_latlon_eq_grids_mod, ONLY: f_shum_eq_to_latlon 
+USE f_shum_latlon_eq_grids_mod, ONLY: f_shum_eq_to_latlon
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 REAL(KIND=real32) :: phi_pole
 REAL(KIND=real32) :: phi_eq(n)
@@ -793,11 +793,11 @@ CHARACTER(LEN=20)            :: case_info
 CALL sample_starting_data(phi_exp, lambda_exp)
 
 ! Now go through the sample cases un-rotating the data and comparing to the
-! original data above 
+! original data above
 DO i = 1,cases
 
   CALL sample_rotated_data(i, phi_pole, lambda_pole, phi_eq, lambda_eq)
-  
+
   status = f_shum_eq_to_latlon(                                                &
          phi_eq, lambda_eq, latitude, longitude, phi_pole, lambda_pole, message)
 
@@ -807,7 +807,7 @@ DO i = 1,cases
     "Unrotating eq arrays to ll returned non-zero exit status"//case_info//    &
     " Message: "//TRIM(message))
 
-  CALL assert_equals(phi_exp, latitude, n, test_tol_32,                        & 
+  CALL assert_equals(phi_exp, latitude, n, test_tol_32,                        &
     "Unrotated phi array does not agree with expected result"//case_info)
 
   CALL assert_equals(lambda_exp, longitude, n, test_tol_32,                    &

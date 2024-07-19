@@ -34,24 +34,24 @@ extern int64_t c_shum_read_wgdos_header(
                       int64_t *message_len);
 
 extern int64_t c_shum_wgdos_pack(
-                      double  *field, 
-                      int64_t *cols, 
-                      int64_t *rows, 
-                      int64_t *accuracy, 
-                      double  *rmdi, 
-                      int32_t *comp_field, 
-                      int64_t *len_comp, 
-                      int64_t *num_words, 
+                      double  *field,
+                      int64_t *cols,
+                      int64_t *rows,
+                      int64_t *accuracy,
+                      double  *rmdi,
+                      int32_t *comp_field,
+                      int64_t *len_comp,
+                      int64_t *num_words,
                       char    *err_msg,
                       int64_t *message_len);
 
 extern int64_t c_shum_wgdos_unpack(
-                      int32_t *comp_field, 
-                      int64_t *len_comp, 
-                      int64_t *cols, 
-                      int64_t *rows, 
-                      double  *rmdi, 
-                      double  *field, 
+                      int32_t *comp_field,
+                      int64_t *len_comp,
+                      int64_t *cols,
+                      int64_t *rows,
+                      double  *rmdi,
+                      double  *field,
                       char    *err_msg,
                       int64_t *message_len);
 

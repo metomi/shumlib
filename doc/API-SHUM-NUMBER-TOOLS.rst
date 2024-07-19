@@ -28,7 +28,7 @@ Fortran Functions/Subroutines
 ``get_shum_number_tools_version``
 '''''''''''''''''''''''''''''''''
 
-All Shumlib libraries expose a module and function named in this format; it 
+All Shumlib libraries expose a module and function named in this format; it
 allows access to the Shumlib version number used when compiling the library.
 
     **Available via module**
@@ -46,7 +46,7 @@ allows access to the Shumlib version number used when compiling the library.
 ``f_shum_is_denormal``
 ''''''''''''''''''''''
 
-This function tests a given floating-point number to determine if it is denormal.  
+This function tests a given floating-point number to determine if it is denormal.
 
     **Available via module**
         ``f_shum_is_denormal_mod``
@@ -66,7 +66,7 @@ This function tests a given floating-point number to determine if it is denormal
 '''''''''''''''''''''''
 
 This function tests a given floating-point array to determine if any element of
-it is denormal.  
+it is denormal.
 
     **Available via module**
         ``f_shum_is_denormal_mod``
@@ -89,8 +89,8 @@ it is denormal.
 ``f_shum_is_inf``
 '''''''''''''''''
 
-This function tests a given floating-point number to determine if it is an 
-infinity.  
+This function tests a given floating-point number to determine if it is an
+infinity.
 
     **Available via module**
         ``f_shum_is_inf_mod``
@@ -110,7 +110,7 @@ infinity.
 ''''''''''''''''''
 
 This function tests a given floating-point array to determine if any element of
-it is an infinity.  
+it is an infinity.
 
     **Available via module**
         ``f_shum_has_inf_mod``
@@ -133,7 +133,7 @@ it is an infinity.
 ``f_shum_is_nan``
 '''''''''''''''''
 
-This function tests a given floating-point number to determine if it is a NaN.  
+This function tests a given floating-point number to determine if it is a NaN.
 
     **Available via module**
         ``f_shum_is_nan_mod``
@@ -153,7 +153,7 @@ This function tests a given floating-point number to determine if it is a NaN.
 ''''''''''''''''''
 
 This function tests a given floating-point array to determine if any element of
-it is a NaN.  
+it is a NaN.
 
     **Available via module**
         ``f_shum_has_nan_mod``

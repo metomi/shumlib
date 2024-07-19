@@ -2762,9 +2762,9 @@ FUNCTION find_field_indices_in_file(self, found_field_indices,              &
   ! field via the file handle. For example:
   ! STATUS = um_file%read_field(found_field_indices(1_int64))
   ! STATUS = um_file%get_field(found_field_indices(1_int64), local_field)
-  !  where found_field_indices is a list on indices matching the criteria and 
+  !  where found_field_indices is a list on indices matching the criteria and
   !  local_field is a field of type shum_field_type. In this case the field
-  ! corresponding to the first index of found_field_indices is retrieved. 
+  ! corresponding to the first index of found_field_indices is retrieved.
   ! An optional argument "max_returned_fields" can be set to limit the number of
   ! indices returned by this function.
   ! Note that FCTIME is a REAL argument which is calculated manually, and
@@ -2808,7 +2808,7 @@ TYPE(shum_ff_status_type) :: STATUS    ! Return status object
 num_matching = 0
 matching_fields = um_imdi
 
-! Loop over fields to find potential matches 
+! Loop over fields to find potential matches
 DO i_field = 1, self%num_fields
   STATUS = self%get_field(i_field, current_field)
   IF (STATUS%icode /= shumlib_success) THEN
@@ -2865,7 +2865,7 @@ DO i_field = 1, self%num_fields
     END IF
   END IF
 
-  ! All criteria match - add field index to the list 
+  ! All criteria match - add field index to the list
   num_matching = num_matching + 1
   matching_fields(num_matching) = i_field
 END DO
@@ -3032,8 +3032,8 @@ END FUNCTION find_fields_in_file
 
 FUNCTION find_forecast_time(self, found_fctime, stashcode) RESULT(STATUS)
 
-  ! This function takes a stashcode as input and returns a list of all the times 
-  ! associated with that stashcode.   
+  ! This function takes a stashcode as input and returns a list of all the times
+  ! associated with that stashcode.
 
 IMPLICIT NONE
 

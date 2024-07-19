@@ -36,5 +36,5 @@ libshum_string_conv.so: f_shum_string_conv_PIC.o ${VERSION_OBJECTS_PIC}
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}

@@ -190,7 +190,7 @@ this option in conjunction with the build location options (see above) to
 produce multiple output directories.  For instance suppose we are building
 multiple libraries for and wish to install to a non-default location:
 
-.. parsed-literal:: 
+.. parsed-literal::
 
     export LIBDIR_OUT=/home/wilfred/shumlib/openmp
     export SHUM_OPENMP=true
@@ -210,13 +210,13 @@ Preprocessed options
 
 Some libraries may contain pre-processed options. Shumlib should build sucessfully
 with the defaults provided by the makefile. However, ocassionally users may wish to
-select specific options from the command line for portability and/or performance 
+select specific options from the command line for portability and/or performance
 reasons. In these cases, the default options can be overridden with environment
 variables. These environment valiables can be set either to true or false.
 
 The currently supported options (environment variables) are:
 
- - ``SHUM_HAS_IEEE_ARITHMETIC``: if true, allows the build to make use of 
+ - ``SHUM_HAS_IEEE_ARITHMETIC``: if true, allows the build to make use of
    functionality from the intrinsic ``IEEE_ARITHMETIC`` Fortran module.
 
  - ``SHUM_EVAL_NAN_BY_BITS``: if true, forces the interrogation of the sepcial NaN
@@ -230,11 +230,11 @@ The currently supported options (environment variables) are:
    if it would otherwise be availible.
 
 
-Similarly to how multiple versions of shumlib could be build with differing OpenMP 
+Similarly to how multiple versions of shumlib could be build with differing OpenMP
 options above, we can select different pre-processing options for different builds
 too:
 
-.. parsed-literal:: 
+.. parsed-literal::
 
     export LIBDIR_OUT=/home/wilfred/shumlib/ieee_arithmetic
     export SHUM_HAS_IEEE_ARITHMETIC=true
@@ -252,10 +252,10 @@ Group/Site Make Scripts
 %%%%%%%%%%%%%%%%%%%%%%%
 
 You can also find bash scripts which handle (and provide traceability for) the
-entire set of builds for a given site, in the ``scripts`` directory. 
- 
-Taking the Met Office script as an example, it consists of a series of 
+entire set of builds for a given site, in the ``scripts`` directory.
+
+Taking the Met Office script as an example, it consists of a series of
 commands that build Shumlib using different combinations of compilers with
-appropriate setup commands to provide the correct environments, as well as 
-producing both OpenMP and non-OpenMP variants.  A script like this may well 
+appropriate setup commands to provide the correct environments, as well as
+producing both OpenMP and non-OpenMP variants.  A script like this may well
 be overkill for smaller installations.

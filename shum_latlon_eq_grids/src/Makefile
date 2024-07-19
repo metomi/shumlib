@@ -38,5 +38,5 @@ libshum_latlon_eq_grids.so: f_shum_latlon_eq_grids_PIC.o \
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}

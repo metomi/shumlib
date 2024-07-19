@@ -5,11 +5,11 @@
 # This file then performs a few tasks:
 #   * The C version files and precision-bomb header are compiled to produce
 #     a bespoke version function (named get_VERSION_LIBNAME_version)
-#   * A suitable C header file containing the prototype for the above C 
+#   * A suitable C header file containing the prototype for the above C
 #     function is created
 #   * It also produces a fortran module (VERSION_LIBNAME_version_mod) which
 #     provides an interface to the above C function (with the same name)
-#   * Lastly it stores the list of objects which are needed at library compile 
+#   * Lastly it stores the list of objects which are needed at library compile
 #     time for the including Makefile to pickup (VERSION_OBJECTS[_PIC]) and the
 #     names of generated files for it to remove on "clean" (VERSION_CLEAN)
 #--------------------------------------------------------------------------------

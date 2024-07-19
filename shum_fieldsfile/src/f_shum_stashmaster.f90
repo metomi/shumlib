@@ -1,23 +1,23 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 ! Description: Methods for reading the UM STASHmaster.
 !
@@ -26,7 +26,7 @@ MODULE f_shum_stashmaster_mod
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
   C_INT64_T, C_INT32_T, C_DOUBLE, C_FLOAT, C_INT8_T
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PRIVATE
 
@@ -45,7 +45,7 @@ PUBLIC ::                                                                      &
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: int8   = C_INT8_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT 
+  INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
 ! This type stores the records defined by the stashmaster for a single
@@ -83,7 +83,7 @@ TYPE shum_STASHmaster_record
   INTEGER(KIND=int64) :: cfff
 END TYPE shum_STASHmaster_record
 
-! This type provides a pointer to the above point - used to enable the 
+! This type provides a pointer to the above point - used to enable the
 ! STASHmaster to be an array of pointers (with elements that have no matching
 ! STASH entry being left unassociated)
 TYPE shum_STASHmaster
@@ -100,7 +100,7 @@ FUNCTION f_shum_add_new_stash_record(                                          &
   datat, dumpp, packing_codes, rotate, ppfc, user, lbvc, blev, tlev, rblevv,   &
   cfll, cfff, message) RESULT(status)
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 TYPE(shum_STASHmaster), INTENT(INOUT) :: STASHmaster(99999)
 INTEGER(KIND=int64),    INTENT(IN)    :: model, section, item, space, point,   &
@@ -172,7 +172,7 @@ END FUNCTION f_shum_add_new_stash_record
 FUNCTION f_shum_read_stashmaster(stashmaster_path, stashmaster, message)       &
                                                                   RESULT(status)
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 CHARACTER(LEN=*),       INTENT(IN)    :: stashmaster_path
 TYPE(shum_STASHmaster), INTENT(INOUT) :: STASHmaster(99999)
@@ -218,8 +218,8 @@ DO
   IF (record_start == '1|') THEN
     ! Back-up to re-read the record properly
     BACKSPACE file_unit
-    
-    ! Record line 1 
+
+    ! Record line 1
     READ(file_unit, "(2X,3(I5,2X),A36)", IOSTAT=status, IOMSG=message)         &
                     model, section, item, name
     IF (status /= 0) THEN

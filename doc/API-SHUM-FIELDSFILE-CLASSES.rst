@@ -14,16 +14,16 @@ Public Variables: ``shum_ff_status_type``
 
 As well as providing the variables detailed below, this module also has
 overloaded operators for ``==``, ``>``, ``<``, ``>=``, ``<=`` and ``/=`` to
-allow the ``icode`` inside the status object to be compared with a raw integer, 
-or with other status objects, e.g. ``IF (status /= 0_int64)`` is equivalent 
+allow the ``icode`` inside the status object to be compared with a raw integer,
+or with other status objects, e.g. ``IF (status /= 0_int64)`` is equivalent
 to ``IF (status%icode /= 0_int64)``.
 
 
 ``icode (shum_ff_status_type)``
 
-An integer return code from the method. This will be zero for success; a 
+An integer return code from the method. This will be zero for success; a
 non-zero value indicates an issue. In cases where there is a distinction
-between a warning and a fatal error, warnings have a negative icode and 
+between a warning and a fatal error, warnings have a negative icode and
 errors positive icode.
 
 
@@ -607,7 +607,7 @@ This method gets the column-dependent constants in the file object.
         ``status (shum_ff_status_type)``
             Exit status; ``0`` means success, anything above ``0`` means an
             error has occurred, and a value of ``-1`` means this component was
-            not present in the file. In all cases the ``message`` variable 
+            not present in the file. In all cases the ``message`` variable
             in the object will contain further information.
 
 
@@ -843,7 +843,7 @@ for example:
 
   ``icode = um_file%get_field(found_field_indices(1_int64), local_field)``
 
-where ``found_field_indices`` is a list of indices matching the criteria and 
+where ``found_field_indices`` is a list of indices matching the criteria and
 ``local_field`` is a field of type ``shum_field_type``. In this case the field
 corresponding to the first index of ``found_field_indices`` is retrieved.
 

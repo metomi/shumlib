@@ -298,7 +298,7 @@ FUNCTION get_real_lookup_by_index(self, num_index, value_to_get) RESULT(status)
     status%icode = 1_int64
     WRITE(status%message,'(A,I0,A)') 'Real lookup index ',num_index,          &
                                      ' out of range'
-  ELSE 
+  ELSE
   ! SHUMlib stores parameters containing the index in the 64-word lookup
   ! However, here we've split it into it's integer and real components, so we
   ! deduct the length of the integer lookup to find the position in the real

@@ -699,7 +699,7 @@ if [ "$PLATFORM" == "ex1a" ] || [ "$PLATFORM" == $THIS ] ; then
     (
     module switch PrgEnv-cray PrgEnv-cray/8.4.0
     module load cpe/23.05
-    module swap cce cce/15.0.0 
+    module swap cce cce/15.0.0
     module load craype-x86-milan
 
     CONFIG=meto-ex1a-crayftn12.0.1+-craycc

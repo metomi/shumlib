@@ -1,31 +1,31 @@
 #!/bin/bash
 # *********************************COPYRIGHT************************************
-# (C) Crown copyright Met Office. All rights reserved.                       
-# For further details please refer to the file LICENCE.txt                   
-# which you should have received as part of this distribution.               
+# (C) Crown copyright Met Office. All rights reserved.
+# For further details please refer to the file LICENCE.txt
+# which you should have received as part of this distribution.
 # *********************************COPYRIGHT************************************
-#                                                                            
-# This file is part of the UM Shared Library project.                        
-#                                                                            
-# The UM Shared Library is free software: you can redistribute it            
-# and/or modify it under the terms of the Modified BSD License, as           
-# published by the Open Source Initiative.                                   
-#                                                                            
-# The UM Shared Library is distributed in the hope that it will be           
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-# Modified BSD License for more details.                                     
-#                                                                            
-# You should have received a copy of the Modified BSD License                
-# along with the UM Shared Library.                                          
-# If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+#
+# This file is part of the UM Shared Library project.
+#
+# The UM Shared Library is free software: you can redistribute it
+# and/or modify it under the terms of the Modified BSD License, as
+# published by the Open Source Initiative.
+#
+# The UM Shared Library is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Modified BSD License for more details.
+#
+# You should have received a copy of the Modified BSD License
+# along with the UM Shared Library.
+# If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 #*******************************************************************************
 #
 # Script to assist with installing shumlib under the many platform/compiler
 # combinations available at the Met Office...
 #
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
-#   scripts/meto_install_shumlib.sh [xc40|x86] 
+#   scripts/meto_install_shumlib.sh [xc40|x86]
 #
 # This script was used to install shumlib version 2018.06.1
 # and is based on the families etc. from the UM at UM 11.1
@@ -33,7 +33,7 @@
 
 set -eu
 
-# Take the platform name as an argument 
+# Take the platform name as an argument
 # (purely so we can maintain one script rather than 2)
 PLATFORM=${1:-}
 if [ -z "${PLATFORM}" ] ; then
@@ -53,7 +53,7 @@ fi
 # tasks to exclude certain libraries)
 LIB_DIRS=$(ls -d shum_* | xargs)
 
-# Destination for the build (can be overidden, otherwise defaults to a 
+# Destination for the build (can be overidden, otherwise defaults to a
 # "build" directory in the working copy - like the Makefile would)
 BUILD_DESTINATION=${BUILD_DESTINATION:-$PWD/build}
 
@@ -89,7 +89,7 @@ function build_openmp_onoff {
 if [ $PLATFORM == "xc40" ] ; then
 
     # Crayftn/CrayCC Haswell 8.6.4 (Current system default)
-    # - note that these versions of CCE don't work correctly with the 
+    # - note that these versions of CCE don't work correctly with the
     # Fieldsfile, so we exclude them
     module list
     CONFIG=icm-xc40-crayftn-craycc
@@ -97,8 +97,8 @@ if [ $PLATFORM == "xc40" ] ; then
     build_openmp_onoff $CONFIG $LIBDIR $(sed -e "s/\bshum_fieldsfile_class\b//g" \
                                              -e "s/\bshum_fieldsfile\b//g" \
                                              <<< $LIB_DIRS)
-  
-    # gfortran/gcc 
+
+    # gfortran/gcc
     module swap PrgEnv-cray/5.2.82 PrgEnv-gnu/5.2.82
     module list
     CONFIG=icm-xc40-gfortran-gcc

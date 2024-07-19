@@ -96,7 +96,7 @@ FUNCTION eq_status_first_64(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int64), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode == int1) THEN
     eq = .TRUE.
   ELSE
@@ -112,7 +112,7 @@ FUNCTION eq_status_second_64(int1, obj) RESULT(eq)
   INTEGER(KIND=int64), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode == int1) THEN
     eq = .TRUE.
   ELSE
@@ -128,7 +128,7 @@ FUNCTION eq_status_first_32(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int32), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode == int1) THEN
     eq = .TRUE.
   ELSE
@@ -144,7 +144,7 @@ FUNCTION eq_status_second_32(int1, obj) RESULT(eq)
   INTEGER(KIND=int32), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode == int1) THEN
     eq = .TRUE.
   ELSE
@@ -159,7 +159,7 @@ FUNCTION eq_status_both(obj1, obj2) RESULT(eq)
   IMPLICIT NONE
   CLASS(shum_ff_status_type), INTENT(IN) :: obj1, obj2
   LOGICAL :: eq
-  
+
   IF (obj1%icode == obj2%icode) THEN
     eq = .TRUE.
   ELSE
@@ -175,7 +175,7 @@ FUNCTION gt_status_first_64(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int64), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode > int1) THEN
     eq = .TRUE.
   ELSE
@@ -191,7 +191,7 @@ FUNCTION gt_status_second_64(int1, obj) RESULT(eq)
   INTEGER(KIND=int64), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode > int1) THEN
     eq = .TRUE.
   ELSE
@@ -207,7 +207,7 @@ FUNCTION gt_status_first_32(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int32), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode > int1) THEN
     eq = .TRUE.
   ELSE
@@ -223,7 +223,7 @@ FUNCTION gt_status_second_32(int1, obj) RESULT(eq)
   INTEGER(KIND=int32), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode > int1) THEN
     eq = .TRUE.
   ELSE
@@ -238,7 +238,7 @@ FUNCTION gt_status_both(obj1, obj2) RESULT(eq)
   IMPLICIT NONE
   CLASS(shum_ff_status_type), INTENT(IN) :: obj1, obj2
   LOGICAL :: eq
-  
+
   IF (obj1%icode > obj2%icode) THEN
     eq = .TRUE.
   ELSE
@@ -254,7 +254,7 @@ FUNCTION lt_status_first_64(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int64), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode < int1) THEN
     eq = .TRUE.
   ELSE
@@ -270,7 +270,7 @@ FUNCTION lt_status_second_64(int1, obj) RESULT(eq)
   INTEGER(KIND=int64), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode < int1) THEN
     eq = .TRUE.
   ELSE
@@ -286,7 +286,7 @@ FUNCTION lt_status_first_32(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int32), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode < int1) THEN
     eq = .TRUE.
   ELSE
@@ -302,7 +302,7 @@ FUNCTION lt_status_second_32(int1, obj) RESULT(eq)
   INTEGER(KIND=int32), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode < int1) THEN
     eq = .TRUE.
   ELSE
@@ -317,7 +317,7 @@ FUNCTION lt_status_both(obj1, obj2) RESULT(eq)
   IMPLICIT NONE
   CLASS(shum_ff_status_type), INTENT(IN) :: obj1, obj2
   LOGICAL :: eq
-  
+
   IF (obj1%icode < obj2%icode) THEN
     eq = .TRUE.
   ELSE
@@ -333,7 +333,7 @@ FUNCTION ge_status_first_64(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int64), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode >= int1) THEN
     eq = .TRUE.
   ELSE
@@ -349,7 +349,7 @@ FUNCTION ge_status_second_64(int1, obj) RESULT(eq)
   INTEGER(KIND=int64), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode >= int1) THEN
     eq = .TRUE.
   ELSE
@@ -365,7 +365,7 @@ FUNCTION ge_status_first_32(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int32), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode >= int1) THEN
     eq = .TRUE.
   ELSE
@@ -381,7 +381,7 @@ FUNCTION ge_status_second_32(int1, obj) RESULT(eq)
   INTEGER(KIND=int32), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode >= int1) THEN
     eq = .TRUE.
   ELSE
@@ -396,7 +396,7 @@ FUNCTION ge_status_both(obj1, obj2) RESULT(eq)
   IMPLICIT NONE
   CLASS(shum_ff_status_type), INTENT(IN) :: obj1, obj2
   LOGICAL :: eq
-  
+
   IF (obj1%icode >= obj2%icode) THEN
     eq = .TRUE.
   ELSE
@@ -412,7 +412,7 @@ FUNCTION le_status_first_64(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int64), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode <= int1) THEN
     eq = .TRUE.
   ELSE
@@ -428,7 +428,7 @@ FUNCTION le_status_second_64(int1, obj) RESULT(eq)
   INTEGER(KIND=int64), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode <= int1) THEN
     eq = .TRUE.
   ELSE
@@ -444,7 +444,7 @@ FUNCTION le_status_first_32(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int32), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode <= int1) THEN
     eq = .TRUE.
   ELSE
@@ -460,7 +460,7 @@ FUNCTION le_status_second_32(int1, obj) RESULT(eq)
   INTEGER(KIND=int32), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode <= int1) THEN
     eq = .TRUE.
   ELSE
@@ -475,7 +475,7 @@ FUNCTION le_status_both(obj1, obj2) RESULT(eq)
   IMPLICIT NONE
   CLASS(shum_ff_status_type), INTENT(IN) :: obj1, obj2
   LOGICAL :: eq
-  
+
   IF (obj1%icode <= obj2%icode) THEN
     eq = .TRUE.
   ELSE
@@ -491,7 +491,7 @@ FUNCTION ne_status_first_64(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int64), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode /= int1) THEN
     eq = .TRUE.
   ELSE
@@ -507,7 +507,7 @@ FUNCTION ne_status_second_64(int1, obj) RESULT(eq)
   INTEGER(KIND=int64), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode /= int1) THEN
     eq = .TRUE.
   ELSE
@@ -523,7 +523,7 @@ FUNCTION ne_status_first_32(obj, int1) RESULT(eq)
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   INTEGER(KIND=int32), INTENT(IN) :: int1
   LOGICAL :: eq
-  
+
   IF (obj%icode /= int1) THEN
     eq = .TRUE.
   ELSE
@@ -539,7 +539,7 @@ FUNCTION ne_status_second_32(int1, obj) RESULT(eq)
   INTEGER(KIND=int32), INTENT(IN) :: int1
   CLASS(shum_ff_status_type), INTENT(IN) :: obj
   LOGICAL :: eq
-  
+
   IF (obj%icode /= int1) THEN
     eq = .TRUE.
   ELSE
@@ -554,7 +554,7 @@ FUNCTION ne_status_both(obj1, obj2) RESULT(eq)
   IMPLICIT NONE
   CLASS(shum_ff_status_type), INTENT(IN) :: obj1, obj2
   LOGICAL :: eq
-  
+
   IF (obj1%icode /= obj2%icode) THEN
     eq = .TRUE.
   ELSE

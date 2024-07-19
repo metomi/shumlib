@@ -42,6 +42,6 @@ libshum_byteswap.so: c_shum_byteswap_PIC.o f_shum_byteswap_PIC.o ${VERSION_OBJEC
 # Cleanup
 #-------------------------------------------------------------------------------
 .PHONY: clean
-clean: 
+clean:
 	rm -f *.o *.mod *.so *.a ${VERSION_CLEAN}
 

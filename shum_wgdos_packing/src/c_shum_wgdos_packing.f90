@@ -1,23 +1,23 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 
 MODULE c_shum_wgdos_packing_mod
@@ -29,7 +29,7 @@ USE f_shum_wgdos_packing_mod, ONLY:                                            &
 USE, INTRINSIC :: iso_c_binding, ONLY: &
     C_F_POINTER, C_LOC, C_INT64_T, C_INT32_T, C_CHAR, C_FLOAT, C_DOUBLE, C_PTR
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 ! Note - this module (intentionally) has nothing set to PUBLIC - this is because
 ! it shouldn't ever be accessed from Fortran and only exists to provide the
@@ -48,7 +48,7 @@ PRIVATE
   INTEGER, PARAMETER :: int64  = C_INT64_T
   INTEGER, PARAMETER :: int32  = C_INT32_T
   INTEGER, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PARAMETER :: real32 = C_FLOAT                                       
+  INTEGER, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
 CONTAINS
@@ -123,7 +123,7 @@ status = f_shum_wgdos_pack(field2d, acc, rmdi, comp_field,                     &
                            num_words, message)
 NULLIFY(field2d)
 
-! If something went wrong allow the calling program to catch the non-zero 
+! If something went wrong allow the calling program to catch the non-zero
 ! exit code and error message then act accordingly
 IF (status /= 0) THEN
   cmessage = f_shum_f2c_string(TRIM(message))
@@ -165,7 +165,7 @@ message = ""
 status = f_shum_wgdos_unpack(comp_field, rmdi, field2d, message)
 NULLIFY(field2d)
 
-! If something went wrong allow the calling program to catch the non-zero 
+! If something went wrong allow the calling program to catch the non-zero
 ! exit code and error message then act accordingly
 IF (status /= 0) THEN
   cmessage = f_shum_f2c_string(TRIM(message))

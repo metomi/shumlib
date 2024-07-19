@@ -31,7 +31,7 @@
 
 typedef enum ENDIANNESS { bigEndian, littleEndian, numEndians } endianness;
 
-extern int64_t c_shum_byteswap(void *array, int64_t len, int64_t word_len, 
+extern int64_t c_shum_byteswap(void *array, int64_t len, int64_t word_len,
                                char *message, int64_t message_len);
 extern endianness c_shum_get_machine_endianism(void);
 

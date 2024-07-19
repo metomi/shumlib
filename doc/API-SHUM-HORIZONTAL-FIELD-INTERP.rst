@@ -7,7 +7,7 @@ Fortran Functions/Subroutines
 ``get_shum_horizontal_field_interp_version``
 ''''''''''''''''''''''''''''''''''''''''''''
 
-All Shumlib libraries expose a module and function named in this format; it 
+All Shumlib libraries expose a module and function named in this format; it
 allows access to the Shumlib version number used when compiling the library.
 
     **Available via module**
@@ -53,7 +53,7 @@ of the 4 surrounding source grid points needed to calculate the target value.
         ``cyclic (64-bit LOGICAL)``
             =T, then source data is cyclic
             =F, then source data is non-cyclic
-    
+
     **Outputs**
         ``index_b_l(points) (64-bit INTEGER)``
             Index of bottom left corner of source gridbox
@@ -197,7 +197,7 @@ and is not intended for direct use.
         ``points (64-bit INTEGER)``
             Total number of points on target grid
         ``ixp1(points (64-bit INTEGER)``
-            Longitudinal index plus 
+            Longitudinal index plus
         ``ix(points) (64-bit INTEGER)``
             Longitudinal index
         ``iy(points) (64-bit INTEGER)``
@@ -257,7 +257,7 @@ This routine is for Cartesian grids.
             X coords of source grid in m
         ``y_srce(points_phi_srce) (64-bit REAL)``
             Y coords of source grid in m
-    
+
     **Outputs**
         ``index_b_l(points) (64-bit INTEGER)``
             Index of bottom left corner of source gridbox

@@ -1,23 +1,23 @@
 ! *********************************COPYRIGHT************************************
-! (C) Crown copyright Met Office. All rights reserved.                       
-! For further details please refer to the file LICENCE.txt                   
-! which you should have received as part of this distribution.               
+! (C) Crown copyright Met Office. All rights reserved.
+! For further details please refer to the file LICENCE.txt
+! which you should have received as part of this distribution.
 ! *********************************COPYRIGHT************************************
-!                                                                            
-! This file is part of the UM Shared Library project.                        
-!                                                                            
-! The UM Shared Library is free software: you can redistribute it            
-! and/or modify it under the terms of the Modified BSD License, as           
-! published by the Open Source Initiative.                                   
-!                                                                            
-! The UM Shared Library is distributed in the hope that it will be           
-! useful, but WITHOUT ANY WARRANTY; without even the implied warranty        
-! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-! Modified BSD License for more details.                                     
-!                                                                            
-! You should have received a copy of the Modified BSD License                
-! along with the UM Shared Library.                                          
-! If not, see <http://opensource.org/licenses/BSD-3-Clause>.                 
+!
+! This file is part of the UM Shared Library project.
+!
+! The UM Shared Library is free software: you can redistribute it
+! and/or modify it under the terms of the Modified BSD License, as
+! published by the Open Source Initiative.
+!
+! The UM Shared Library is distributed in the hope that it will be
+! useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+! of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! Modified BSD License for more details.
+!
+! You should have received a copy of the Modified BSD License
+! along with the UM Shared Library.
+! If not, see <http://opensource.org/licenses/BSD-3-Clause>.
 !*******************************************************************************
 ! Description: Indices for the fixed length header.
 !
@@ -26,7 +26,7 @@ MODULE f_shum_fixed_length_header_indices_mod
 USE, INTRINSIC :: ISO_C_BINDING, ONLY:                                         &
   C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 PUBLIC
 
@@ -43,7 +43,7 @@ PRIVATE :: C_INT64_T, C_INT32_T, C_FLOAT, C_DOUBLE
   INTEGER, PRIVATE, PARAMETER :: int64  = C_INT64_T
   INTEGER, PRIVATE, PARAMETER :: int32  = C_INT32_T
   INTEGER, PRIVATE, PARAMETER :: real64 = C_DOUBLE
-  INTEGER, PRIVATE, PARAMETER :: real32 = C_FLOAT                                       
+  INTEGER, PRIVATE, PARAMETER :: real32 = C_FLOAT
 !------------------------------------------------------------------------------!
 
 INTEGER(KIND=int64), PARAMETER :: data_set_format_version = 1
@@ -115,7 +115,7 @@ INTEGER(KIND=int64), PARAMETER :: comp_field_index3_dim   = 145
 INTEGER(KIND=int64), PARAMETER :: lookup_start            = 150
 INTEGER(KIND=int64), PARAMETER :: lookup_dim1             = 151
 INTEGER(KIND=int64), PARAMETER :: lookup_dim2             = 152
-INTEGER(KIND=int64), PARAMETER :: data_start              = 160 
+INTEGER(KIND=int64), PARAMETER :: data_start              = 160
 INTEGER(KIND=int64), PARAMETER :: data_dim                = 161
 
 !------------------------------------------------------------------------------!

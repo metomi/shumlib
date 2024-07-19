@@ -243,7 +243,7 @@ commands that compile each object should specify the output include directory
 are picked up correctly.
 
 Some libraries may require a pre-processing step, in which case the makefile
-will generate the required ``.f90`` file by pre-processing the proveded 
+will generate the required ``.f90`` file by pre-processing the proveded
 ``.F90`` file.
 
 Structure of the testing makefiles
@@ -344,7 +344,7 @@ routine is as follows.
 
 Firstly, have the routine report the Shumlib version and its name, details of
 where this module comes from can be found in the later "Version Inclusion"
-section. 
+section.
 
 .. parsed-literal::
 
@@ -357,7 +357,7 @@ section.
 
     WRITE(OUTPUT_UNIT, "()")
     WRITE(OUTPUT_UNIT, "(A,I0)")                                               &
-        "Testing <library_name> at Shumlib version: ", version    
+        "Testing <library_name> at Shumlib version: ", version
 
 
 Next, each test case (which should be defined as a ``SUBROUTINE`` elsewhere in
@@ -438,7 +438,7 @@ Where the arguments have the following meanings:
         against and considered "correct").
 
     **var_2**
-        Variable containing the *tested* value (i.e. the value which is being 
+        Variable containing the *tested* value (i.e. the value which is being
         validated by the test).
 
     **dim1**, **dim2**

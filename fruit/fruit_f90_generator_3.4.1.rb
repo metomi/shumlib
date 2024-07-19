@@ -4,7 +4,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
   #---- variable type ------
   t_def = {
     "logical" => "logical",
-    "string"  => "character (len = *)", 
+    "string"  => "character (len = *)",
     "int"     => "integer",
     "real"    => "real",
     "double"  => "double precision",
@@ -19,7 +19,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
 
   t_eq = { "logical" => ".eqv.", }
   t_eq.default = "=="
-  
+
   t_ne = { "logical" => ".neqv.", }
   t_ne.default = "/="
 
@@ -45,7 +45,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
   elsif dim == "1d"
     name = base_name + "1d_" + t + "_"
     size = "n, "
-    integers_def = "    integer, intent (in) :: n" + "\n" + 
+    integers_def = "    integer, intent (in) :: n" + "\n" +
                    "    integer              :: i"
     ij     = "(i)"
     ij_1st = "(1)"
@@ -56,14 +56,14 @@ def generate_assertation(t, dim, has_range, equals = "1")
   elsif dim == "2d"
     name = base_name + "2d_" + t + "_"
     size = "n, m, "
-    integers_def = "    integer, intent (in) :: n, m" + "\n" + 
+    integers_def = "    integer, intent (in) :: n, m" + "\n" +
                    "    integer              :: i, j"
     ij     = "(i, j)"
     ij_1st = "(1, 1)"
     nm     = "(n, m)"
-    loop_from = "    do j = 1, m" + "\n" + 
+    loop_from = "    do j = 1, m" + "\n" +
                 "      do i = 1, n"
-    loop_to   = "      enddo" + "\n" + 
+    loop_to   = "      enddo" + "\n" +
                 "    enddo"
     pre_message = "'2d array #{trouble}, ' // "
   else
@@ -95,7 +95,7 @@ def generate_assertation(t, dim, has_range, equals = "1")
     del_def_line = "#{del_def[t]}, intent (in) :: delta"
     condition = "abs(var1#{ij} - var2#{ij}) > delta"
   end
-  
+
   #----- returns ------
   if (equals)
     interface_eq  = "    module procedure " + name + "\n"
@@ -165,11 +165,11 @@ end
 def many_assert()
   types = %w/ logical string int real double complex /
   dims = %w/ 0d 1d 2d /
-  
+
   interface_eq = ""
   interface_neq = ""
   f90str = ""
-  
+
   [1, nil].each{|if_equals|
     types.each {|t|
       dims.each {|dim|
@@ -179,9 +179,9 @@ def many_assert()
         end
 
         range_loop.each{|has_range|
-          a_interface_eq, a_interface_neq, a_f90str = 
+          a_interface_eq, a_interface_neq, a_f90str =
             generate_assertation(t, dim, has_range, if_equals)
-  
+
           interface_eq  += a_interface_eq
           interface_neq += a_interface_neq
           f90str += a_f90str
