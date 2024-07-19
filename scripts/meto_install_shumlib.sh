@@ -27,8 +27,8 @@
 # USAGE:  (Note - must be run from the toplevel Shumlib directory!)
 #   scripts/meto_install_shumlib.sh [xc40|x86|ex1a]
 #
-# This script was used to install shumlib version 2022.11.1
-# and was intended for use with the UM at UM 13.1
+# This script was used to install shumlib version 2023.06.1
+# and was intended for use with the UM at UM 13.3
 #
 
 set -eu
@@ -211,16 +211,16 @@ if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
     fi
 fi
 
-THIS="x86_nag_6.2_gcc"
+THIS="x86_nag_7.0_gcc"
 if [ $PLATFORM == "x86" ] || [ $PLATFORM == $THIS ] ; then
-    # NagFor/GCC (nagfor 6.2.0)
+    # NagFor/GCC (nagfor 7.0.0)
     (
     source /etc/profile.d/metoffice.d/modules.sh || :
     module purge
-    module load nagfor/6.2.0_64
+    module load nagfor/7.0.0_64
     unset SHUM_TMPDIR
     CONFIG=meto-x86-nagfor-gcc
-    LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-6.2.0-gcc-4.4.7
+    LIBDIR=$BUILD_DESTINATION/meto-x86-nagfor-7.0.0-gcc-4.4.7
     build_openmp_onoff $CONFIG $LIBDIR all_libs
     )
     if [ $? -ne 0 ] ; then
