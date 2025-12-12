@@ -1,5 +1,8 @@
 # Shumlib
 
+> [!Warning]
+> This fork is archived, development has moved to https://github.com/MetOffice/shumlib
+
 What is Shumlib?
 ----------------
 
